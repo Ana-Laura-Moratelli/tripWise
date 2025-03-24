@@ -11,7 +11,7 @@ import {
   Switch,
 } from 'react-native';
 import axios from 'axios';
-
+import { useRouter } from 'expo-router'; // adicione no topo do arquivo
 const SERPAPI_KEY = "ad5fc2187f55ec89675e6630529688fc5de9de87bae04f185a8a42c7d6994956";
 const SERPAPI_URL = "https://serpapi.com/search.json";
 
@@ -33,6 +33,8 @@ export default function FlightScreen() {
   const [idaEVolta, setIdaEVolta] = useState(true);
   const [voos, setVoos] = useState<Voo[]>([]);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
 
   function validarParametros() {
     if (!iataOrigem || iataOrigem.length !== 3) {
@@ -104,27 +106,27 @@ export default function FlightScreen() {
         if (primeiraIda?.airline) {
           voosFormatados.push({
             tipo: 'Ida',
-            origin: primeiraIda?.departure_airport?.id ?? 'Origem não informada',
-            destination: ultimaIda?.arrival_airport?.id ?? 'Destino não informado',
+            origin: iataOrigem.toUpperCase(),
+            destination: iataDestino.toUpperCase(),
             airline: primeiraIda.airline,
             departureTime: formatarDataCompleta(primeiraIda?.departure_airport?.time),
             arrivalTime: calcularChegada(primeiraIda?.departure_airport?.time, duracaoIda),
             price: voo?.price ? `$${voo.price}` : 'Preço não disponível',
           });
+        
 
           if (idaEVolta) {
             const vooVolta = conexoes.slice(metade);
             const primeiraVolta = vooVolta[0];
-            const ultimaVolta = vooVolta[vooVolta.length - 1];
-
+          
             if (primeiraVolta?.airline) {
               const horaVolta = primeiraVolta?.departure_airport?.time?.split('T')[1]?.substring(0, 5) || '12:00';
               const dataHoraPartidaVolta = new Date(`${dataVolta}T${horaVolta}:00`);
-
+          
               voosFormatados.push({
                 tipo: 'Volta',
-                origin: ultimaIda?.arrival_airport?.id ?? 'Origem não informada',
-                destination: primeiraIda?.departure_airport?.id ?? 'Destino não informado',
+                origin: iataDestino.toUpperCase(),      // origem da volta = destino da ida
+                destination: iataOrigem.toUpperCase(),  // destino da volta = origem da ida
                 airline: primeiraVolta.airline,
                 departureTime: dataHoraPartidaVolta.toLocaleString('pt-BR', {
                   hour: '2-digit',
@@ -138,6 +140,7 @@ export default function FlightScreen() {
               });
             }
           }
+          
         }
       });
 
@@ -216,13 +219,30 @@ export default function FlightScreen() {
             data={voos}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
-              <View style={styles.vooItem}>
-                <Text style={styles.vooDestino}>{item.tipo} - {item.origin} → {item.destination}</Text>
-                <Text>Companhia: {item.airline}</Text>
-                <Text>Preço: {item.price}</Text>
-                <Text>Partida: {item.departureTime}</Text>
-                <Text>Chegada: {item.arrivalTime}</Text>
-              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  router.push({
+                    pathname: "/infoVooModal",
+                    params: {
+                      tipo: item.tipo,
+                      origin: item.origin,
+                      destination: item.destination,
+                      airline: item.airline,
+                      departureTime: item.departureTime,
+                      arrivalTime: item.arrivalTime,
+                      price: item.price,
+                    },
+                  });
+                }}
+              >
+                <View style={styles.vooItem}>
+                  <Text style={styles.vooDestino}>{item.tipo} - {item.origin} → {item.destination}</Text>
+                  <Text>Companhia: {item.airline}</Text>
+                  <Text>Preço: {item.price}</Text>
+                  <Text>Partida: {item.departureTime}</Text>
+                  <Text>Chegada: {item.arrivalTime}</Text>
+                </View>
+              </TouchableOpacity>
             )}
           />
 

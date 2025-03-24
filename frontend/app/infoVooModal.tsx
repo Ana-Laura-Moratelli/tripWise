@@ -4,151 +4,102 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Platform
+  Platform,
+  Alert
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function InfoHotelModal() {
+export default function InfoVooModal() {
   const router = useRouter();
+  const {
+    tipo,
+    origin,
+    destination,
+    airline,
+    departureTime,
+    arrivalTime,
+    price,
+  } = useLocalSearchParams();
 
-  // Exemplo de dados do hotel (fixos para demonstração)
-  const hotelName = "Hotel 1";
-  const reviews = "5.0 • 3 reviews";
-  const location = "Yonkers, New York, United States";
-  const price = "$32 night";
-  const dates = "Feb 13 - 14";
+  async function adicionarAoCarrinho() {
+    try {
+      const voo = {
+        tipo,
+        origin,
+        destination,
+        airline,
+        departureTime,
+        arrivalTime,
+        price,
+      };
+
+      const carrinhoAtual = await AsyncStorage.getItem('@carrinho_voos');
+      const carrinho = carrinhoAtual ? JSON.parse(carrinhoAtual) : [];
+
+      carrinho.push(voo);
+      await AsyncStorage.setItem('@carrinho_voos', JSON.stringify(carrinho));
+
+      Alert.alert('Sucesso', `Voo de ${tipo} adicionado ao carrinho.`);
+      router.back(); // volta para a tela anterior
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível adicionar o voo ao carrinho.');
+      console.error(error);
+    }
+  }
 
   return (
     <View style={styles.container}>
-      {/* StatusBar: no iOS, use "light" para ficar visível no espaço acima */}
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
 
-
-      {/* Conteúdo principal do modal */}
       <View style={styles.content}>
-        {/* Informações do hotel */}
-        <Text style={styles.hotelName}>{hotelName}</Text>
-        <Text style={styles.reviews}>{reviews}</Text>
-        <Text style={styles.location}>{location}</Text>
+        <Text style={styles.titulo}>Detalhes do Voo ({tipo})</Text>
+        <Text style={styles.info}>Origem: {origin}</Text>
+        <Text style={styles.info}>Destino: {destination}</Text>
+        <Text style={styles.info}>Companhia: {airline}</Text>
+        <Text style={styles.info}>Partida: {departureTime}</Text>
+        <Text style={styles.info}>Chegada: {arrivalTime}</Text>
+        <Text style={styles.info}>Preço: {price}</Text>
 
-
-        {/* Botões de ação */}
-
-        {/* Área inferior com preço, datas e botões */}
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.removeButton}>
-            <Text style={styles.removeButtonText}>Remover hotel</Text>
+          <TouchableOpacity style={styles.addButton} onPress={adicionarAoCarrinho}>
+            <Text style={styles.addButtonText}>Adicionar ao Carrinho</Text>
           </TouchableOpacity>
-          <View style={styles.footercart}>
-            <View>
-              <Text style={styles.price}>{price}</Text>
-              <Text style={styles.dates}>{dates}</Text>
-            </View>
-
-
-            <TouchableOpacity style={styles.addButton}>
-              <Text style={styles.addButtonText}>Adicionar carrinho</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </View>
     </View>
   );
 }
-
 // Estilos
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF',
   },
-  // Cabeçalho
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 50, // Ajuste se quiser espaço extra no iOS
-    paddingBottom: 16,
-    backgroundColor: '#FFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEE',
-  },
-  backButton: {
-    marginRight: 16,
-  },
-  backButtonText: {
-    fontSize: 22,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  // Conteúdo principal
   content: {
     flex: 1,
     padding: 20,
   },
-  hotelName: {
-    fontSize: 18,
+  titulo: {
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 6,
-  },
-  reviews: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 6,
-  },
-  location: {
-    fontSize: 14,
-    color: '#666',
     marginBottom: 20,
   },
-  removeButton: {
-    paddingVertical: 14,
-    marginBottom: 10,
-    borderRadius: 8,
-    backgroundColor: '#EEE',
-    alignItems: 'center',
-  },
-  removeButtonText: {
-    color: '#333',
-    fontWeight: '600',
-  },
-  // Rodapé com preço, datas e botões
-  footer: {
-   
-    marginTop: 'auto',
-    marginBottom: 12,
-   
-  },
-  footercart: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 12,
-    paddingBottom: 12,
-    marginTop: 'auto',
-    marginBottom: 12,
-    borderTopWidth: 1,       // Largura da borda superior
-    borderTopColor: '#E2E8F0',
-  },
-  price: {
+  info: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#5B2FD4',
-    marginBottom: 4,
+    color: '#333',
+    marginBottom: 10,
   },
-  dates: {
-    fontSize: 14,
-    color: '#666',
+  footer: {
+    marginTop: 'auto',
   },
   addButton: {
     padding: 16,
     borderRadius: 8,
     backgroundColor: '#5B2FD4',
     alignItems: 'center',
+    marginTop: 20,
   },
   addButtonText: {
     color: '#FFF',
