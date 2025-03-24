@@ -8,5 +8,6 @@ app.use(express.json());
 
 app.use("/auth", authRoutes);
 
-const PORT = 5000;
-app.listen(PORT, "0.0.0.0", () => console.log(`🚀 Backend rodando na porta ${PORT}`));
+const PORT = parseInt(process.env.PORT || "5000", 10);
+const HOST = "192.168.15.9"; // Use o IP correto da sua máquina
+app.listen(PORT, HOST, () => console.log(`🚀 Backend rodando em http://${HOST}:${PORT}`));

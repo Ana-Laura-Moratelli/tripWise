@@ -31,17 +31,21 @@ export async function loginUser(email: string, password: string) {
 
 export async function registerUser(data: RegisterData) {
     try {
-        console.log("📡 Enviando requisição de cadastro:", data); // Log dos dados enviados
-
-        const response = await api.post("/auth/register", data);
-
-        console.log("✅ Resposta da API:", response.status, response.data); // Log da resposta do backend
-
-        return response.data;
+      console.log("📡 Enviando requisição de cadastro:", data);
+      const response = await api.post("/auth/register", data);
+      console.log("✅ Resposta da API:", response.status, response.data);
+      return response.data;
     } catch (error: any) {
-        console.error("❌ Erro na requisição:", error); // Log de erro completo
-        console.error("📌 Detalhes da resposta:", error.response?.data); // Verifica se o backend retornou algo
-
-        throw new Error(error.response?.data?.error || "Erro ao cadastrar usuário");
+      // Log completo do erro para depuração
+      console.error("❌ Erro na requisição completa:", error);
+      if (error.code === "ECONNABORTED") {
+        console.error("⏱ Timeout exceeded: A requisição excedeu o tempo limite.");
+      }
+      if (error.response) {
+        console.error("📌 Detalhes da resposta:", error.response.data);
+      } else {
+        console.error("📌 Erro sem resposta do servidor:", error.message);
+      }
+      throw new Error(error.response?.data?.error || error.message || "Erro ao cadastrar usuário");
     }
-}
+  }

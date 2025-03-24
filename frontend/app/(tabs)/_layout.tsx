@@ -21,16 +21,15 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
+        tabBarActiveTintColor: '#5B2FD4',   
+        tabBarInactiveTintColor: '#aaa',
         headerShown: useClientOnlyValue(false, true),
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Explorar',
-          tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
+          title: 'Hotéis',
+          tabBarIcon: ({ color }) => <TabBarIcon name="hotel" color={color} />,
           tabBarLabelStyle: { marginTop: 4 },
           headerRight: () => (
             <Link href="/modal" asChild>
@@ -48,19 +47,27 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="trip"
+        <Tabs.Screen
+        name="voo"
         options={{
-          title: 'Viagens',
+          title: 'Voos',
           tabBarIcon: ({ color }) => <TabBarIcon name="plane" color={color} />,
           tabBarLabelStyle: { marginTop: 4 },
         }}
       />
-      <Tabs.Screen
+       <Tabs.Screen
         name="cart"
         options={{
           title: 'Carrinho',
           tabBarIcon: ({ color }) => <TabBarIcon name="shopping-cart" color={color} />,
+          tabBarLabelStyle: { marginTop: 4 },
+        }}
+      />
+      <Tabs.Screen
+        name="trip"
+        options={{
+          title: 'Viagens',
+          tabBarIcon: ({ color }) => <TabBarIcon name="globe" color={color} />,
           tabBarLabelStyle: { marginTop: 4 },
         }}
       />

@@ -1,12 +1,11 @@
 import axios from "axios";
 
-// Defina a URL do seu backend
-const API_URL = "http://192.168.56.1:5000"; // Altere para a URL do servidor
+const API_URL = "http://192.168.15.9:5000";
 
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
+  timeout: 20000,
 });
