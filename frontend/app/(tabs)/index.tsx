@@ -1,263 +1,179 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  Image, 
-  StyleSheet, 
-  ImageBackground,
-  ScrollView
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
+import axios from 'axios';
 import { useRouter } from 'expo-router';
 
-export default function ExploreScreen() {
-  const [activeTab, setActiveTab] = useState<'hoteis' | 'voos'>('hoteis');
+const SERPAPI_KEY = "ad5fc2187f55ec89675e6630529688fc5de9de87bae04f185a8a42c7d6994956";
+const SERPAPI_URL = "https://serpapi.com/search.json";
+
+interface Hotel {
+  name: string;
+  price: string;
+  rating: string;
+  address: string;
+  reviews: string;
+}
+
+export default function HotelSearchScreen() {
+  const [cidade, setCidade] = useState('');
+  const [checkin, setCheckin] = useState('');
+  const [checkout, setCheckout] = useState('');
+  const [hoteis, setHoteis] = useState<Hotel[]>([]);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  function validarCampos() {
+    if (!cidade) throw new Error("Informe a cidade para busca.");
+    if (!/\d{4}-\d{2}-\d{2}/.test(checkin)) throw new Error("Data de entrada inválida (YYYY-MM-DD).");
+    if (!/\d{4}-\d{2}-\d{2}/.test(checkout)) throw new Error("Data de saída inválida (YYYY-MM-DD).");
+  }
+
+  async function buscarHoteis() {
+    setLoading(true);
+    try {
+      validarCampos();
+
+      const query = `${cidade.trim().replace(/\s+/g, "+")}`;
+      const url = `${SERPAPI_URL}?engine=google_hotels&q=${query}&check_in_date=${checkin}&check_out_date=${checkout}&adults=2&currency=USD&gl=us&hl=en&api_key=${SERPAPI_KEY}`;
+
+      const response = await axios.get(url);
+      const resultados = response.data.properties || [];
+
+      if (!resultados.length) {
+        Alert.alert("Nenhum hotel encontrado.");
+        setHoteis([]);
+        return;
+      }
+
+      const formatados: Hotel[] = resultados.map((hotel: any) => ({
+        name: hotel.name ?? 'Nome não disponível',
+        price: hotel?.rate_per_night?.lowest ?? 'Preço não informado',
+        rating: hotel.overall_rating?.toString() ?? 'Sem avaliação',
+        address: hotel.gps_coordinates
+          ? `Lat: ${hotel.gps_coordinates.latitude}, Long: ${hotel.gps_coordinates.longitude}`
+          : 'Localização não disponível',
+        reviews: hotel.reviews?.toString() ?? '0 avaliações',
+      }));
+
+      setHoteis(formatados);
+    } catch (error: any) {
+      Alert.alert("Erro", error.message || "Erro ao buscar hotéis");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <View style={styles.container}>
-     
+      <TextInput
+        style={styles.input}
+        placeholder="Cidade (ex: Bali)"
+        value={cidade}
+        onChangeText={setCidade}
+      />
 
-      {/* Conteúdo principal */}
-      <View style={styles.loginContainer}>
-        {/* Campos de busca */}
-        <View style={styles.inputContainer}>
-        <TextInput 
-            placeholder="Ponto de Origem" 
-            style={styles.input} 
-            placeholderTextColor="#888"
-          />
-          <TextInput 
-            placeholder="Destino" 
-            style={styles.input} 
-            placeholderTextColor="#888"
-          />
-          <TextInput 
-            placeholder="Data de ida" 
-            style={styles.input} 
-            placeholderTextColor="#888"
-          />
-          <TextInput 
-            placeholder="Data de volta" 
-            style={styles.input} 
-            placeholderTextColor="#888"
-          />
-        </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Check-in (YYYY-MM-DD)"
+        value={checkin}
+        onChangeText={setCheckin}
+      />
 
-        <Text style={styles.noteText}>
-          Selecione uma data local que irá aparecer os hotéis disponíveis
-        </Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Check-out (YYYY-MM-DD)"
+        value={checkout}
+        onChangeText={setCheckout}
+      />
 
-        {/* Tabs: Hotéis e Voos */}
-        <View style={styles.tabs}>
-          <TouchableOpacity 
-            style={activeTab === 'hoteis' ? styles.activeTab : styles.inactiveTab}
-            onPress={() => setActiveTab('hoteis')}
-          >
-            <Text 
-              style={
-                activeTab === 'hoteis' ? styles.activeTabText : styles.inactiveTabText
+      <TouchableOpacity style={styles.searchButton} onPress={buscarHoteis}>
+        <Text style={styles.searchButtonText}>Buscar</Text>
+      </TouchableOpacity>
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#5B2FD4" />
+      ) : (
+        <FlatList
+          data={hoteis}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: "/infoHotelModal",
+                  params: {
+                    name: item.name,
+                    price: item.price,
+                    address: item.address,
+                    rating: item.rating,
+                    reviews: item.reviews,
+                    checkin,
+                    checkout,
+                  },
+                })
               }
             >
-              Hotéis
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={activeTab === 'voos' ? styles.activeTab : styles.inactiveTab}
-            onPress={() => setActiveTab('voos')}
-          >
-            <Text 
-              style={
-                activeTab === 'voos' ? styles.activeTabText : styles.inactiveTabText
-              }
-            >
-              Voos
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Conteúdo condicional baseado na tab ativa */}
-        {activeTab === 'hoteis' ? (
-          <ScrollView style={styles.hotelsContainer}>
-            {/* Exemplo de item de hotel */}
-            <TouchableOpacity 
-              style={styles.hotelItem}
-              onPress={() => router.push("/infoHotelModal")} // outro hotel
-            >
-           
-              <View style={styles.hotelRow}>
-                <Text style={styles.hotelName}>Hotel 1</Text>
-                <Text style={styles.hotelRating}>4.87 (71)</Text>
+              <View style={styles.hotelItem}>
+                <Text style={styles.hotelTitle}>{item.name}</Text>
+                <Text>{item.address}</Text>
+                <Text>Avaliação: {item.rating} ({item.reviews})</Text>
+                <Text style={styles.hotelPrice}>{item.price}</Text>
               </View>
-              <Text style={styles.hotelDistance}>1,669 kilometers</Text>
-              <Text style={styles.hotelDate}>Jul 2 - Jul 7</Text>
-              <Text style={styles.hotelPrice}>$360 night</Text>
-           
             </TouchableOpacity>
-
-            <View style={styles.hotelItem}>
-              <View style={styles.hotelRow}>
-                <Text style={styles.hotelName}>Kintamani, Indonesia</Text>
-                <Text style={styles.hotelRating}>4.91 (89)</Text>
-              </View>
-              <Text style={styles.hotelDistance}>971 kilometers</Text>
-              <Text style={styles.hotelDate}>Jul 6 - 11</Text>
-              <Text style={styles.hotelPrice}>$268 night</Text>
-            </View>
-
-            {/* Adicione outros itens de hotel conforme necessário */}
-          </ScrollView>
-        ) : (
-          <View style={styles.hotelsContainer}>
-            <Text style={{ color: '#333' }}>
-              Seção de voos em breve...
-            </Text>
-          </View>
-        )}
-      </View>
+          )}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // Container principal
   container: {
     flex: 1,
-    alignItems: 'center',
-    backgroundColor: 'white',
-  },
-  // Cabeçalho com imagem de fundo
-  headerBackground: {
-    width: '100%',
-    height: 300,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  header: {
-    alignItems: 'flex-start',
-    paddingTop: 16,
-  },
-  logo: {
-    width: 150,
-    height: 50,
-    resizeMode: 'contain',
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: 'white',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  // Conteúdo principal
-  loginContainer: {
-    flex: 1,
-    width: '100%',
     padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  // Campos de busca
-  inputContainer: {
-    width: '100%',
-    marginVertical: 16,
+    backgroundColor: '#FFF',
   },
   input: {
     padding: 16,
-    borderRadius: 40,
-    marginBottom: 10,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
+    marginBottom: 10,
     color: 'black',
   },
-  noteText: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
+  searchButton: {
+    backgroundColor: '#5B2FD4',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
     marginBottom: 20,
   },
-  // Tabs para seleção entre Hotéis e Voos
-  tabs: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 40,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    padding: 5,
-    width: '100%',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  inactiveTab: {
-    flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 40,
-    padding: 16,
-    alignItems: 'center',
-  },
-  activeTab: {
-    flex: 1,
-    backgroundColor: '#EEE',
-    borderRadius: 40,
-    padding: 16,
-    alignItems: 'center',
-  },
-  inactiveTabText: {
+  searchButtonText: {
+    color: '#FFF',
     fontWeight: 'bold',
-  },
-  activeTabText: {
-    color: '#888',
-  },
-  // Lista de Hotéis e Voos
-  hotelsContainer: {
-    width: '100%',
-    // Caso deseje limitar a altura da rolagem, adicione: height: 300,
   },
   hotelItem: {
     backgroundColor: '#F9F9F9',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
   },
-  hotelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  hotelName: {
+  hotelTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
-  },
-  hotelRating: {
-    fontSize: 14,
-    color: '#666',
-  },
-  hotelDistance: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  hotelDate: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
   },
   hotelPrice: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    marginTop: 6,
     color: '#5B2FD4',
-    marginTop: 4,
+    fontWeight: 'bold',
   },
 });

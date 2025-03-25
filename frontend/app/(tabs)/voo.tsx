@@ -113,16 +113,16 @@ export default function FlightScreen() {
             arrivalTime: calcularChegada(primeiraIda?.departure_airport?.time, duracaoIda),
             price: voo?.price ? `$${voo.price}` : 'Preço não disponível',
           });
-        
+
 
           if (idaEVolta) {
             const vooVolta = conexoes.slice(metade);
             const primeiraVolta = vooVolta[0];
-          
+
             if (primeiraVolta?.airline) {
               const horaVolta = primeiraVolta?.departure_airport?.time?.split('T')[1]?.substring(0, 5) || '12:00';
               const dataHoraPartidaVolta = new Date(`${dataVolta}T${horaVolta}:00`);
-          
+
               voosFormatados.push({
                 tipo: 'Volta',
                 origin: iataDestino.toUpperCase(),      // origem da volta = destino da ida
@@ -140,7 +140,7 @@ export default function FlightScreen() {
               });
             }
           }
-          
+
         }
       });
 
@@ -166,37 +166,36 @@ export default function FlightScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Buscar Voos</Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Código IATA Origem (Ex: GRU)"
+          value={iataOrigem}
+          onChangeText={setIataOrigem}
+          autoCapitalize="characters"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Código IATA Origem (Ex: GRU)"
-        value={iataOrigem}
-        onChangeText={setIataOrigem}
-        autoCapitalize="characters"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Código IATA Destino (Ex: AUA)"
+          value={iataDestino}
+          onChangeText={setIataDestino}
+          autoCapitalize="characters"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Código IATA Destino (Ex: AUA)"
-        value={iataDestino}
-        onChangeText={setIataDestino}
-        autoCapitalize="characters"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Data de Ida (YYYY-MM-DD)"
+          value={dataPartida}
+          onChangeText={setDataPartida}
+          keyboardType="default"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Data de Ida (YYYY-MM-DD)"
-        value={dataPartida}
-        onChangeText={setDataPartida}
-        keyboardType="default"
-      />
-
-      <View style={styles.switchContainer}>
-        <Text>Ida e Volta?</Text>
-        <Switch value={idaEVolta} onValueChange={setIdaEVolta} />
+        <View style={styles.switchContainer}>
+          <Text>Ida e Volta?</Text>
+          <Switch value={idaEVolta} onValueChange={setIdaEVolta} />
+        </View>
       </View>
-
       {idaEVolta && (
         <TextInput
           style={styles.input}
@@ -274,14 +273,17 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: 'center',
   },
+  inputContainer: {
+    width: '100%',
+    marginVertical: 16,
+  },
   input: {
-    height: 50,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    padding: 16,
+    borderRadius: 40,
     marginBottom: 10,
-    color: '#000',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    color: 'black',
   },
   switchContainer: {
     flexDirection: 'row',

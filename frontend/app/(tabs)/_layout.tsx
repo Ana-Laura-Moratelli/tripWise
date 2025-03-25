@@ -63,6 +63,7 @@ export default function TabLayout() {
           tabBarLabelStyle: { marginTop: 4 },
         }}
       />
+      
       <Tabs.Screen
         name="trip"
         options={{

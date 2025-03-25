@@ -4,50 +4,77 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Platform
+  Platform,
+  Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function InfoHotelModal() {
   const router = useRouter();
+  const {
+    name,
+    address,
+    rating,
+    reviews,
+    price,
+    checkin,
+    checkout,
+  } = useLocalSearchParams();
 
-  // Exemplo de dados do hotel (fixos para demonstração)
-  const hotelName = "Hotel 1";
-  const reviews = "5.0 • 3 reviews";
-  const location = "Yonkers, New York, United States";
-  const price = "$32 night";
-  const dates = "Feb 13 - 14";
+  async function adicionarAoCarrinho() {
+    try {
+      const novoHotel = {
+        name,
+        address,
+        rating,
+        reviews,
+        price,
+        checkin,
+        checkout,
+      };
+
+      const carrinhoAtual = await AsyncStorage.getItem('@carrinho_hoteis');
+      const carrinho = carrinhoAtual ? JSON.parse(carrinhoAtual) : [];
+
+      carrinho.push(novoHotel);
+      await AsyncStorage.setItem('@carrinho_hoteis', JSON.stringify(carrinho));
+
+      Alert.alert('Sucesso', 'Hotel adicionado ao carrinho!');
+      router.back(); // voltar para a tela anterior
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível adicionar o hotel.');
+      console.error(error);
+    }
+  }
 
   return (
     <View style={styles.container}>
-      {/* StatusBar: no iOS, use "light" para ficar visível no espaço acima */}
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
 
-
-      {/* Conteúdo principal do modal */}
       <View style={styles.content}>
-        {/* Informações do hotel */}
-        <Text style={styles.hotelName}>{hotelName}</Text>
-        <Text style={styles.reviews}>{reviews}</Text>
-        <Text style={styles.location}>{location}</Text>
+        <Text style={styles.hotelName}>{name}</Text>
+        <Text style={styles.reviews}>{rating} • {reviews}</Text>
+        <Text style={styles.location}>{address}</Text>
 
-
-        {/* Botões de ação */}
-
-        {/* Área inferior com preço, datas e botões */}
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.removeButton}>
+          <TouchableOpacity
+            style={styles.removeButton}
+            onPress={() => {
+              Alert.alert('Aviso', 'Ainda não implementado remover hotel.');
+            }}
+          >
             <Text style={styles.removeButtonText}>Remover hotel</Text>
           </TouchableOpacity>
+
           <View style={styles.footercart}>
             <View>
               <Text style={styles.price}>{price}</Text>
-              <Text style={styles.dates}>{dates}</Text>
+              <Text style={styles.dates}>{checkin} - {checkout}</Text>
             </View>
 
-
-            <TouchableOpacity style={styles.addButton}>
+            <TouchableOpacity style={styles.addButton} onPress={adicionarAoCarrinho}>
               <Text style={styles.addButtonText}>Adicionar carrinho</Text>
             </TouchableOpacity>
           </View>
@@ -57,40 +84,17 @@ export default function InfoHotelModal() {
   );
 }
 
-// Estilos
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF',
   },
-  // Cabeçalho
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 50, // Ajuste se quiser espaço extra no iOS
-    paddingBottom: 16,
-    backgroundColor: '#FFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEE',
-  },
-  backButton: {
-    marginRight: 16,
-  },
-  backButtonText: {
-    fontSize: 22,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  // Conteúdo principal
   content: {
     flex: 1,
     padding: 20,
   },
   hotelName: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 6,
   },
@@ -115,23 +119,17 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '600',
   },
-  // Rodapé com preço, datas e botões
   footer: {
-   
     marginTop: 'auto',
     marginBottom: 12,
-   
   },
   footercart: {
-    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 12,
     paddingBottom: 12,
-    marginTop: 'auto',
-    marginBottom: 12,
-    borderTopWidth: 1,       // Largura da borda superior
+    borderTopWidth: 1,
     borderTopColor: '#E2E8F0',
   },
   price: {

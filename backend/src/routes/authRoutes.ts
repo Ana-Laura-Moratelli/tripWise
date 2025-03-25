@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.post("/register", register);
 router.post("/login", login);
+
 // Em authRoutes.ts ou em um novo arquivo de rotas
 router.get("/ping", (req, res) => {
     res.status(200).json({ message: "Backend funcionando" });
