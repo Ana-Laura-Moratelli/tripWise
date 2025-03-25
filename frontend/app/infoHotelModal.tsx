@@ -21,6 +21,7 @@ export default function InfoHotelModal() {
     price,
     checkin,
     checkout,
+    total,
   } = useLocalSearchParams();
 
   async function adicionarAoCarrinho() {
@@ -33,6 +34,7 @@ export default function InfoHotelModal() {
         price,
         checkin,
         checkout,
+        total,
       };
 
       const carrinhoAtual = await AsyncStorage.getItem('@carrinho_hoteis');
@@ -54,28 +56,18 @@ export default function InfoHotelModal() {
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
 
       <View style={styles.content}>
-        <Text style={styles.hotelName}>{name}</Text>
-        <Text style={styles.reviews}>{rating} • {reviews}</Text>
-        <Text style={styles.location}>{address}</Text>
+        <Text style={styles.titulo}>{name}</Text>
+        <Text style={styles.info}>Avaliação: {rating} • {reviews}</Text>
+        <Text style={styles.info}>{address}</Text>
+        <Text style={styles.info}>Check-in: {checkin}</Text>
+        <Text style={styles.info}>Check-out: {checkout}</Text>
+        <Text style={styles.info}>Preço diária: {price}</Text>
 
+        <Text style={styles.info}>Total: {total}</Text>
         <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.removeButton}
-            onPress={() => {
-              Alert.alert('Aviso', 'Ainda não implementado remover hotel.');
-            }}
-          >
-            <Text style={styles.removeButtonText}>Remover hotel</Text>
-          </TouchableOpacity>
-
-          <View style={styles.footercart}>
-            <View>
-              <Text style={styles.price}>{price}</Text>
-              <Text style={styles.dates}>{checkin} - {checkout}</Text>
-            </View>
-
+          <View style={styles.footer}>
             <TouchableOpacity style={styles.addButton} onPress={adicionarAoCarrinho}>
-              <Text style={styles.addButtonText}>Adicionar carrinho</Text>
+              <Text style={styles.addButtonText}>Adicionar ao Carrinho</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -144,12 +136,22 @@ const styles = StyleSheet.create({
   },
   addButton: {
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 40,
     backgroundColor: '#5B2FD4',
     alignItems: 'center',
   },
   addButtonText: {
     color: '#FFF',
     fontWeight: '600',
+  },
+  titulo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  info: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
   },
 });

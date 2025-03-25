@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: "#EFEFEF",
         padding: 14,
-        borderRadius: 10,
+        borderRadius: 20,
         marginBottom: 12,
     },
     cardTitle: {
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     cancelButton: {
         backgroundColor: "#D00",
         padding: 14,
-        borderRadius: 8,
+        borderRadius: 40,
         alignItems: "center",
         marginTop: 20,
     },
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     cronogramaButton: {
         backgroundColor: "#5B2FD4",
         padding: 14,
-        borderRadius: 8,
+        borderRadius: 40,
         alignItems: "center",
         marginTop: 30,
     },
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     shareButton: {
         backgroundColor: "#34A853",
         padding: 14,
-        borderRadius: 8,
+        borderRadius: 40,
         alignItems: "center",
         marginTop: 20,
     },

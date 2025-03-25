@@ -121,7 +121,7 @@ export default function ItineraryListScreen() {
           data={itinerarios}
           keyExtractor={(_, index) => index.toString()}
           renderItem={renderItem}
-          ListEmptyComponent={<Text>Nenhum item encontrado.</Text>}
+          ListEmptyComponent={<Text style={styles.noItem}>Nenhum item encontrado.</Text>}
         />
       )}
       <TouchableOpacity
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderWidth: 1,
     borderColor: '#DDD',
-    borderRadius: 8,
+    borderRadius: 20,
     marginBottom: 10
   },
   itemText: {
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   deleteButton: {
     backgroundColor: '#E53935',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 40,
     alignItems: 'center',
     marginTop: 10
   },
@@ -171,12 +171,17 @@ const styles = StyleSheet.create({
   cronogramaButton: {
     backgroundColor: "#5B2FD4",
     padding: 14,
-    borderRadius: 8,
+    borderRadius: 40,
     alignItems: "center",
     marginTop: 30,
   },
   cronogramaButtonText: {
     color: "#FFF",
     fontWeight: "bold",
+  },
+  noItem: {
+    fontSize: 18,
+    textAlign: 'center'
+
   },
 });

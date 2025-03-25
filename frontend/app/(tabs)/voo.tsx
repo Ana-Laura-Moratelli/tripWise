@@ -11,9 +11,12 @@ import {
   Switch,
 } from 'react-native';
 import axios from 'axios';
-import { useRouter } from 'expo-router'; // adicione no topo do arquivo
+import { useRouter } from 'expo-router';
+import { TextInputMask } from 'react-native-masked-text';
+
 const SERPAPI_KEY = "ad5fc2187f55ec89675e6630529688fc5de9de87bae04f185a8a42c7d6994956";
 const SERPAPI_URL = "https://serpapi.com/search.json";
+const EXCHANGE_RATE_URL = "https://api.exchangerate.host/latest?base=USD&symbols=BRL";
 
 interface Voo {
   tipo: 'Ida' | 'Volta';
@@ -35,18 +38,29 @@ export default function FlightScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  function formatarParaISO(data: string) {
+    const partes = data.split('/');
+    if (partes.length === 3) {
+      const [dia, mes, ano] = partes;
+      return `${ano}-${mes}-${dia}`;
+    }
+    return data;
+  }
 
   function validarParametros() {
+    const isoPartida = formatarParaISO(dataPartida);
+    const isoVolta = formatarParaISO(dataVolta);
+
     if (!iataOrigem || iataOrigem.length !== 3) {
       throw new Error("O código IATA de origem deve ter 3 letras.");
     }
     if (!iataDestino || iataDestino.length !== 3) {
       throw new Error("O código IATA de destino deve ter 3 letras.");
     }
-    if (!/\d{4}-\d{2}-\d{2}/.test(dataPartida)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(isoPartida)) {
       throw new Error("A data de ida deve estar no formato YYYY-MM-DD.");
     }
-    if (idaEVolta && !/\d{4}-\d{2}-\d{2}/.test(dataVolta)) {
+    if (idaEVolta && !/^\d{4}-\d{2}-\d{2}$/.test(isoVolta)) {
       throw new Error("A data de volta deve estar no formato YYYY-MM-DD.");
     }
   }
@@ -75,12 +89,32 @@ export default function FlightScreen() {
     });
   }
 
+  async function buscarCotacaoUSD() {
+    try {
+      const res = await axios.get(EXCHANGE_RATE_URL);
+      return res.data?.rates?.BRL ?? 5.0;
+    } catch {
+      Alert.alert("Aviso", "Erro ao obter taxa de câmbio. Usando valor padrão de R$5,00.");
+      return 5.0;
+    }
+  }
+
   async function buscarVoos() {
     setLoading(true);
     try {
       validarParametros();
+      const isoPartida = formatarParaISO(dataPartida);
+      const isoVolta = formatarParaISO(dataVolta);
 
-      const url = `${SERPAPI_URL}?engine=google_flights&departure_id=${iataOrigem.toUpperCase()}&arrival_id=${iataDestino.toUpperCase()}&outbound_date=${dataPartida}${idaEVolta ? `&return_date=${dataVolta}&type=1` : '&type=2'}&currency=USD&hl=en&api_key=${SERPAPI_KEY}`;
+      const cotacaoBRL = await buscarCotacaoUSD();
+
+      const formatarReal = (valor: number) =>
+        new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        }).format(valor);
+
+      const url = `${SERPAPI_URL}?engine=google_flights&departure_id=${iataOrigem.toUpperCase()}&arrival_id=${iataDestino.toUpperCase()}&outbound_date=${isoPartida}${idaEVolta ? `&return_date=${isoVolta}&type=1` : '&type=2'}&currency=USD&hl=en&api_key=${SERPAPI_KEY}`;
 
       const response = await axios.get(url);
       const resultados = response.data.best_flights;
@@ -99,9 +133,11 @@ export default function FlightScreen() {
 
         const vooIda = conexoes.slice(0, metade);
         const primeiraIda = vooIda[0];
-        const ultimaIda = vooIda[vooIda.length - 1];
 
         const duracaoIda = voo.total_duration / (idaEVolta ? 2 : 1);
+
+        const precoUSD = parseFloat(voo?.price);
+        const precoBRL = isNaN(precoUSD) ? null : precoUSD * cotacaoBRL;
 
         if (primeiraIda?.airline) {
           voosFormatados.push({
@@ -111,9 +147,8 @@ export default function FlightScreen() {
             airline: primeiraIda.airline,
             departureTime: formatarDataCompleta(primeiraIda?.departure_airport?.time),
             arrivalTime: calcularChegada(primeiraIda?.departure_airport?.time, duracaoIda),
-            price: voo?.price ? `$${voo.price}` : 'Preço não disponível',
+            price: precoBRL ? formatarReal(precoBRL) : 'Preço não disponível',
           });
-
 
           if (idaEVolta) {
             const vooVolta = conexoes.slice(metade);
@@ -121,12 +156,12 @@ export default function FlightScreen() {
 
             if (primeiraVolta?.airline) {
               const horaVolta = primeiraVolta?.departure_airport?.time?.split('T')[1]?.substring(0, 5) || '12:00';
-              const dataHoraPartidaVolta = new Date(`${dataVolta}T${horaVolta}:00`);
+              const dataHoraPartidaVolta = new Date(`${isoVolta}T${horaVolta}:00`);
 
               voosFormatados.push({
                 tipo: 'Volta',
-                origin: iataDestino.toUpperCase(),      // origem da volta = destino da ida
-                destination: iataOrigem.toUpperCase(),  // destino da volta = origem da ida
+                origin: iataDestino.toUpperCase(),
+                destination: iataOrigem.toUpperCase(),
                 airline: primeiraVolta.airline,
                 departureTime: dataHoraPartidaVolta.toLocaleString('pt-BR', {
                   hour: '2-digit',
@@ -136,11 +171,10 @@ export default function FlightScreen() {
                   year: 'numeric',
                 }),
                 arrivalTime: calcularChegada(dataHoraPartidaVolta.toISOString(), duracaoIda),
-                price: voo?.price ? `$${voo.price}` : 'Preço não disponível',
+                price: precoBRL ? formatarReal(precoBRL) : 'Preço não disponível',
               });
             }
           }
-
         }
       });
 
@@ -153,15 +187,26 @@ export default function FlightScreen() {
     }
   }
 
-  function obterComparativoPrecos(voos: Voo[]) {
+  function obterComparativoPrecos(voos: Voo[]): { [companhia: string]: string } {
     const mapaCompanhias: { [companhia: string]: number } = {};
     voos.forEach((voo) => {
-      const precoNumerico = parseFloat(voo.price.replace('$', ''));
+      const precoNumerico = parseFloat(
+        voo.price.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()
+      );
       if (!mapaCompanhias[voo.airline] || precoNumerico < mapaCompanhias[voo.airline]) {
         mapaCompanhias[voo.airline] = precoNumerico;
       }
     });
-    return mapaCompanhias;
+
+    const mapaFormatado: { [companhia: string]: string } = {};
+    Object.entries(mapaCompanhias).forEach(([companhia, valor]) => {
+      mapaFormatado[companhia] = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(valor);
+    });
+
+    return mapaFormatado;
   }
 
   return (
@@ -173,6 +218,8 @@ export default function FlightScreen() {
           value={iataOrigem}
           onChangeText={setIataOrigem}
           autoCapitalize="characters"
+          placeholderTextColor="#888"
+
         />
 
         <TextInput
@@ -181,14 +228,19 @@ export default function FlightScreen() {
           value={iataDestino}
           onChangeText={setIataDestino}
           autoCapitalize="characters"
+          placeholderTextColor="#888"
+
         />
 
-        <TextInput
+        <TextInputMask
+          type={'datetime'}
+          options={{ format: 'DD/MM/YYYY' }}
           style={styles.input}
-          placeholder="Data de Ida (YYYY-MM-DD)"
+          placeholder="Data de Ida"
           value={dataPartida}
           onChangeText={setDataPartida}
-          keyboardType="default"
+          placeholderTextColor="#888"
+
         />
 
         <View style={styles.switchContainer}>
@@ -196,13 +248,17 @@ export default function FlightScreen() {
           <Switch value={idaEVolta} onValueChange={setIdaEVolta} />
         </View>
       </View>
+
       {idaEVolta && (
-        <TextInput
+        <TextInputMask
+          type={'datetime'}
+          options={{ format: 'DD/MM/YYYY' }}
           style={styles.input}
-          placeholder="Data de Volta (YYYY-MM-DD)"
+          placeholder="Data de Volta"
           value={dataVolta}
           onChangeText={setDataVolta}
-          keyboardType="default"
+          placeholderTextColor="#888"
+
         />
       )}
 
@@ -219,7 +275,7 @@ export default function FlightScreen() {
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
               <TouchableOpacity
-                onPress={() => {
+                onPress={() =>
                   router.push({
                     pathname: "/infoVooModal",
                     params: {
@@ -231,8 +287,8 @@ export default function FlightScreen() {
                       arrivalTime: item.arrivalTime,
                       price: item.price,
                     },
-                  });
-                }}
+                  })
+                }
               >
                 <View style={styles.vooItem}>
                   <Text style={styles.vooDestino}>{item.tipo} - {item.origin} → {item.destination}</Text>
@@ -250,7 +306,7 @@ export default function FlightScreen() {
               <Text style={styles.comparadorTitulo}>Comparativo de Preços</Text>
               {Object.entries(obterComparativoPrecos(voos)).map(([companhia, preco]) => (
                 <Text key={companhia} style={styles.comparadorItem}>
-                  {companhia}: ${preco}
+                  {companhia}: {preco}
                 </Text>
               ))}
             </View>
@@ -267,15 +323,8 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: 'white',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
   inputContainer: {
     width: '100%',
-    marginVertical: 16,
   },
   input: {
     padding: 16,
@@ -288,13 +337,13 @@ const styles = StyleSheet.create({
   switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
     justifyContent: 'space-between',
+    marginBottom: 10,
   },
   searchButton: {
     backgroundColor: '#5B2FD4',
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 40,
     alignItems: 'center',
     marginBottom: 20,
   },
@@ -305,7 +354,7 @@ const styles = StyleSheet.create({
   vooItem: {
     backgroundColor: '#F9F9F9',
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 20,
     marginBottom: 10,
   },
   vooDestino: {
@@ -316,7 +365,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 15,
     backgroundColor: '#EFEFEF',
-    borderRadius: 8,
+    borderRadius: 20,
   },
   comparadorTitulo: {
     fontSize: 16,

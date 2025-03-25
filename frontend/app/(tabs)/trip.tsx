@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   },
   vooItem: {
     backgroundColor: '#F1F1F1',
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 12,
   },

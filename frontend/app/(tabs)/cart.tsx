@@ -153,13 +153,26 @@ export default function CartScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF' },
-  content: { flex: 1, padding: 20 },
-  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 16 },
-  textoVazio: { color: '#666', marginBottom: 12 },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#FFF' 
+  },
+  content: { 
+    padding: 20 
+  },
+
+  title: { 
+    fontSize: 20, 
+    fontWeight: 'bold', 
+    marginBottom: 16 
+  },
+  textoVazio: { 
+    color: '#666', 
+    marginBottom: 12 
+  },
   item: {
     backgroundColor: '#F9F9F9',
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 12,
   },
@@ -169,6 +182,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   itemTitle: {
+    width: '70%',
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
@@ -185,7 +199,7 @@ const styles = StyleSheet.create({
   botaoViagem: {
     paddingVertical: 14,
     marginTop: 20,
-    borderRadius: 8,
+    borderRadius: 40,
     backgroundColor: '#5B2FD4',
     alignItems: 'center',
   },

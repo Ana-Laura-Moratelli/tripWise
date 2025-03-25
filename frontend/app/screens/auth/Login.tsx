@@ -103,7 +103,7 @@ export default function AuthScreen() {
                         onPress={() => setActiveTab("register")}
                     >
                         <Text style={activeTab === "register" ? styles.activeTabText : styles.inactiveTabText}>
-                            Register
+                            Cadastre-se
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -131,7 +131,7 @@ export default function AuthScreen() {
                             disabled={loginLoading}
                         >
                             <Text style={styles.loginButtonText}>
-                                {loginLoading ? "Carregando..." : "Entrar"}
+                                {loginLoading ? "Entrando..." : "Entrar"}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -179,7 +179,7 @@ export default function AuthScreen() {
                             disabled={registerLoading}
                         >
                             <Text style={styles.loginButtonText}>
-                                {registerLoading ? "Carregando..." : "Cadastre-se"}
+                                {registerLoading ? "Cadastrando..." : "Cadastre-se"}
                             </Text>
                         </TouchableOpacity>
                     </View>
