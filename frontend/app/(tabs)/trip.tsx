@@ -12,7 +12,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 
 interface Viagem {
   id: string;
-  voos: Voo[];
+  voos?: Voo[];
+  hoteis?: Hotel[];
 }
 
 interface Voo {
@@ -23,6 +24,13 @@ interface Voo {
   departureTime: string;
   arrivalTime: string;
   price: string;
+}
+
+interface Hotel {
+  name: string;
+  checkin: string;
+  checkout: string;
+  preco: string;
 }
 
 export default function ViagemRealizadaScreen() {
@@ -44,6 +52,30 @@ export default function ViagemRealizadaScreen() {
     }, [])
   );
 
+  const renderVoo = (voos: Voo[]) => {
+    const origem = voos[0]?.origin;
+    const destino = voos[0]?.destination;
+    const data = voos[0]?.departureTime;
+    const trechos = voos.length;
+
+    return (
+      <View style={styles.subItem}>
+        <Text style={styles.vooTitle}>✈️ Voo: {origem} → {destino}</Text>
+        <Text style={styles.vooInfo}>{trechos} trecho{trechos > 1 ? 's' : ''} - {data}</Text>
+      </View>
+    );
+  };
+
+  const renderHotel = (hoteis: Hotel[]) => {
+    return hoteis.map((hotel, index) => (
+      <View key={index} style={styles.subItem}>
+        <Text style={styles.vooTitle}>🏨 Hotel: {hotel.name}</Text>
+        <Text style={styles.vooInfo}>Check-in: {hotel.checkin}</Text>
+      </View>
+    ));
+  };
+  
+
   return (
     <View style={styles.container}>
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
@@ -60,18 +92,14 @@ export default function ViagemRealizadaScreen() {
               <TouchableOpacity
                 onPress={() =>
                   router.push({
-                    pathname: "/infoTripModal",
+                    pathname: "/modal/infoTripModal",
                     params: { id: item.id },
                   })
                 }
               >
                 <View style={styles.vooItem}>
-                  <Text style={styles.vooTitle}>
-                    Viagem de {item.voos[0]?.origin} → {item.voos[item.voos.length - 1]?.destination}
-                  </Text>
-                  <Text style={{ color: '#666' }}>
-                    {item.voos.length} trechos - {item.voos[0]?.departureTime}
-                  </Text>
+                  {item.voos && item.voos.length > 0 && renderVoo(item.voos)}
+                  {item.hoteis && item.hoteis.length > 0 && renderHotel(item.hoteis)}
                 </View>
               </TouchableOpacity>
             )}
@@ -97,13 +125,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   vooItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
     backgroundColor: '#F1F1F1',
     borderRadius: 20,
     padding: 16,
     marginBottom: 12,
   },
+  subItem: {
+  },
   vooTitle: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  vooInfo: {
+    color: '#666',
   },
 });

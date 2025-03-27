@@ -82,10 +82,10 @@ export default function ModalScreen() {
         <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={100} // Ajuste conforme sua barra superior
+            keyboardVerticalOffset={100} 
         >
             <ScrollView
-                contentContainerStyle={{ flexGrow: 1, padding: 20, backgroundColor: 'white' }}
+                style={{ backgroundColor: "#fff", padding: 20, flex: 1 }}
                 keyboardShouldPersistTaps="handled"
             >
 

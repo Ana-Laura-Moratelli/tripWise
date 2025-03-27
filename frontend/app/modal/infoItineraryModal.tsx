@@ -1,12 +1,12 @@
 // app/ItineraryList.tsx
 import React, { useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Alert 
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  Alert
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 
@@ -113,6 +113,7 @@ export default function ItineraryListScreen() {
 
   return (
     <View style={styles.container}>
+
       <Text style={styles.title}>Cronograma</Text>
       {loading ? (
         <Text>Carregando...</Text>
@@ -121,12 +122,12 @@ export default function ItineraryListScreen() {
           data={itinerarios}
           keyExtractor={(_, index) => index.toString()}
           renderItem={renderItem}
-          ListEmptyComponent={<Text style={styles.noItem}>Nenhum item encontrado.</Text>}
+          ListEmptyComponent={<Text style={styles.textoVazio}>Nenhum item encontrado.</Text>}
         />
       )}
       <TouchableOpacity
         style={styles.cronogramaButton}
-        onPress={() => router.push({ pathname: "/modalCronograma", params: { id } })}
+        onPress={() => router.push({ pathname: "/modal/createItineraryModal", params: { id } })}
       >
         <Text style={styles.cronogramaButtonText}>Criar Cronograma</Text>
       </TouchableOpacity>
@@ -168,20 +169,21 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: 'bold'
   },
+
   cronogramaButton: {
     backgroundColor: "#5B2FD4",
     padding: 14,
     borderRadius: 40,
+    
     alignItems: "center",
-    marginTop: 30,
+
   },
   cronogramaButtonText: {
     color: "#FFF",
     fontWeight: "bold",
   },
-  noItem: {
-    fontSize: 18,
-    textAlign: 'center'
-
+  textoVazio: {
+    textAlign: 'center',
+    color: '#666',
   },
 });

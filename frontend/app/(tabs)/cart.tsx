@@ -7,6 +7,7 @@ import {
   Platform,
   FlatList,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -70,7 +71,7 @@ export default function CartScreen() {
 
   const realizarViagem = async () => {
     try {
-      const userId = "id-do-usuario-logado"; // Substitua pelo ID real
+      const userId = await AsyncStorage.getItem('@user_id');
 
       const response = await fetch("http://192.168.15.9:5000/api/travel", {
         method: "POST",
@@ -92,12 +93,14 @@ export default function CartScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
-      <View style={styles.content}>
+      
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 100 }]}>
         <Text style={styles.title}>Voos no Carrinho</Text>
         {voosCarrinho.length === 0 ? (
           <Text style={styles.textoVazio}>Nenhum voo adicionado.</Text>
         ) : (
           <FlatList
+            scrollEnabled={false}
             data={voosCarrinho}
             keyExtractor={(_, index) => `voo-${index}`}
             renderItem={({ item, index }) => (
@@ -124,6 +127,7 @@ export default function CartScreen() {
           <Text style={styles.textoVazio}>Nenhum hotel adicionado.</Text>
         ) : (
           <FlatList
+            scrollEnabled={false}
             data={hoteisCarrinho}
             keyExtractor={(_, index) => `hotel-${index}`}
             renderItem={({ item, index }) => (
@@ -143,32 +147,36 @@ export default function CartScreen() {
             )}
           />
         )}
+      </ScrollView>
 
-        <TouchableOpacity style={styles.botaoViagem} onPress={realizarViagem}>
-          <Text style={styles.botaoViagemTexto}>Realizar Viagem</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Botão fixo no footer */}
+      {(voosCarrinho.length > 0 || hoteisCarrinho.length > 0) && (
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.botaoViagem} onPress={realizarViagem}>
+            <Text style={styles.botaoViagemTexto}>Realizar Viagem</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#FFF' 
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF'
   },
-  content: { 
-    padding: 20 
+  content: {
+    padding: 20
   },
-
-  title: { 
-    fontSize: 20, 
-    fontWeight: 'bold', 
-    marginBottom: 16 
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16
   },
-  textoVazio: { 
-    color: '#666', 
-    marginBottom: 12 
+  textoVazio: {
+    color: '#666',
+    marginBottom: 12
   },
   item: {
     backgroundColor: '#F9F9F9',
@@ -198,13 +206,23 @@ const styles = StyleSheet.create({
   },
   botaoViagem: {
     paddingVertical: 14,
-    marginTop: 20,
     borderRadius: 40,
     backgroundColor: '#5B2FD4',
     alignItems: 'center',
+    width: '90%',
   },
   botaoViagemTexto: {
     color: 'white',
     fontWeight: '600',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#FFF',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderColor: '#ddd',
   },
 });

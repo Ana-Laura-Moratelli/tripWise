@@ -18,8 +18,8 @@ export default function Profile() {
 
   async function handleLogout() {
     try {
-      await AsyncStorage.removeItem('token'); // ou o nome que você usou
-      router.replace('/screens/auth/Login'); // redireciona para tela de login
+      await AsyncStorage.removeItem('@user_id');
+      router.replace('/screens/auth/Login'); 
     } catch (error) {
       Alert.alert('Erro', 'Erro ao fazer logout.');
       console.error(error);

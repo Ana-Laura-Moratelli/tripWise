@@ -277,7 +277,7 @@ export default function FlightScreen() {
               <TouchableOpacity
                 onPress={() =>
                   router.push({
-                    pathname: "/infoVooModal",
+                    pathname: "/modal/infoVooModal",
                     params: {
                       tipo: item.tipo,
                       origin: item.origin,

@@ -45,6 +45,25 @@ export default function HotelSearchScreen() {
     if (!/\d{4}-\d{2}-\d{2}/.test(checkout)) throw new Error("Data de saída inválida (YYYY-MM-DD).");
   }
 
+  async function converterCoordenadasParaEndereco(lat: number, lng: number): Promise<string> {
+    try {
+      const API_KEY = 'AIzaSyBpmchWTIClePxMh-US0DCEe4ZzoVmA5Ms'; // ⬅️ substitua pela sua chave real
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${API_KEY}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.status === "OK" && data.results.length > 0) {
+        return data.results[0].formatted_address;
+      } else {
+        return 'Endereço não encontrado';
+      }
+    } catch (error) {
+      console.error('Erro ao converter coordenadas:', error);
+      return 'Endereço não disponível';
+    }
+  }
+
   async function buscarHoteis() {
     setLoading(true);
     try {
@@ -70,27 +89,35 @@ export default function HotelSearchScreen() {
 
       const BRL_EXCHANGE_RATE = 5.71;
 
-      const formatados: Hotel[] = resultados.map((hotel: any) => {
-        const precoUSD = Number(hotel?.rate_per_night?.extracted_lowest || 0);
-        const totalUSD = precoUSD * diasHospedagem;
+      const formatados: Hotel[] = await Promise.all(
+        resultados.map(async (hotel: any) => {
+          const precoUSD = Number(hotel?.rate_per_night?.extracted_lowest || 0);
+          const totalUSD = precoUSD * diasHospedagem;
 
-        const precoBRL = precoUSD * BRL_EXCHANGE_RATE;
-        const totalBRL = totalUSD * BRL_EXCHANGE_RATE;
+          const precoBRL = precoUSD * BRL_EXCHANGE_RATE;
+          const totalBRL = totalUSD * BRL_EXCHANGE_RATE;
 
-        const formatarReal = (valor: number) =>
-          new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+          const formatarReal = (valor: number) =>
+            new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 
-        return {
-          name: hotel.name ?? 'Nome não disponível',
-          price: precoUSD ? formatarReal(precoBRL) : 'Preço não informado',
-          rating: hotel.overall_rating?.toString() ?? 'Sem avaliação',
-          address: hotel.gps_coordinates
-            ? `Lat: ${hotel.gps_coordinates.latitude}, Long: ${hotel.gps_coordinates.longitude}`
-            : 'Localização não disponível',
-          reviews: hotel.reviews?.toString() ?? '0 avaliações',
-          total: totalUSD ? formatarReal(totalBRL) : 'Total não disponível',
-        };
-      });
+          let endereco = 'Localização não disponível';
+          if (hotel.gps_coordinates) {
+            endereco = await converterCoordenadasParaEndereco(
+              hotel.gps_coordinates.latitude,
+              hotel.gps_coordinates.longitude
+            );
+          }
+
+          return {
+            name: hotel.name ?? 'Nome não disponível',
+            price: precoUSD ? formatarReal(precoBRL) : 'Preço não informado',
+            rating: hotel.overall_rating?.toString() ?? 'Sem avaliação',
+            address: endereco,
+            reviews: hotel.reviews?.toString() ?? '0 avaliações',
+            total: totalUSD ? formatarReal(totalBRL) : 'Total não disponível',
+          };
+        })
+      );
 
       setHoteis(formatados);
     } catch (error: any) {
@@ -102,9 +129,9 @@ export default function HotelSearchScreen() {
 
   return (
     <View style={styles.container}>
-       <TextInput
+      <TextInput
         style={styles.input}
-        placeholder="Cidade (ex: Bali)"
+        placeholder="Destino"
         value={cidade}
         onChangeText={setCidade}
         placeholderTextColor="#888"
@@ -114,7 +141,7 @@ export default function HotelSearchScreen() {
         type={'datetime'}
         options={{ format: 'DD/MM/YYYY' }}
         style={styles.input}
-        placeholder="Check-in (dd/mm/aaaa)"
+        placeholder="Check-in"
         value={checkinMask}
         onChangeText={setCheckinMask}
         placeholderTextColor="#888"
@@ -124,7 +151,7 @@ export default function HotelSearchScreen() {
         type={'datetime'}
         options={{ format: 'DD/MM/YYYY' }}
         style={styles.input}
-        placeholder="Check-out (dd/mm/aaaa)"
+        placeholder="Check-out"
         value={checkoutMask}
         onChangeText={setCheckoutMask}
         placeholderTextColor="#888"
@@ -144,7 +171,7 @@ export default function HotelSearchScreen() {
             <TouchableOpacity
               onPress={() =>
                 router.push({
-                  pathname: "/infoHotelModal",
+                  pathname: "/modal/infoHotelModal",
                   params: {
                     name: item.name,
                     price: item.price,

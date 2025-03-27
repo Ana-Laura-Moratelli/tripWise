@@ -8,11 +8,15 @@ import {
     StyleSheet,
     ImageBackground,
     Alert,
+    KeyboardAvoidingView,
+    ScrollView,
+    Platform,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginUser, registerUser } from "../../../src/services/auth";
+import { TextInputMask } from 'react-native-masked-text';
 
 export default function AuthScreen() {
     const router = useRouter();
@@ -33,159 +37,226 @@ export default function AuthScreen() {
 
     async function handleLogin() {
         if (!email || !password) {
-            Alert.alert("Erro", "Preencha todos os campos!");
-            return;
+          Alert.alert("Erro", "Preencha todos os campos!");
+          return;
         }
+      
         setLoginLoading(true);
+      
         try {
-            const user = await loginUser(email, password);
-            console.log("✅ Usuário logado:", user);
-            const savedToken = await AsyncStorage.getItem("@token");
-            console.log("🔑 Token salvo:", savedToken);
-            router.replace("/(tabs)"); // Redireciona para as tabs
+          const response = await loginUser(email, password);
+      
+          // Esperado: { token: string, user: { uid: string, ... } }
+          const { token, user } = response;
+      
+          // Salva o token e o ID do usuário no AsyncStorage
+          await AsyncStorage.setItem("@token", token);
+          await AsyncStorage.setItem("@user_id", user.uid);
+      
+          console.log("✅ Usuário logado:", user);
+          console.log("🔑 Token salvo:", token);
+          console.log("🆔 UID salvo:", user.uid);
+      
+          router.replace("/(tabs)");
         } catch (error: any) {
-            Alert.alert("Erro", error.message);
+          Alert.alert("Erro", error.message);
         } finally {
-            setLoginLoading(false);
+          setLoginLoading(false);
         }
-    }
-
+      }
+      
     async function handleRegister() {
+        const numeroLimpo = phoneNumber.replace(/\D/g, '');
+        const telefoneFormatado = `+55${numeroLimpo}`;
+        const cpfLimpo = cpf.replace(/\D/g, '');
+
         if (!name || !phoneNumber || !cpf || !regEmail || !regPassword) {
             Alert.alert("Erro", "Preencha todos os campos!");
             return;
         }
+
+        if (regPassword.length < 8) {
+            Alert.alert("Erro", "A senha deve ter no mínimo 8 caracteres.");
+            return;
+        }
+
         setRegisterLoading(true);
         try {
-            const data = { name, phoneNumber, cpf, email: regEmail, password: regPassword };
+            const data = {
+                name,
+                phoneNumber: telefoneFormatado,
+                cpf: cpfLimpo,
+                email: regEmail,
+                password: regPassword
+            };
+
             console.log("📡 Enviando dados para cadastro:", data);
             const response = await registerUser(data);
+
+            if (response?.error?.includes("CPF já cadastrado")) {
+                throw new Error("Este CPF já está cadastrado.");
+            }
+
             console.log("✅ Cadastro bem-sucedido:", response);
             Alert.alert("Sucesso", "Cadastro realizado com sucesso!");
             router.push("/screens/auth/Login");
         } catch (error: any) {
             console.error("❌ Erro ao cadastrar:", error.message);
-            Alert.alert("Erro", error.message);
-        } finally {
-            setRegisterLoading(false);
-        }
+          
+            let mensagemErro = "Erro ao cadastrar. Tente novamente.";
+          
+            if (typeof error.message === "string") {
+              if (error.message.includes("CPF")) {
+                mensagemErro = "Este CPF já está cadastrado.";
+              } else if (error.message.includes("email") || error.message.includes("Email")) {
+                mensagemErro = "Este e-mail já está cadastrado.";
+              } else if (error.message.includes("phone") || error.message.includes("Phone")) {
+                mensagemErro = "Este número de telefone já está cadastrado.";
+              }
+            }
+          
+            Alert.alert("Erro", mensagemErro);
+          }
+          
     }
 
     return (
-        <View style={styles.container}>
-            <StatusBar style="light" hidden={true} />
-            <ImageBackground
-                source={require('@/assets/images/header-bg.png')}
-                style={styles.headerBackground}
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+
+        >
+            <ScrollView
+                contentContainerStyle={{ flexGrow: 1, backgroundColor: 'white' }}
+                keyboardShouldPersistTaps="handled"
             >
-                <View style={styles.header}>
-                    <Image
-                        source={require('@/assets/images/logo.png')}
-                        style={styles.logo}
-                    />
-                    <Text style={styles.title}>Melhor App de planejamento de viagens!</Text>
-                   
-                </View>
-            </ImageBackground>
-
-            <View style={styles.loginContainer}>
-                <View style={styles.tabs}>
-                    <TouchableOpacity
-                        style={activeTab === "login" ? styles.activeTab : styles.inactiveTab}
-                        onPress={() => setActiveTab("login")}
+                <View style={styles.container}>
+                    <StatusBar style="light" hidden={true} />
+                    <ImageBackground
+                        source={require('@/assets/images/header-bg.png')}
+                        style={styles.headerBackground}
                     >
-                        <Text style={activeTab === "login" ? styles.activeTabText : styles.inactiveTabText}>
-                            Login
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={activeTab === "register" ? styles.activeTab : styles.inactiveTab}
-                        onPress={() => setActiveTab("register")}
-                    >
-                        <Text style={activeTab === "register" ? styles.activeTabText : styles.inactiveTabText}>
-                            Cadastre-se
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                        <View style={styles.header}>
+                            <Image
+                                source={require('@/assets/images/logo.png')}
+                                style={styles.logo}
+                            />
+                            <Text style={styles.title}>Melhor App de planejamento de viagens!</Text>
 
-                {activeTab === "login" ? (
-                    <View style={styles.inputContainer}>
-                        <TextInput
-                            placeholder="E-mail"
-                            value={email}
-                            onChangeText={setEmail}
-                            style={styles.input}
-                            placeholderTextColor="#888"
-                        />
-                        <TextInput
-                            placeholder="Senha"
-                            secureTextEntry
-                            value={password}
-                            onChangeText={setPassword}
-                            style={styles.input}
-                            placeholderTextColor="#888"
-                        />
-                        <TouchableOpacity
-                            onPress={handleLogin}
-                            style={styles.loginButton}
-                            disabled={loginLoading}
-                        >
-                            <Text style={styles.loginButtonText}>
-                                {loginLoading ? "Entrando..." : "Entrar"}
-                            </Text>
-                        </TouchableOpacity>
+                        </View>
+                    </ImageBackground>
+
+                    <View style={styles.loginContainer}>
+                        <View style={styles.tabs}>
+                            <TouchableOpacity
+                                style={activeTab === "login" ? styles.activeTab : styles.inactiveTab}
+                                onPress={() => setActiveTab("login")}
+                            >
+                                <Text style={activeTab === "login" ? styles.activeTabText : styles.inactiveTabText}>
+                                    Login
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={activeTab === "register" ? styles.activeTab : styles.inactiveTab}
+                                onPress={() => setActiveTab("register")}
+                            >
+                                <Text style={activeTab === "register" ? styles.activeTabText : styles.inactiveTabText}>
+                                    Cadastre-se
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {activeTab === "login" ? (
+                            <View style={styles.inputContainer}>
+                                <TextInput
+                                    placeholder="E-mail"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    style={styles.input}
+                                    placeholderTextColor="#888"
+                                />
+                                <TextInput
+                                    placeholder="Senha"
+                                    secureTextEntry
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    style={styles.input}
+                                    placeholderTextColor="#888"
+                                />
+                                <TouchableOpacity
+                                    onPress={handleLogin}
+                                    style={styles.loginButton}
+                                    disabled={loginLoading}
+                                >
+                                    <Text style={styles.loginButtonText}>
+                                        {loginLoading ? "Entrando..." : "Entrar"}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <View style={styles.inputContainer}>
+                                <TextInput
+                                    placeholder="Nome"
+                                    style={styles.input}
+                                    value={name}
+                                    onChangeText={setName}
+                                    placeholderTextColor="#888"
+                                />
+                                <TextInputMask
+                                    type={'cel-phone'}
+                                    options={{
+                                        maskType: 'BRL',
+                                        withDDD: true,
+                                        dddMask: '(99) '
+                                    }}
+                                    placeholder="Telefone"
+                                    style={styles.input}
+                                    value={phoneNumber}
+                                    onChangeText={setPhoneNumber}
+                                    keyboardType="phone-pad"
+                                    placeholderTextColor="#888"
+                                />
+
+                                <TextInputMask
+                                    type={'cpf'}
+                                    value={cpf}
+                                    onChangeText={setCpf}
+                                    style={styles.input}
+                                    placeholder="CPF"
+                                    placeholderTextColor="#888"
+                                    keyboardType="numeric"
+                                />
+
+                                <TextInput
+                                    placeholder="E-mail"
+                                    style={styles.input}
+                                    value={regEmail}
+                                    onChangeText={setRegEmail}
+                                    placeholderTextColor="#888"
+                                />
+                                <TextInput
+                                    placeholder="Senha"
+                                    secureTextEntry
+                                    style={styles.input}
+                                    value={regPassword}
+                                    onChangeText={setRegPassword}
+                                    placeholderTextColor="#888"
+                                />
+                                <TouchableOpacity
+                                    onPress={handleRegister}
+                                    style={styles.loginButton}
+                                    disabled={registerLoading}
+                                >
+                                    <Text style={styles.loginButtonText}>
+                                        {registerLoading ? "Cadastrando..." : "Cadastre-se"}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
-                ) : (
-                    <View style={styles.inputContainer}>
-                        <TextInput
-                            placeholder="Nome"
-                            style={styles.input}
-                            value={name}
-                            onChangeText={setName}
-                            placeholderTextColor="#888"
-                        />
-                        <TextInput
-                            placeholder="Telefone"
-                            style={styles.input}
-                            value={phoneNumber}
-                            onChangeText={setPhoneNumber}
-                            placeholderTextColor="#888"
-                        />
-                        <TextInput
-                            placeholder="CPF"
-                            style={styles.input}
-                            value={cpf}
-                            onChangeText={setCpf}
-                            placeholderTextColor="#888"
-                        />
-                        <TextInput
-                            placeholder="E-mail"
-                            style={styles.input}
-                            value={regEmail}
-                            onChangeText={setRegEmail}
-                            placeholderTextColor="#888"
-                        />
-                        <TextInput
-                            placeholder="Senha"
-                            secureTextEntry
-                            style={styles.input}
-                            value={regPassword}
-                            onChangeText={setRegPassword}
-                            placeholderTextColor="#888"
-                        />
-                        <TouchableOpacity
-                            onPress={handleRegister}
-                            style={styles.loginButton}
-                            disabled={registerLoading}
-                        >
-                            <Text style={styles.loginButtonText}>
-                                {registerLoading ? "Cadastrando..." : "Cadastre-se"}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
-        </View>
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 

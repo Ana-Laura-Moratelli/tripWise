@@ -44,7 +44,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         const userDoc = await db.collection("users").doc(user.uid).get();
         const userData = userDoc.exists ? userDoc.data() : null;
 
-        res.status(200).json({ token: customToken, user: { ...userData, email } });
+        res.status(200).json({
+            token: customToken,
+            user: {
+              uid: user.uid, 
+              ...userData,
+              email
+            }
+          });
+          
     } catch (error) {
         const errMessage = error instanceof Error ? error.message : "Usuário ou senha incorretos";
         res.status(400).json({ error: errMessage });
