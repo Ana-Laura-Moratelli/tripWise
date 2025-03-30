@@ -1,7 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { db } from "../services/firebase";
 
-// POST /api/travel
 export const registrarViagem = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId, voos, hoteis } = req.body;
@@ -11,7 +10,7 @@ export const registrarViagem = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    await db.collection("travel").add({
+    await db.collection("trip").add({
       userId,
       voos,
       hoteis,
@@ -25,10 +24,9 @@ export const registrarViagem = async (req: Request, res: Response): Promise<void
   }
 };
 
-// GET /api/travel
 export const listarViagens = async (_req: Request, res: Response) => {
   try {
-    const snapshot = await db.collection("travel").orderBy("createdAt", "desc").get();
+    const snapshot = await db.collection("trip").orderBy("createdAt", "desc").get();
     const viagens = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     res.status(200).json(viagens);
   } catch (error) {
@@ -36,18 +34,16 @@ export const listarViagens = async (_req: Request, res: Response) => {
   }
 };
 
-// DELETE /api/travel/:id
 export const deletarViagem = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await db.collection("travel").doc(id).delete();
+    await db.collection("trip").doc(id).delete();
     res.status(200).json({ message: "Viagem cancelada com sucesso." });
   } catch (error) {
     res.status(500).json({ error: "Erro ao cancelar viagem." });
   }
 };
 
-// POST /api/travel/:id/itinerary
 export const adicionarItinerario: RequestHandler = async (req, res) => {
     try {
       const { id } = req.params;
@@ -55,10 +51,10 @@ export const adicionarItinerario: RequestHandler = async (req, res) => {
   
       if (!nomeLocal || !tipo || !localizacao || !valor) {
         res.status(400).json({ error: "Campos obrigatórios não preenchidos." });
-        return; // apenas encerre a função, sem retornar o objeto res
+        return;
       }
   
-      const docRef = db.collection("travel").doc(id);
+      const docRef = db.collection("trip").doc(id);
       const docSnap = await docRef.get();
   
       if (!docSnap.exists) {
@@ -95,13 +91,12 @@ export const adicionarItinerario: RequestHandler = async (req, res) => {
       const { id, itemIndex } = req.params;
       const index = Number(itemIndex);
   
-      // Verifica se o índice é válido
       if (isNaN(index)) {
         res.status(400).json({ error: "Índice inválido." });
         return;
       }
   
-      const docRef = db.collection("travel").doc(id);
+      const docRef = db.collection("trip").doc(id);
       const docSnap = await docRef.get();
   
       if (!docSnap.exists) {
@@ -112,13 +107,11 @@ export const adicionarItinerario: RequestHandler = async (req, res) => {
       const dados = docSnap.data();
       const itinerariosAtuais = dados?.itinerarios || [];
   
-      // Verifica se o índice existe no array
       if (index < 0 || index >= itinerariosAtuais.length) {
         res.status(400).json({ error: "Índice fora dos limites." });
         return;
       }
   
-      // Remove o item do array
       itinerariosAtuais.splice(index, 1);
       await docRef.update({ itinerarios: itinerariosAtuais });
   
@@ -135,14 +128,14 @@ export const adicionarItinerario: RequestHandler = async (req, res) => {
     try {
       const { id, itemIndex } = req.params;
       const index = Number(itemIndex);
-      const novoItem = req.body; // Dados atualizados enviados pelo frontend
+      const novoItem = req.body; 
   
       if (isNaN(index)) {
         res.status(400).json({ error: "Índice inválido." });
         return;
       }
   
-      const docRef = db.collection("travel").doc(id);
+      const docRef = db.collection("trip").doc(id);
       const docSnap = await docRef.get();
   
       if (!docSnap.exists) {
@@ -158,10 +151,8 @@ export const adicionarItinerario: RequestHandler = async (req, res) => {
         return;
       }
   
-      // Removendo campos extras que não fazem parte do itinerário, como "originalIndex"
       const { originalIndex, ...dadosParaAtualizar } = novoItem;
   
-      // Atualiza o item, mantendo os dados que não foram modificados
       itinerariosAtuais[index] = { ...itinerariosAtuais[index], ...dadosParaAtualizar };
   
       await docRef.update({ itinerarios: itinerariosAtuais });

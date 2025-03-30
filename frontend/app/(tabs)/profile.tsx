@@ -1,55 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Alert 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { TextInputMask } from 'react-native-masked-text';
 
 function formatPhoneForDisplay(phone: string): string {
-  // Se o número começa com "+55", remove os 3 primeiros caracteres.
-  if (phone.startsWith('+55')) {
-    phone = phone.substring(3);
-  }
-  // Se o número começa com "55" (sem o "+") e possui mais dígitos do que o esperado, remove os 2 primeiros.
-  else if (phone.startsWith('55') && phone.length > 11) {
-    phone = phone.substring(2);
-  }
-  
-  // Se o número possui 11 dígitos, formata como (12) 99999-9999
-  if (phone.length === 11) {
+  if (phone.startsWith('+55')) phone = phone.substring(3);
+  else if (phone.startsWith('55') && phone.length > 11) phone = phone.substring(2);
+
+  if (phone.length === 11)
     return `(${phone.substring(0, 2)}) ${phone.substring(2, 7)}-${phone.substring(7)}`;
-  } 
-  // Se o número possui 10 dígitos, formata como (12) 9999-9999
-  else if (phone.length === 10) {
+  if (phone.length === 10)
     return `(${phone.substring(0, 2)}) ${phone.substring(2, 6)}-${phone.substring(6)}`;
-  } 
-  else {
-    return phone;
-  }
+  return phone;
 }
 
-
 function transformPhoneNumber(maskedPhone: string): string {
-  // Remove todos os caracteres não numéricos e antepõe +55
   const digits = maskedPhone.replace(/\D/g, '');
   return `+55${digits}`;
 }
 
+function formatPhoneForEditing(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  return digits.startsWith('55') ? digits.substring(2) : digits;
+}
+
 export default function Profile() {
   const router = useRouter();
-
-  const [user, setUser] = useState({
-    name: '',
-    email: '',
-    cpf: '',
-    phoneNumber: '',
-  });
+  const [user, setUser] = useState({ name: '', email: '', cpf: '', phoneNumber: '' });
   const [editing, setEditing] = useState(false);
 
   useEffect(() => {
@@ -65,41 +50,73 @@ export default function Profile() {
             phoneNumber: userObj.phoneNumber || '',
           });
         }
-      } catch (error) {
-        console.error('Erro ao carregar usuário:', error);
-      }
+      } catch (error) {}
     }
     carregarUsuario();
   }, []);
 
-  async function handleSave() {
-    const phoneTransformed = transformPhoneNumber(user.phoneNumber);
-    const payload = {
-      ...user,
-      phoneNumber: phoneTransformed,
-    };
-
+  async function verificarDuplicidade(campo: string, valor: string): Promise<boolean> {
     try {
       const userId = await AsyncStorage.getItem('@user_id');
-      if (!userId) {
-        Alert.alert('Erro', 'Usuário não autenticado.');
-        return;
-      }
-      const response = await fetch(`http://192.168.15.9:5000/api/users/${userId}`, {
+      const response = await fetch('http://192.168.15.7:5000/api/users');
+      const usuarios = await response.json();
+
+      return usuarios.some((u: any) => u.id !== userId && u[campo] === valor);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async function handleSave() {
+    const userId = await AsyncStorage.getItem('@user_id');
+    if (!userId) {
+      Alert.alert('Erro', 'Usuário não autenticado.');
+      return;
+    }
+
+    const phoneTransformed = transformPhoneNumber(user.phoneNumber);
+    const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+
+    if (!cpfRegex.test(user.cpf)) {
+      Alert.alert('Erro', 'CPF inválido. Use o formato 999.999.999-99.');
+      return;
+    }
+
+    const [emailDuplicado, telefoneDuplicado, cpfDuplicado] = await Promise.all([
+      verificarDuplicidade('email', user.email),
+      verificarDuplicidade('phoneNumber', phoneTransformed),
+      verificarDuplicidade('cpf', user.cpf),
+    ]);
+
+    if (emailDuplicado || telefoneDuplicado || cpfDuplicado) {
+      let msg = 'Erro ao salvar:\n';
+      if (emailDuplicado) msg += '- E-mail já cadastrado\n';
+      if (telefoneDuplicado) msg += '- Telefone já cadastrado\n';
+      if (cpfDuplicado) msg += '- CPF já cadastrado\n';
+      Alert.alert('Duplicidade', msg);
+      return;
+    }
+
+    const payload = { ...user, phoneNumber: phoneTransformed };
+
+    try {
+      const response = await fetch(`http://192.168.15.7:5000/api/users/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error('Erro ao atualizar perfil.');
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData?.error || 'Erro ao atualizar perfil.');
+      }
+      
       const updatedData = await response.json();
       Alert.alert('Sucesso', 'Perfil atualizado com sucesso.');
-      // Atualiza o AsyncStorage com os novos dados do usuário
       await AsyncStorage.setItem('@user', JSON.stringify(updatedData.user));
       setEditing(false);
     } catch (error: any) {
       Alert.alert('Erro', error.message || 'Erro ao atualizar perfil.');
-      console.error(error);
     }
   }
 
@@ -109,7 +126,6 @@ export default function Profile() {
       router.replace('/screens/auth/Login');
     } catch (error) {
       Alert.alert('Erro', 'Erro ao fazer logout.');
-      console.error(error);
     }
   }
 
@@ -131,7 +147,6 @@ export default function Profile() {
             onChangeText={(text) => setUser({ ...user, email: text })}
             placeholderTextColor="#888"
           />
-          {/* CPF com máscara */}
           <TextInputMask
             type={'cpf'}
             value={user.cpf}
@@ -140,15 +155,10 @@ export default function Profile() {
             placeholder="CPF"
             placeholderTextColor="#888"
           />
-          {/* Telefone com máscara: exibe (12)99999-9999 */}
           <TextInputMask
             type={'cel-phone'}
-            options={{
-              maskType: 'BRL',
-              withDDD: true,
-              dddMask: '(99) '
-            }}
-            value={user.phoneNumber}
+            options={{ maskType: 'BRL', withDDD: true, dddMask: '(99) ' }}
+            value={formatPhoneForEditing(user.phoneNumber)}
             onChangeText={(text) => setUser({ ...user, phoneNumber: text })}
             style={styles.input}
             placeholder="Telefone"
@@ -163,33 +173,20 @@ export default function Profile() {
         </>
       ) : (
         <>
+          <TextInput style={styles.input} value={user.name} editable={false} placeholder="Nome" placeholderTextColor="#888" />
+          <TextInput style={styles.input} value={user.email} editable={false} placeholder="E-mail" placeholderTextColor="#888" />
           <TextInput
             style={styles.input}
-            placeholder="Nome"
-            value={user.name}
+            value={user.cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4")}
             editable={false}
-            placeholderTextColor="#888"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="E-mail"
-            value={user.email}
-            editable={false}
-            placeholderTextColor="#888"
-          />
-          <TextInput
-            style={styles.input}
             placeholder="CPF"
-            value={user.cpf}
-            editable={false}
             placeholderTextColor="#888"
           />
-          {/* Exibe o telefone formatado sem o +55 */}
           <TextInput
             style={styles.input}
-            placeholder="Telefone"
             value={formatPhoneForDisplay(user.phoneNumber)}
             editable={false}
+            placeholder="Telefone"
             placeholderTextColor="#888"
           />
           <TouchableOpacity style={styles.editButton} onPress={() => setEditing(true)}>
@@ -248,7 +245,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     backgroundColor: '#D00',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 10,
   },
   logoutText: {
     color: '#FFF',

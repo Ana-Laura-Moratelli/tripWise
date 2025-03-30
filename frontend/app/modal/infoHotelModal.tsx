@@ -61,10 +61,9 @@ export default function InfoHotelModal() {
       await AsyncStorage.setItem(`@carrinho_hoteis_${userId}`, JSON.stringify(carrinho));
   
       Alert.alert('Sucesso', 'Hotel adicionado ao carrinho!');
-      router.back(); // Volta para a tela anterior
+      router.back();
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível adicionar o hotel.');
-      console.error(error);
     }
   }
   
@@ -79,8 +78,8 @@ export default function InfoHotelModal() {
         <Text style={styles.info}>{address}</Text>
         <Text style={styles.info}>Check-in: {checkin}</Text>
         <Text style={styles.info}>Check-out: {checkout}</Text>
-        <Text style={styles.info}>Preço diária: {price}</Text>
-        <Text style={styles.info}>Total: {total}</Text>
+        <Text style={styles.hotelPrice}>Preço diária: {price}</Text>
+        <Text style={styles.hotelTotal}>Total: {total}</Text>
         <View style={styles.footer}>
           <View style={styles.footer}>
             <TouchableOpacity style={styles.addButton} onPress={adicionarAoCarrinho}>
@@ -170,5 +169,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     marginBottom: 10,
+  },
+  hotelTotal: {
+    fontSize: 16,
+    marginTop: 4,
+    color: '#333',
+    fontWeight: '600',
+  },
+  hotelPrice: {
+    fontSize: 16,
+    marginTop: 6,
+    color: '#5B2FD4',
+    fontWeight: 'bold',
   },
 });

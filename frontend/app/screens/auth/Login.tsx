@@ -22,12 +22,10 @@ export default function AuthScreen() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<"login" | "register">("login");
 
-    // Estados para Login
+ 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loginLoading, setLoginLoading] = useState(false);
-
-    // Estados para Register
     const [name, setName] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
     const [cpf, setCpf] = useState("");
@@ -37,88 +35,105 @@ export default function AuthScreen() {
 
     async function handleLogin() {
         if (!email || !password) {
-          Alert.alert("Erro", "Preencha todos os campos!");
-          return;
+            Alert.alert("Campos obrigatórios", "Preencha todos os campos!");
+            return;
         }
-      
+
         setLoginLoading(true);
-      
+
         try {
-          const response = await loginUser(email, password);
-      
-          // Esperado: { token: string, user: { uid: string, ... } }
-          const { token, user } = response;
-      
-          // Salva o token e o ID do usuário no AsyncStorage
-          await AsyncStorage.setItem("@token", token);
-          await AsyncStorage.setItem("@user_id", user.uid);
-      
-          console.log("✅ Usuário logado:", user);
-          console.log("🔑 Token salvo:", token);
-          console.log("🆔 UID salvo:", user.uid);
-      
-          router.replace("/(tabs)");
+            const response = await loginUser(email, password);
+
+            const { token, user } = response;
+
+            await AsyncStorage.setItem("@token", token);
+            await AsyncStorage.setItem("@user_id", user.uid);
+
+            console.log("✅ Usuário logado:", user);
+            router.replace("/(tabs)");
         } catch (error: any) {
-          Alert.alert("Erro", error.message);
+
+            const mensagemErro = error?.message?.toLowerCase() || "";
+
+            if (mensagemErro.includes("usuário não encontrado")) {
+                Alert.alert("Usuário não encontrado", "Verifique o e-mail digitado.");
+            } else if (mensagemErro.includes("senha incorreta")) {
+                Alert.alert("Senha incorreta", "A senha informada está errada.");
+            } else {
+                Alert.alert("Erro no login", "Não foi possível fazer login. Tente novamente.");
+            }
         } finally {
-          setLoginLoading(false);
+            setLoginLoading(false);
         }
-      }
-      
+    }
+
+
     async function handleRegister() {
         const numeroLimpo = phoneNumber.replace(/\D/g, '');
         const telefoneFormatado = `+55${numeroLimpo}`;
-        const cpfLimpo = cpf.replace(/\D/g, '');
-
+        const cpfFormatado = cpf; 
+    
         if (!name || !phoneNumber || !cpf || !regEmail || !regPassword) {
             Alert.alert("Erro", "Preencha todos os campos!");
             return;
         }
-
+    
         if (regPassword.length < 8) {
             Alert.alert("Erro", "A senha deve ter no mínimo 8 caracteres.");
             return;
         }
-
+    
         setRegisterLoading(true);
+    
         try {
             const data = {
                 name,
                 phoneNumber: telefoneFormatado,
-                cpf: cpfLimpo,
+                cpf: cpfFormatado,
                 email: regEmail,
                 password: regPassword
             };
-
+    
             console.log("📡 Enviando dados para cadastro:", data);
+    
             const response = await registerUser(data);
-
-            if (response?.error?.includes("CPF já cadastrado")) {
-                throw new Error("Este CPF já está cadastrado.");
+    
+            if (response?.error) {
+                throw new Error(response.error);
             }
-
+    
             console.log("✅ Cadastro bem-sucedido:", response);
             Alert.alert("Sucesso", "Cadastro realizado com sucesso!");
+    
+            setName('');
+            setPhoneNumber('');
+            setCpf('');
+            setRegEmail('');
+            setRegPassword('');
+    
             router.push("/screens/auth/Login");
+    
         } catch (error: any) {
-            console.error("❌ Erro ao cadastrar:", error.message);
-          
+    
             let mensagemErro = "Erro ao cadastrar. Tente novamente.";
-          
+    
             if (typeof error.message === "string") {
-              if (error.message.includes("CPF")) {
-                mensagemErro = "Este CPF já está cadastrado.";
-              } else if (error.message.includes("email") || error.message.includes("Email")) {
-                mensagemErro = "Este e-mail já está cadastrado.";
-              } else if (error.message.includes("phone") || error.message.includes("Phone")) {
-                mensagemErro = "Este número de telefone já está cadastrado.";
-              }
+                const msg = error.message.toLowerCase();
+                if (msg.includes("cpf")) {
+                    mensagemErro = "Este CPF já está cadastrado.";
+                } else if (msg.includes("e-mail") || msg.includes("email")) {
+                    mensagemErro = "Este e-mail já está cadastrado.";
+                } else if (msg.includes("telefone") || msg.includes("phone")) {
+                    mensagemErro = "Este número de telefone já está cadastrado.";
+                }
             }
-          
-            Alert.alert("Erro", mensagemErro);
-          }
-          
+    
+            Alert.alert("Erro no cadastro", mensagemErro);
+        } finally {
+            setRegisterLoading(false);
+        }
     }
+    
 
     return (
         <KeyboardAvoidingView

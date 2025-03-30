@@ -46,13 +46,12 @@ export default function ViagemRealizadaScreen() {
           const userId = await AsyncStorage.getItem("@user_id");
           if (!userId) return;
   
-          const response = await fetch(`http://192.168.15.9:5000/api/travel?userId=${userId}`);
+          const response = await fetch(`http://192.168.15.7:5000/api/trip?userId=${userId}`);
           const json = await response.json();
   
           const viagensFiltradas = json.filter((viagem: Viagem) => viagem.userId === userId);
           setViagens(viagensFiltradas);
         } catch (error) {
-          console.error("Erro ao buscar viagens realizadas:", error);
         }
       }
       carregarViagens();

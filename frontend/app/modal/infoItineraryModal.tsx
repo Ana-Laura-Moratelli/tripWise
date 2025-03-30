@@ -44,7 +44,7 @@ export default function ItineraryListScreen() {
     });
   }, [navigation]);
 
-  const { id } = useLocalSearchParams(); // id da viagem
+  const { id } = useLocalSearchParams();
   const router = useRouter();
   const [itinerarios, setItinerarios] = useState<Itinerario[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,10 +52,30 @@ export default function ItineraryListScreen() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingItem, setEditingItem] = useState<Partial<Itinerario>>({});
 
+  function validarDataAtividade(dataStr: string): string | null {
+    if (!dataStr || dataStr.length < 10) return null;
+  
+    const partes = dataStr.trim().split(' ');
+    const [dia, mes, ano] = partes[0].split('/');
+    if (!dia || !mes || !ano) return null;
+  
+    const hora = partes[1] || '00:00';
+    const [h, m] = hora.split(':');
+    if (isNaN(Number(h)) || isNaN(Number(m))) return null;
+  
+    const dataISO = `${ano}-${mes}-${dia}T${hora}:00`;
+    const dataSelecionada = new Date(dataISO);
+  
+    if (isNaN(dataSelecionada.getTime())) return null;
+    if (dataSelecionada < new Date()) return null;
+  
+    return `${dia}/${mes}/${ano}` + (partes[1] ? ` ${partes[1]}` : '');
+  }
+  
 
   async function fetchItinerarios() {
     try {
-      const response = await fetch('http://192.168.15.9:5000/api/travel');
+      const response = await fetch('http://192.168.15.7:5000/api/trip');
       if (!response.ok) throw new Error("Erro ao buscar dados");
 
       const data = await response.json();
@@ -76,7 +96,6 @@ export default function ItineraryListScreen() {
         Alert.alert("Erro", "Viagem não encontrada.");
       }
     } catch (error) {
-      console.error("Erro ao buscar itinerários:", error);
     } finally {
       setLoading(false);
     }
@@ -96,7 +115,7 @@ export default function ItineraryListScreen() {
   async function deleteItinerary(itemIndex: number, originalIndex?: number) {
     const indexToUse = originalIndex !== undefined ? originalIndex : itemIndex;
     try {
-      const response = await fetch(`http://192.168.15.9:5000/api/travel/${id}/itinerary/${indexToUse}`, {
+      const response = await fetch(`http://192.168.15.7:5000/api/trip/${id}/itinerary/${indexToUse}`, {
         method: 'DELETE'
       });
       if (!response.ok) throw new Error("Erro ao deletar item");
@@ -104,7 +123,6 @@ export default function ItineraryListScreen() {
       Alert.alert("Sucesso", "Item deletado com sucesso!");
       fetchItinerarios();
     } catch (error) {
-      console.error("Erro ao deletar item:", error);
       Alert.alert("Erro", "Não foi possível deletar o item.");
     }
   }
@@ -113,23 +131,37 @@ export default function ItineraryListScreen() {
     const indexToUse = originalIndex !== undefined ? originalIndex : itemIndex;
     try {
       const { originalIndex, ...dadosParaAtualizar } = editingItem;
-      const response = await fetch(`http://192.168.15.9:5000/api/travel/${id}/itinerary/${indexToUse}`, {
+  
+      if (!dadosParaAtualizar.nomeLocal || !dadosParaAtualizar.tipo || !dadosParaAtualizar.localizacao || !dadosParaAtualizar.dia) {
+        Alert.alert("Preencha todos os campos obrigatórios.");
+        return;
+      }
+  
+      const dataValidada = validarDataAtividade(dadosParaAtualizar.dia || '');
+      if (!dataValidada) {
+        Alert.alert("Data inválida", "A data não pode ser anterior ao momento atual e deve estar no formato (dd/mm/aaaa hh:mm).");
+        return;
+      }
+  
+      dadosParaAtualizar.dia = dataValidada;
+  
+      const response = await fetch(`http://192.168.15.7:5000/api/trip/${id}/itinerary/${indexToUse}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dadosParaAtualizar),
       });
+  
       if (!response.ok) throw new Error("Erro ao atualizar o item");
-
+  
       Alert.alert("Sucesso", "Item atualizado com sucesso!");
       setEditingIndex(null);
       setEditingItem({});
       fetchItinerarios();
     } catch (error: any) {
-      console.error("Erro ao atualizar item:", error);
       Alert.alert("Erro", error.message || "Não foi possível atualizar o item.");
     }
   }
-
+  
 
   function renderItem({ item, index }: { item: Itinerario; index: number }) {
     const origIndex = item.originalIndex;
@@ -141,20 +173,22 @@ export default function ItineraryListScreen() {
             value={editingItem.nomeLocal ?? item.nomeLocal}
             onChangeText={(text) => setEditingItem({ ...editingItem, nomeLocal: text })}
             placeholder="Nome do local"
+            placeholderTextColor="#888"
           />
           <TextInput
             style={styles.input}
             value={editingItem.tipo ?? item.tipo}
             onChangeText={(text) => setEditingItem({ ...editingItem, tipo: text })}
             placeholder="Tipo de atividade"
+            placeholderTextColor="#888"
           />
           <TextInput
             style={styles.input}
             value={editingItem.localizacao ?? item.localizacao}
             onChangeText={(text) => setEditingItem({ ...editingItem, localizacao: text })}
             placeholder="Localização"
+            placeholderTextColor="#888"
           />
-          {/* Input para Valor com máscara de dinheiro */}
           <TextInputMask
             type={'money'}
             options={{
@@ -168,21 +202,23 @@ export default function ItineraryListScreen() {
             value={editingItem.valor ?? item.valor}
             onChangeText={(text) => setEditingItem({ ...editingItem, valor: text })}
             placeholder="Valor"
+            placeholderTextColor="#888"
           />
-          {/* Input para Data com máscara */}
           <TextInputMask
             type={'datetime'}
             options={{ format: 'DD/MM/YYYY HH:mm' }}
             style={styles.input}
             value={editingItem.dia ?? item.dia}
             onChangeText={(text) => setEditingItem({ ...editingItem, dia: text })}
-            placeholder="Dia (DD/MM/YYYY [HH:mm])"
+            placeholder="Dia (dd/mm/aaaa hh:mm)"
+            placeholderTextColor="#888"
           />
           <TextInput
             style={styles.input}
             value={editingItem.descricao ?? item.descricao}
             onChangeText={(text) => setEditingItem({ ...editingItem, descricao: text })}
             placeholder="Descrição (opcional)"
+            placeholderTextColor="#888"
           />
           <View style={styles.editButtonsContainer}>
             <TouchableOpacity style={styles.saveButton} onPress={() => updateItinerary(index, origIndex)}>

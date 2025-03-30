@@ -13,9 +13,9 @@ import {
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { TextInputMask } from 'react-native-masked-text';
+import { parseISO, isBefore } from 'date-fns';
 
-const SERPAPI_KEY = "ad5fc2187f55ec89675e6630529688fc5de9de87bae04f185a8a42c7d6994956";
-const SERPAPI_URL = "https://serpapi.com/search.json";
+
 const EXCHANGE_RATE_URL = "https://api.exchangerate.host/latest?base=USD&symbols=BRL";
 
 interface Voo {
@@ -58,10 +58,10 @@ export default function FlightScreen() {
       throw new Error("O código IATA de destino deve ter 3 letras.");
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(isoPartida)) {
-      throw new Error("A data de ida deve estar no formato YYYY-MM-DD.");
+      throw new Error("A data de ida deve estar no formato correto.");
     }
     if (idaEVolta && !/^\d{4}-\d{2}-\d{2}$/.test(isoVolta)) {
-      throw new Error("A data de volta deve estar no formato YYYY-MM-DD.");
+      throw new Error("A data de volta deve estar no formatocorreto.");
     }
   }
 
@@ -92,10 +92,10 @@ export default function FlightScreen() {
   async function buscarCotacaoUSD() {
     try {
       const res = await axios.get(EXCHANGE_RATE_URL);
-      return res.data?.rates?.BRL ?? 5.0;
+      return res.data?.rates?.BRL ?? 5.71;
     } catch {
-      Alert.alert("Aviso", "Erro ao obter taxa de câmbio. Usando valor padrão de R$5,00.");
-      return 5.0;
+      Alert.alert("Aviso", "Erro ao obter taxa de câmbio. Usando valor padrão de R$5,71.");
+      return 5.71;
     }
   }
 
@@ -103,18 +103,34 @@ export default function FlightScreen() {
     setLoading(true);
     try {
       validarParametros();
+      const hoje = new Date();
       const isoPartida = formatarParaISO(dataPartida);
       const isoVolta = formatarParaISO(dataVolta);
 
-      const cotacaoBRL = await buscarCotacaoUSD();
+      const dataPartidaISO = parseISO(isoPartida);
+      const dataVoltaISO = parseISO(isoVolta);
 
+      if (isBefore(dataPartidaISO, hoje)) {
+        throw new Error("A data de ida não pode ser anterior à data de hoje.");
+      }
+  
+      if (idaEVolta) {
+        if (isBefore(dataVoltaISO, hoje)) {
+          throw new Error("A data de volta não pode ser anterior à data de hoje.");
+        }
+        if (isBefore(dataVoltaISO, dataPartidaISO)) {
+          throw new Error("A data de volta não pode ser anterior à data de ida.");
+        }
+      }
+
+      const cotacaoBRL = await buscarCotacaoUSD();
       const formatarReal = (valor: number) =>
         new Intl.NumberFormat('pt-BR', {
           style: 'currency',
           currency: 'BRL',
         }).format(valor);
 
-      const url = `http://192.168.15.9:5000/api/flights?iataOrigem=${iataOrigem}&iataDestino=${iataDestino}&dataPartida=${isoPartida}&dataVolta=${isoVolta}&idaEVolta=${idaEVolta}`;
+      const url = `http://192.168.15.7:5000/api/flights?iataOrigem=${iataOrigem}&iataDestino=${iataDestino}&dataPartida=${isoPartida}&dataVolta=${isoVolta}&idaEVolta=${idaEVolta}`;
 
       const response = await axios.get(url);
       const resultados = response.data.best_flights;
@@ -180,7 +196,6 @@ export default function FlightScreen() {
 
       setVoos(voosFormatados);
     } catch (error: any) {
-      console.error("Erro ao buscar voos:", error.response?.data || error.message);
       Alert.alert("Erro", error.message || "Erro ao buscar voos.");
     } finally {
       setLoading(false);
@@ -293,9 +308,9 @@ export default function FlightScreen() {
                 <View style={styles.vooItem}>
                   <Text style={styles.vooDestino}>{item.tipo} - {item.origin} → {item.destination}</Text>
                   <Text>Companhia: {item.airline}</Text>
-                  <Text>Preço: {item.price}</Text>
                   <Text>Partida: {item.departureTime}</Text>
                   <Text>Chegada: {item.arrivalTime}</Text>
+                  <Text style={styles.vooPrice}>Preço: {item.price}</Text>
                 </View>
               </TouchableOpacity>
             )}
@@ -375,5 +390,10 @@ const styles = StyleSheet.create({
   comparadorItem: {
     fontSize: 14,
     marginBottom: 4,
+  },
+  vooPrice: {
+    marginTop: 6,
+    color: '#5B2FD4',
+    fontWeight: 'bold',
   },
 });

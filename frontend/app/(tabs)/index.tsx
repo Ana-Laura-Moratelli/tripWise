@@ -11,11 +11,8 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
-import { differenceInDays, parseISO } from 'date-fns';
+import { differenceInDays, parseISO, isBefore  } from 'date-fns';
 import { TextInputMask } from 'react-native-masked-text';
-
-const SERPAPI_KEY = "ad5fc2187f55ec89675e6630529688fc5de9de87bae04f185a8a42c7d6994956";
-const SERPAPI_URL = "https://serpapi.com/search.json";
 
 interface Hotel {
   name: string;
@@ -41,13 +38,13 @@ export default function HotelSearchScreen() {
 
   function validarCampos(checkin: string, checkout: string) {
     if (!cidade) throw new Error("Informe a cidade para busca.");
-    if (!/\d{4}-\d{2}-\d{2}/.test(checkin)) throw new Error("Data de entrada inválida (YYYY-MM-DD).");
-    if (!/\d{4}-\d{2}-\d{2}/.test(checkout)) throw new Error("Data de saída inválida (YYYY-MM-DD).");
+    if (!/\d{4}-\d{2}-\d{2}/.test(checkin)) throw new Error("Data de entrada inválida.");
+    if (!/\d{4}-\d{2}-\d{2}/.test(checkout)) throw new Error("Data de saída inválida.");
   }
 
   async function converterCoordenadasParaEndereco(lat: number, lng: number): Promise<string> {
     try {
-      const API_KEY = 'AIzaSyBpmchWTIClePxMh-US0DCEe4ZzoVmA5Ms'; // ⬅️ substitua pela sua chave real
+      const API_KEY = 'AIzaSyBpmchWTIClePxMh-US0DCEe4ZzoVmA5Ms'; 
       const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${API_KEY}`;
 
       const response = await fetch(url);
@@ -59,7 +56,6 @@ export default function HotelSearchScreen() {
         return 'Endereço não encontrado';
       }
     } catch (error) {
-      console.error('Erro ao converter coordenadas:', error);
       return 'Endereço não disponível';
     }
   }
@@ -72,11 +68,23 @@ export default function HotelSearchScreen() {
 
       validarCampos(checkin, checkout);
 
+      const hoje = new Date();
+      const dataCheckin = parseISO(checkin);
+      const dataCheckout = parseISO(checkout);
+  
+      if (isBefore(dataCheckin, hoje)) {
+        throw new Error("A data de check-in não pode ser anterior ao dia de hoje.");
+      }
+  
+      if (isBefore(dataCheckout, hoje)) {
+        throw new Error("A data de check-out não pode ser anterior ao dia de hoje.");
+      }
+
       const diasHospedagem = differenceInDays(parseISO(checkout), parseISO(checkin));
       if (diasHospedagem <= 0) throw new Error("A data de check-out deve ser após a de check-in.");
 
       const query = `${cidade.trim().replace(/\s+/g, "+")}`;
-      const url = `http://192.168.15.9:5000/api/hotels?cidade=${encodeURIComponent(cidade)}&checkin=${checkin}&checkout=${checkout}`;
+      const url = `http://192.168.15.7:5000/api/hotels?cidade=${encodeURIComponent(cidade)}&checkin=${checkin}&checkout=${checkout}`;
 
       const response = await axios.get(url);
       const resultados = response.data.properties || [];

@@ -1,26 +1,41 @@
 import { Request, Response } from "express";
-import { auth, db } from "../services/firebase"; // Importando Firestore também
+import { auth, db } from "../services/firebase"; 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// Cadastro de usuário (com senha criptografada)
+
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, phoneNumber, cpf, email, password } = req.body;
 
     const usersRef = db.collection("users");
 
-    // Verifica se o e-mail já está cadastrado
-    const snapshot = await usersRef.where("email", "==", email).get();
-    if (!snapshot.empty) {
+    const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+    if (!cpfRegex.test(cpf)) {
+      res.status(400).json({ error: "CPF inválido. Use o formato 999.999.999-99." });
+      return;
+    }
+
+    const emailSnap = await usersRef.where("email", "==", email).get();
+    if (!emailSnap.empty) {
       res.status(400).json({ error: "E-mail já cadastrado" });
       return;
     }
 
-    // Criptografa a senha
+    const phoneSnap = await usersRef.where("phoneNumber", "==", phoneNumber).get();
+    if (!phoneSnap.empty) {
+      res.status(400).json({ error: "Telefone já cadastrado" });
+      return;
+    }
+
+    const cpfSnap = await usersRef.where("cpf", "==", cpf).get();
+    if (!cpfSnap.empty) {
+      res.status(400).json({ error: "CPF já cadastrado" });
+      return;
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Salva no Firestore
     const newUser = await usersRef.add({
       name,
       phoneNumber,
@@ -39,6 +54,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: err });
   }
 };
+
+
 
 
 export const login = async (req: Request, res: Response): Promise<void> => {
@@ -101,20 +118,43 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const updateProfile = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params; // ID do usuário
-    const { name, email, cpf, phoneNumber } = req.body;
+  const { id } = req.params;
+  const { name, email, cpf, phoneNumber } = req.body;
 
-    // Atualiza o documento do usuário no Firestore
-    await db.collection("users").doc(id).update({
-      name,
-      email,
-      cpf,
-      phoneNumber,
-      updatedAt: new Date(),
+  const usersRef = db.collection("users");
+
+  try {
+    await db.runTransaction(async (transaction) => {
+      const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+      if (!cpfRegex.test(cpf)) {
+        throw new Error("CPF inválido. Use o formato 999.999.999-99.");
+      }
+
+      const emailSnap = await transaction.get(usersRef.where("email", "==", email));
+      if (!emailSnap.empty && emailSnap.docs.some(doc => doc.id !== id)) {
+        throw new Error("E-mail já cadastrado");
+      }
+
+      const phoneSnap = await transaction.get(usersRef.where("phoneNumber", "==", phoneNumber));
+      if (!phoneSnap.empty && phoneSnap.docs.some(doc => doc.id !== id)) {
+        throw new Error("Telefone já cadastrado");
+      }
+
+      const cpfSnap = await transaction.get(usersRef.where("cpf", "==", cpf));
+      if (!cpfSnap.empty && cpfSnap.docs.some(doc => doc.id !== id)) {
+        throw new Error("CPF já cadastrado");
+      }
+
+      transaction.update(usersRef.doc(id), {
+        name,
+        email,
+        cpf,
+        phoneNumber,
+        updatedAt: new Date(),
+      });
     });
 
-    const updatedUserSnap = await db.collection("users").doc(id).get();
+    const updatedUserSnap = await usersRef.doc(id).get();
     const updatedUser = updatedUserSnap.data();
 
     res.status(200).json({
@@ -122,11 +162,18 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
       user: {
         uid: id,
         ...updatedUser,
-        password: undefined, // Não retorna a senha
+        password: undefined,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erro ao atualizar perfil:", error);
-    res.status(500).json({ error: error.message || "Erro interno ao atualizar perfil." });
+  
+    const mensagemErro =
+      error instanceof Error
+        ? error.message
+        : "Erro interno ao atualizar perfil.";
+  
+    res.status(500).json({ error: mensagemErro });
   }
+  
 };

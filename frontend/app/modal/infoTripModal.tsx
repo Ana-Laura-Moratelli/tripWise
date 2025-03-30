@@ -46,7 +46,7 @@ export default function InfoViagemScreen() {
 
     async function fetchViagem() {
         try {
-            const res = await fetch("http://192.168.15.9:5000/api/travel");
+            const res = await fetch("http://192.168.15.7:5000/api/trip");
             const data = await res.json();
             const item = data.find((v: any) => v.id === id);
 
@@ -63,7 +63,6 @@ export default function InfoViagemScreen() {
                 setViagem(null);
             }
         } catch (error) {
-            console.error("Erro ao buscar viagem:", error);
             Alert.alert("Erro", "Não foi possível carregar os dados da viagem.");
         }
     }
@@ -76,7 +75,7 @@ export default function InfoViagemScreen() {
 
     async function cancelarViagem() {
         try {
-            await fetch(`http://192.168.15.9:5000/api/travel/${id}`, {
+            await fetch(`http://192.168.15.7:5000/api/trip/${id}`, {
                 method: "DELETE",
             });
             Alert.alert("Sucesso", "Viagem cancelada.");
@@ -92,8 +91,7 @@ export default function InfoViagemScreen() {
         if (!viagem) return;
 
         let message = "Detalhes da Viagem:\n\n";
-
-        // Seção de Voos
+        
         if (viagem.voos && viagem.voos.length > 0) {
             message += "Voos:\n";
             viagem.voos.forEach((voo: any, index: number) => {
@@ -106,7 +104,6 @@ export default function InfoViagemScreen() {
             });
         }
 
-        // Seção de Hotéis
         if (viagem.hoteis && viagem.hoteis.length > 0) {
             message += "Hotéis:\n";
             viagem.hoteis.forEach((hotel: any, index: number) => {
@@ -120,7 +117,6 @@ export default function InfoViagemScreen() {
             });
         }
 
-        // Seção de Cronograma (itinerário), se existir
         if (viagem.itinerarios && viagem.itinerarios.length > 0) {
             message += "Cronograma:\n";
             viagem.itinerarios.forEach((item: any, index: number) => {
@@ -153,7 +149,6 @@ export default function InfoViagemScreen() {
             <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
             <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 200 }]}>
 
-                {/* Seção de Voos */}
                 {viagem.voos?.length > 0 && (
                     <>
                         <Text style={styles.sectionTitle}>Voos</Text>
@@ -171,7 +166,6 @@ export default function InfoViagemScreen() {
                     </>
                 )}
 
-                {/* Seção de Hotéis */}
                 {viagem.hoteis?.length > 0 && (
                     <>
                         <Text style={styles.sectionTitle}>Hotéis</Text>
@@ -190,7 +184,6 @@ export default function InfoViagemScreen() {
                     </>
                 )}
 
-                {/* Seção de Cronograma */}
                 {viagem.itinerarios?.length > 0 && (
                     <>
                         <Text style={styles.sectionTitle}>Cronograma</Text>

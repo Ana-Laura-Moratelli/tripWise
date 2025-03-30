@@ -18,38 +18,55 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 export default function ModalScreen() {
 
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  
+
     useEffect(() => {
-      navigation.setOptions({
-        title: 'Adicionar ao Cronograma',
-        headerBackTitle: 'Voltar',
-      });
+        navigation.setOptions({
+            title: 'Adicionar ao Cronograma',
+            headerBackTitle: 'Voltar',
+        });
     }, [navigation]);
 
-    const { id } = useLocalSearchParams(); 
+    const { id } = useLocalSearchParams();
     const router = useRouter();
 
     const [nomeLocal, setNomeLocal] = useState('');
     const [tipoAtividade, setTipoAtividade] = useState('');
     const [localizacao, setLocalizacao] = useState('');
-    const [valor, setValor] = useState(''); 
+    const [valor, setValor] = useState('');
     const [descricao, setDescricao] = useState('');
     const [dia, setDia] = useState('');
 
-    
+
     function formatarDataAtividade(dataHoraBR: string): string | null {
         if (!dataHoraBR || dataHoraBR.length < 10) return null;
 
-        const partes = dataHoraBR.split(' ');
-        const dataPart = partes[0]; 
+        const partes = dataHoraBR.trim().split(' ');
+        const dataPart = partes[0];
+        const [dia, mes, ano] = dataPart.split('/');
+        if (!dia || !mes || !ano) return null;
 
-        if (partes.length > 1 && partes[1].trim() !== "") {
-            const timePart = partes[1].trim().substring(0, 5);
-            return `${dataPart} ${timePart}`;
-        } else {
-            return dataPart;
+        // Validação de hora se estiver presente
+        if (partes.length > 1 && partes[1].trim() !== '') {
+            const horaPart = partes[1].trim();
+            const horaValida = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(horaPart);
+            if (!horaValida) return null;
+
+            return `${dia}/${mes}/${ano} ${horaPart}`;        }
+
+            return `${dia}/${mes}/${ano}`;
         }
-    }
+
+        function converterParaISO(dataHoraBR: string): string | null {
+            const partes = dataHoraBR.trim().split(' ');
+            const [dia, mes, ano] = partes[0].split('/');
+          
+            if (!dia || !mes || !ano) return null;
+          
+            const hora = partes[1] || '00:00';
+            const iso = `${ano}-${mes}-${dia}T${hora}:00`;
+            return iso;
+          }
+          
 
     async function salvarCronograma() {
         try {
@@ -58,22 +75,31 @@ export default function ModalScreen() {
                 return;
             }
 
+            const agora = new Date();
             const dataFormatada = formatarDataAtividade(dia);
-            if (!dataFormatada) {
-                Alert.alert("Data inválida", "Informe uma data válida no formato DD/MM/AAAA [HH:mm].");
-                return;
+            const dataISO = converterParaISO(dia);
+
+            if (!dataFormatada || !dataISO) {
+              Alert.alert("Data inválida", "Informe uma data válida no formato (dd/mm/aaaa hh:mm).");
+              return;
+            }
+            
+            const dataSelecionada = new Date(dataISO);
+            if (dataSelecionada < new Date()) {
+              Alert.alert("Data inválida", "A data da atividade não pode ser anterior ao momento atual.");
+              return;
             }
 
             const novoItem = {
                 nomeLocal,
                 tipo: tipoAtividade,
                 localizacao,
-                valor, // Campo de valor com máscara de dinheiro
+                valor, 
                 descricao,
                 dia: dataFormatada,
             };
 
-            const response = await fetch(`http://192.168.15.9:5000/api/travel/${id}/itinerary`, {
+            const response = await fetch(`http://192.168.15.7:5000/api/trip/${id}/itinerary`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(novoItem),
@@ -89,7 +115,6 @@ export default function ModalScreen() {
             router.back();
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : "Erro ao adicionar cronograma.";
-            console.error("Erro no salvarCronograma:", error);
             Alert.alert("Erro", errorMessage);
         }
     }
@@ -98,7 +123,7 @@ export default function ModalScreen() {
         <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={100} 
+            keyboardVerticalOffset={100}
         >
             <ScrollView
                 style={{ backgroundColor: "#fff", padding: 20, flex: 1 }}
@@ -125,19 +150,15 @@ export default function ModalScreen() {
                     onChangeText={setLocalizacao}
                     placeholderTextColor="#888"
                 />
-
-                {/* Campo de data com máscara para "DD/MM/YYYY HH:mm". O horário não é obrigatório. */}
                 <TextInputMask
                     type={'datetime'}
                     options={{ format: 'DD/MM/YYYY HH:mm' }}
                     style={styles.input}
                     value={dia}
                     onChangeText={setDia}
-                    placeholder="Data da atividade (dd/mm/aaaa [hh:mm])"
+                    placeholder="Data da atividade (dd/mm/aaaa hh:mm)"
                     placeholderTextColor="#888"
                 />
-
-                {/* Campo de Valor com máscara de dinheiro em R$ */}
                 <TextInputMask
                     type={'money'}
                     options={{

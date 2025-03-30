@@ -44,49 +44,46 @@ export default function CartScreen() {
         try {
           const userId = await AsyncStorage.getItem('@user_id');
           if (!userId) return;
-
+  
           const voosSalvos = await AsyncStorage.getItem(`@carrinho_voos_${userId}`);
           const hoteisSalvos = await AsyncStorage.getItem(`@carrinho_hoteis_${userId}`);
-
+  
           setVoosCarrinho(voosSalvos ? JSON.parse(voosSalvos) : []);
           setHoteisCarrinho(hoteisSalvos ? JSON.parse(hoteisSalvos) : []);
         } catch (error) {
-          console.error("Erro ao carregar o carrinho:", error);
         }
       }
       carregarCarrinho();
     }, [])
   );
+  
 
   const removerVoo = async (index: number) => {
     const userId = await AsyncStorage.getItem('@user_id');
     if (!userId) return;
-
+  
     const novaLista = [...voosCarrinho];
     novaLista.splice(index, 1);
     setVoosCarrinho(novaLista);
     await AsyncStorage.setItem(`@carrinho_voos_${userId}`, JSON.stringify(novaLista));
   };
-
+  
   const removerHotel = async (index: number) => {
     const userId = await AsyncStorage.getItem('@user_id');
     if (!userId) return;
-
+  
     const novaLista = [...hoteisCarrinho];
     novaLista.splice(index, 1);
     setHoteisCarrinho(novaLista);
     await AsyncStorage.setItem(`@carrinho_hoteis_${userId}`, JSON.stringify(novaLista));
   };
+  
 
   const realizarViagem = async () => {
     try {
       const userId = await AsyncStorage.getItem('@user_id');
-      if (!userId) {
-        Alert.alert("Erro", "Usuário não identificado!");
-        return;
-      }
 
-      const response = await fetch("http://192.168.15.9:5000/api/travel", {
+      const response = await fetch("http://192.168.15.7:5000/api/trip", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, voos: voosCarrinho, hoteis: hoteisCarrinho }),
@@ -97,9 +94,11 @@ export default function CartScreen() {
       Alert.alert("Sucesso!", "Viagem registrada com sucesso!");
       setVoosCarrinho([]);
       setHoteisCarrinho([]);
-      // Removendo itens do carrinho utilizando as chaves com userId
-      await AsyncStorage.multiRemove([`@carrinho_voos_${userId}`, `@carrinho_hoteis_${userId}`]);
-    } catch (error: any) {
+      await AsyncStorage.multiRemove([
+        `@carrinho_voos_${userId}`,
+        `@carrinho_hoteis_${userId}`
+      ]);
+          } catch (error: any) {
       Alert.alert("Erro", error.message || "Erro ao registrar viagem");
     }
   };
@@ -107,7 +106,7 @@ export default function CartScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
-
+      
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 100 }]}>
         <Text style={styles.title}>Voos no Carrinho</Text>
         {voosCarrinho.length === 0 ? (

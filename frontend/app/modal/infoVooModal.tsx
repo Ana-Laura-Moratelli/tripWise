@@ -62,10 +62,9 @@ export default function InfoVooModal() {
       await AsyncStorage.setItem(`@carrinho_voos_${userId}`, JSON.stringify(carrinho));
   
       Alert.alert('Sucesso', `Voo de ${tipo} adicionado ao carrinho.`);
-      router.back(); // volta para a tela anterior
+      router.back(); 
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível adicionar o voo ao carrinho.');
-      console.error(error);
     }
   }
   
@@ -81,7 +80,7 @@ export default function InfoVooModal() {
         <Text style={styles.info}>Companhia: {airline}</Text>
         <Text style={styles.info}>Partida: {departureTime}</Text>
         <Text style={styles.info}>Chegada: {arrivalTime}</Text>
-        <Text style={styles.info}>Preço: {price}</Text>
+        <Text style={styles.vooPrice}>Preço: {price}</Text>
 
         <View style={styles.footer}>
           <TouchableOpacity style={styles.addButton} onPress={adicionarAoCarrinho}>
@@ -92,7 +91,7 @@ export default function InfoVooModal() {
     </View>
   );
 }
-// Estilos
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -125,5 +124,11 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: '#FFF',
     fontWeight: '600',
+  },
+  vooPrice: {
+    fontSize: 16,
+    marginTop: 6,
+    color: '#5B2FD4',
+    fontWeight: 'bold',
   },
 });
