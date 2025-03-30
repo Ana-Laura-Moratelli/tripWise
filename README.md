@@ -152,7 +152,7 @@ O App tripWise tem como objetivo facilitar a organização de viagens, permitind
     <td>01</td>
     <td>10/03/2025</td>
     <td>30/03/2025</td>
-    <td><a href="https://github.com/Ana-Laura-Moratelli/tripWise/sprints/sprint01/sprint01.md">Relatório</a></td> 
+    <td><a href="https://github.com/Ana-Laura-Moratelli/tripWise/blob/main/sprints/sprint01/sprint01.md">Relatório</a></td> 
     <td>✅</td>
   </tr>
   <tr align="center">
@@ -175,7 +175,13 @@ O App tripWise tem como objetivo facilitar a organização de viagens, permitind
 <br>
 
 <h2 id='tecnologias'> 💻 Tecnologias </h2>
-  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white&color=000000" /> 
+
+<div>
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white&color=5B2FD4" />
+  <img src="https://img.shields.io/badge/React_Native-61DAFB?style=for-the-badge&logo=react&logoColor=white&color=5B2FD4" />
+  <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white&color=5B2FD4" />
+</div>
+
 <br>
 
 <h2 id='como-executar'> :hammer_and_wrench: Como executar </h2>
