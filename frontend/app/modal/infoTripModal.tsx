@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
     View,
     Text,
@@ -10,23 +10,40 @@ import {
     Platform,
 } from "react-native";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from "expo-status-bar";
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-// Função auxiliar para converter o horário em minutos
-// Se o horário estiver em formato "HH:MM" ou "HH:MM - HH:MM", utiliza o primeiro valor.
+
 function parseHorarios(horario: string): number {
-    // Exemplo: "14:00" ou "14:00 - 16:00"
     const [start] = horario.split("-");
     const [hours, minutes] = start.trim().split(":").map(Number);
     return hours * 60 + (minutes || 0);
 }
 
+
+function parseDate(dateStr: string): Date {
+    const [dataPart, timePart] = dateStr.split(" ");
+    const [day, month, year] = dataPart.split("/");
+    const hours = timePart ? timePart.split(":")[0] : "00";
+    const minutes = timePart ? timePart.split(":")[1] : "00";
+    const isoString = `${year}-${month}-${day}T${hours}:${minutes}:00`;
+    return new Date(isoString);
+}
+
 export default function InfoViagemScreen() {
+    const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+    useEffect(() => {
+      navigation.setOptions({
+        title: 'Detalhes da Viagem',
+        headerBackTitle: 'Voltar',
+      });
+    }, [navigation]);
     const { id } = useLocalSearchParams();
     const router = useRouter();
     const [viagem, setViagem] = useState<any>(null);
 
-    // Função para buscar os dados da viagem
     async function fetchViagem() {
         try {
             const res = await fetch("http://192.168.15.9:5000/api/travel");
@@ -34,15 +51,11 @@ export default function InfoViagemScreen() {
             const item = data.find((v: any) => v.id === id);
 
             if (item) {
-                // Se houver itinerários, vamos ordená-los por dia e horário
                 if (item.itinerarios && item.itinerarios.length > 0) {
                     item.itinerarios.sort((a: any, b: any) => {
-                        // 1) Ordena pelo dia
-                        if (a.dia !== b.dia) {
-                            return a.dia - b.dia;
-                        }
-                        // 2) Se o dia for igual, ordena pelo horário
-                        return parseHorarios(a.horario) - parseHorarios(b.horario);
+                        const dateA = parseDate(a.dia);
+                        const dateB = parseDate(b.dia);
+                        return dateA.getTime() - dateB.getTime();
                     });
                 }
                 setViagem(item);
@@ -55,7 +68,6 @@ export default function InfoViagemScreen() {
         }
     }
 
-    // useFocusEffect: toda vez que a tela ganhar foco, busca novamente os dados
     useFocusEffect(
         useCallback(() => {
             fetchViagem();
@@ -116,7 +128,7 @@ export default function InfoViagemScreen() {
                 message += `Nome: ${item.nomeLocal}\n`;
                 message += `Tipo: ${item.tipo}\n`;
                 message += `Local: ${item.localizacao}\n`;
-                message += `Horário: ${item.horario}\n`;
+                message += `Valor: ${item.valor}\n`;
                 message += `Dia: ${item.dia}\n`;
                 if (item.descricao) {
                     message += `Descrição: ${item.descricao}\n`;
@@ -138,9 +150,8 @@ export default function InfoViagemScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
+            <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
             <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 200 }]}>
-                <Text style={styles.title}>Detalhes da Viagem</Text>
 
                 {/* Seção de Voos */}
                 {viagem.voos?.length > 0 && (
@@ -189,7 +200,7 @@ export default function InfoViagemScreen() {
                                 <Text>Nome: {item.nomeLocal}</Text>
                                 <Text>Tipo: {item.tipo}</Text>
                                 <Text>Local: {item.localizacao}</Text>
-                                <Text>Horário: {item.horario}</Text>
+                                <Text>Valor: {item.valor}</Text>
                                 <Text>Dia: {item.dia}</Text>
                                 {item.descricao && <Text>Descrição: {item.descricao}</Text>}
                             </View>
@@ -217,20 +228,18 @@ export default function InfoViagemScreen() {
                 <TouchableOpacity style={styles.cancelButton} onPress={cancelarViagem}>
                     <Text style={styles.cancelButtonText}>Cancelar Viagem</Text>
                 </TouchableOpacity>
-
             </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-
     container: {
         flex: 1,
-        backgroundColor: '#FFF'
+        backgroundColor: "#FFF",
     },
     content: {
-        padding: 20
+        padding: 20,
     },
     title: {
         fontSize: 22,
@@ -262,7 +271,6 @@ const styles = StyleSheet.create({
     },
     cancelButton: {
         width: "100%",
-
         backgroundColor: "#D00",
         padding: 14,
         borderRadius: 40,
@@ -273,15 +281,14 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         gap: 10,
         paddingTop: 10,
-
         padding: 20,
-        position: 'absolute',
+        position: "absolute",
         bottom: 0,
-        width: '100%',
-        backgroundColor: '#FFF',
-        alignItems: 'center',
+        width: "100%",
+        backgroundColor: "#FFF",
+        alignItems: "center",
         borderTopWidth: 1,
-        borderColor: '#ddd',
+        borderColor: "#ddd",
     },
     cancelButtonText: {
         color: "#FFF",
@@ -300,12 +307,10 @@ const styles = StyleSheet.create({
     },
     shareButton: {
         width: "100%",
-
         backgroundColor: "#34A853",
         padding: 14,
         borderRadius: 40,
         alignItems: "center",
-
     },
     shareButtonText: {
         color: "#FFF",

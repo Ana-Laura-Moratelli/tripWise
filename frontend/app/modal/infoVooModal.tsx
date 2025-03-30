@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -10,8 +10,22 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 export default function InfoVooModal() {
+   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  
+      useEffect(() => {
+        navigation.setOptions({
+          title: 'Detalhes do Voo',
+          headerBackTitle: 'Voltar',
+        });
+      }, [navigation]);
+
+
+
+
   const router = useRouter();
   const {
     tipo,
@@ -34,13 +48,19 @@ export default function InfoVooModal() {
         arrivalTime,
         price,
       };
-
-      const carrinhoAtual = await AsyncStorage.getItem('@carrinho_voos');
+  
+      const userId = await AsyncStorage.getItem('@user_id');
+      if (!userId) {
+        Alert.alert('Erro', 'Usuário não identificado.');
+        return;
+      }
+  
+      const carrinhoAtual = await AsyncStorage.getItem(`@carrinho_voos_${userId}`);
       const carrinho = carrinhoAtual ? JSON.parse(carrinhoAtual) : [];
-
+  
       carrinho.push(voo);
-      await AsyncStorage.setItem('@carrinho_voos', JSON.stringify(carrinho));
-
+      await AsyncStorage.setItem(`@carrinho_voos_${userId}`, JSON.stringify(carrinho));
+  
       Alert.alert('Sucesso', `Voo de ${tipo} adicionado ao carrinho.`);
       router.back(); // volta para a tela anterior
     } catch (error) {
@@ -48,6 +68,7 @@ export default function InfoVooModal() {
       console.error(error);
     }
   }
+  
 
   return (
     <View style={styles.container}>

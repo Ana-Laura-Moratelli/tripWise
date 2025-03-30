@@ -9,9 +9,11 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect, useRouter } from 'expo-router';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Viagem {
   id: string;
+  userId: string; 
   voos?: Voo[];
   hoteis?: Hotel[];
 }
@@ -41,9 +43,14 @@ export default function ViagemRealizadaScreen() {
     useCallback(() => {
       async function carregarViagens() {
         try {
-          const response = await fetch("http://192.168.15.9:5000/api/travel");
+          const userId = await AsyncStorage.getItem("@user_id");
+          if (!userId) return;
+  
+          const response = await fetch(`http://192.168.15.9:5000/api/travel?userId=${userId}`);
           const json = await response.json();
-          setViagens(json);
+  
+          const viagensFiltradas = json.filter((viagem: Viagem) => viagem.userId === userId);
+          setViagens(viagensFiltradas);
         } catch (error) {
           console.error("Erro ao buscar viagens realizadas:", error);
         }
@@ -51,6 +58,7 @@ export default function ViagemRealizadaScreen() {
       carregarViagens();
     }, [])
   );
+
 
   const renderVoo = (voos: Voo[]) => {
     const origem = voos[0]?.origin;

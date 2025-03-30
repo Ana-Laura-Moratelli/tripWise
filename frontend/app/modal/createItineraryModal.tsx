@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -13,38 +13,54 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { TextInputMask } from 'react-native-masked-text';
-
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 export default function ModalScreen() {
-    const { id } = useLocalSearchParams(); // ID da viagem vinculada
+
+    const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  
+    useEffect(() => {
+      navigation.setOptions({
+        title: 'Adicionar ao Cronograma',
+        headerBackTitle: 'Voltar',
+      });
+    }, [navigation]);
+
+    const { id } = useLocalSearchParams(); 
     const router = useRouter();
 
     const [nomeLocal, setNomeLocal] = useState('');
     const [tipoAtividade, setTipoAtividade] = useState('');
     const [localizacao, setLocalizacao] = useState('');
-    const [horario, setHorario] = useState('');
+    const [valor, setValor] = useState(''); 
     const [descricao, setDescricao] = useState('');
     const [dia, setDia] = useState('');
 
-    function formatarDataHoraParaISO(dataHoraBR: string): string | null {
+    
+    function formatarDataAtividade(dataHoraBR: string): string | null {
         if (!dataHoraBR || dataHoraBR.length < 10) return null;
 
-        const [data, hora] = dataHoraBR.split(' ');
-        const [dia, mes, ano] = data.split('/');
+        const partes = dataHoraBR.split(' ');
+        const dataPart = partes[0]; 
 
-        const horaFormatada = hora || '00:00:00';
-        return `${ano}-${mes}-${dia}T${horaFormatada}`;
+        if (partes.length > 1 && partes[1].trim() !== "") {
+            const timePart = partes[1].trim().substring(0, 5);
+            return `${dataPart} ${timePart}`;
+        } else {
+            return dataPart;
+        }
     }
 
     async function salvarCronograma() {
         try {
-            if (!nomeLocal || !tipoAtividade || !localizacao || !horario || !dia) {
+            if (!nomeLocal || !tipoAtividade || !localizacao || !dia) {
                 Alert.alert("Preencha todos os campos obrigatórios.");
                 return;
             }
 
-            const dataISO = formatarDataHoraParaISO(dia);
-            if (!dataISO) {
-                Alert.alert("Data inválida", "Informe uma data válida no formato dd/mm/aaaa hh:mm:ss");
+            const dataFormatada = formatarDataAtividade(dia);
+            if (!dataFormatada) {
+                Alert.alert("Data inválida", "Informe uma data válida no formato DD/MM/AAAA [HH:mm].");
                 return;
             }
 
@@ -52,9 +68,9 @@ export default function ModalScreen() {
                 nomeLocal,
                 tipo: tipoAtividade,
                 localizacao,
-                horario,
+                valor, // Campo de valor com máscara de dinheiro
                 descricao,
-                dia: dataISO,
+                dia: dataFormatada,
             };
 
             const response = await fetch(`http://192.168.15.9:5000/api/travel/${id}/itinerary`, {
@@ -88,8 +104,6 @@ export default function ModalScreen() {
                 style={{ backgroundColor: "#fff", padding: 20, flex: 1 }}
                 keyboardShouldPersistTaps="handled"
             >
-
-                <Text style={styles.title}>Adicionar ao Cronograma</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Nome do local"
@@ -97,7 +111,6 @@ export default function ModalScreen() {
                     onChangeText={setNomeLocal}
                     placeholderTextColor="#888"
                 />
-
                 <TextInput
                     style={styles.input}
                     placeholder="Tipo de atividade"
@@ -105,7 +118,6 @@ export default function ModalScreen() {
                     onChangeText={setTipoAtividade}
                     placeholderTextColor="#888"
                 />
-
                 <TextInput
                     style={styles.input}
                     placeholder="Localização"
@@ -114,21 +126,31 @@ export default function ModalScreen() {
                     placeholderTextColor="#888"
                 />
 
+                {/* Campo de data com máscara para "DD/MM/YYYY HH:mm". O horário não é obrigatório. */}
                 <TextInputMask
                     type={'datetime'}
-                    options={{ format: 'DD/MM/YYYY HH:mm:ss' }}
+                    options={{ format: 'DD/MM/YYYY HH:mm' }}
                     style={styles.input}
                     value={dia}
                     onChangeText={setDia}
-                    placeholder="Data da atividade (dd/mm/aaaa hh:mm)"
+                    placeholder="Data da atividade (dd/mm/aaaa [hh:mm])"
                     placeholderTextColor="#888"
                 />
 
-                <TextInput
+                {/* Campo de Valor com máscara de dinheiro em R$ */}
+                <TextInputMask
+                    type={'money'}
+                    options={{
+                        precision: 2,
+                        separator: ',',
+                        delimiter: '.',
+                        unit: 'R$',
+                        suffixUnit: ''
+                    }}
                     style={styles.input}
                     placeholder="Valor"
-                    value={horario}
-                    onChangeText={setHorario}
+                    value={valor}
+                    onChangeText={setValor}
                     placeholderTextColor="#888"
                 />
 

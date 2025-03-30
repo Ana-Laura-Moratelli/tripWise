@@ -76,7 +76,7 @@ export default function HotelSearchScreen() {
       if (diasHospedagem <= 0) throw new Error("A data de check-out deve ser após a de check-in.");
 
       const query = `${cidade.trim().replace(/\s+/g, "+")}`;
-      const url = `${SERPAPI_URL}?engine=google_hotels&q=${query}&check_in_date=${checkin}&check_out_date=${checkout}&adults=2&currency=USD&gl=us&hl=en&api_key=${SERPAPI_KEY}`;
+      const url = `http://192.168.15.9:5000/api/hotels?cidade=${encodeURIComponent(cidade)}&checkin=${checkin}&checkout=${checkout}`;
 
       const response = await axios.get(url);
       const resultados = response.data.properties || [];

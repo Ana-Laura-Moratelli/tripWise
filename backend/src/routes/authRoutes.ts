@@ -1,10 +1,11 @@
 import express from "express";
-import { register, login } from "../controllers/authController";
+import { register, login, updateProfile} from "../controllers/authController";
 
 const router = express.Router();
 
 router.post("/register", register);
 router.post("/login", login);
+router.put("/:id", updateProfile);
 
 // Em authRoutes.ts ou em um novo arquivo de rotas
 router.get("/ping", (req, res) => {

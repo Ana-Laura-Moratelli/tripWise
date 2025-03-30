@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -10,8 +10,19 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 export default function InfoHotelModal() {
+
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+    
+        useEffect(() => {
+          navigation.setOptions({
+            title: 'Detalhes do Hotel',
+            headerBackTitle: 'Voltar',
+          });
+        }, [navigation]);
+
   const router = useRouter();
   const {
     name,
@@ -36,20 +47,27 @@ export default function InfoHotelModal() {
         checkout,
         total,
       };
-
-      const carrinhoAtual = await AsyncStorage.getItem('@carrinho_hoteis');
+  
+      const userId = await AsyncStorage.getItem('@user_id');
+      if (!userId) {
+        Alert.alert('Erro', 'Usuário não identificado.');
+        return;
+      }
+  
+      const carrinhoAtual = await AsyncStorage.getItem(`@carrinho_hoteis_${userId}`);
       const carrinho = carrinhoAtual ? JSON.parse(carrinhoAtual) : [];
-
+  
       carrinho.push(novoHotel);
-      await AsyncStorage.setItem('@carrinho_hoteis', JSON.stringify(carrinho));
-
+      await AsyncStorage.setItem(`@carrinho_hoteis_${userId}`, JSON.stringify(carrinho));
+  
       Alert.alert('Sucesso', 'Hotel adicionado ao carrinho!');
-      router.back(); // voltar para a tela anterior
+      router.back(); // Volta para a tela anterior
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível adicionar o hotel.');
       console.error(error);
     }
   }
+  
 
   return (
     <View style={styles.container}>
@@ -62,7 +80,6 @@ export default function InfoHotelModal() {
         <Text style={styles.info}>Check-in: {checkin}</Text>
         <Text style={styles.info}>Check-out: {checkout}</Text>
         <Text style={styles.info}>Preço diária: {price}</Text>
-
         <Text style={styles.info}>Total: {total}</Text>
         <View style={styles.footer}>
           <View style={styles.footer}>

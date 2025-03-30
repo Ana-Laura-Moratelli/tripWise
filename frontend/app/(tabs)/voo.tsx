@@ -114,7 +114,7 @@ export default function FlightScreen() {
           currency: 'BRL',
         }).format(valor);
 
-      const url = `${SERPAPI_URL}?engine=google_flights&departure_id=${iataOrigem.toUpperCase()}&arrival_id=${iataDestino.toUpperCase()}&outbound_date=${isoPartida}${idaEVolta ? `&return_date=${isoVolta}&type=1` : '&type=2'}&currency=USD&hl=en&api_key=${SERPAPI_KEY}`;
+      const url = `http://192.168.15.9:5000/api/flights?iataOrigem=${iataOrigem}&iataDestino=${iataDestino}&dataPartida=${isoPartida}&dataVolta=${isoVolta}&idaEVolta=${idaEVolta}`;
 
       const response = await axios.get(url);
       const resultados = response.data.best_flights;

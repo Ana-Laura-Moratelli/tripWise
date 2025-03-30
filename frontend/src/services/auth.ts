@@ -11,22 +11,13 @@ interface RegisterData {
 }
 
 export async function loginUser(email: string, password: string) {
-    try {
-        console.log("📡 Enviando login para API:", email, password);
+  const response = await api.post("/auth/login", { email, password });
 
-        const response = await api.post("/auth/login", { email, password });
+  await AsyncStorage.setItem("@token", response.data.token);
+  await AsyncStorage.setItem("@user", JSON.stringify(response.data.user));
+  await AsyncStorage.setItem("@user_id", response.data.user.uid);
 
-        console.log("✅ Resposta da API:", response.status, response.data); // Verificar se a API retornou sucesso
-
-        // Salvar usuário e token no AsyncStorage
-        await AsyncStorage.setItem("@user", JSON.stringify(response.data));
-        await AsyncStorage.setItem("@token", response.data.token);
-
-        return response.data;
-    } catch (error: any) {
-        console.error("❌ Erro na requisição:", error.response?.data);
-        throw new Error(error.response?.data?.error || "Erro ao fazer login");
-    }
+  return response.data;
 }
 
 export async function registerUser(data: RegisterData) {

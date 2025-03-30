@@ -51,9 +51,9 @@ export const deletarViagem = async (req: Request, res: Response) => {
 export const adicionarItinerario: RequestHandler = async (req, res) => {
     try {
       const { id } = req.params;
-      const { nomeLocal, tipo, localizacao, horario, descricao, dia } = req.body;
+      const { nomeLocal, tipo, localizacao, valor, descricao, dia } = req.body;
   
-      if (!nomeLocal || !tipo || !localizacao || !horario) {
+      if (!nomeLocal || !tipo || !localizacao || !valor) {
         res.status(400).json({ error: "Campos obrigatórios não preenchidos." });
         return; // apenas encerre a função, sem retornar o objeto res
       }
@@ -73,7 +73,7 @@ export const adicionarItinerario: RequestHandler = async (req, res) => {
         nomeLocal,
         tipo,
         localizacao,
-        horario,
+        valor,
         descricao,
         dia,
         criadoEm: new Date(),
@@ -130,3 +130,46 @@ export const adicionarItinerario: RequestHandler = async (req, res) => {
       return;
     }
   };
+
+  export const atualizarItinerario: RequestHandler = async (req, res) => {
+    try {
+      const { id, itemIndex } = req.params;
+      const index = Number(itemIndex);
+      const novoItem = req.body; // Dados atualizados enviados pelo frontend
+  
+      if (isNaN(index)) {
+        res.status(400).json({ error: "Índice inválido." });
+        return;
+      }
+  
+      const docRef = db.collection("travel").doc(id);
+      const docSnap = await docRef.get();
+  
+      if (!docSnap.exists) {
+        res.status(404).json({ error: "Viagem não encontrada." });
+        return;
+      }
+  
+      const dados = docSnap.data();
+      const itinerariosAtuais = dados?.itinerarios || [];
+  
+      if (index < 0 || index >= itinerariosAtuais.length) {
+        res.status(400).json({ error: "Índice fora dos limites." });
+        return;
+      }
+  
+      // Removendo campos extras que não fazem parte do itinerário, como "originalIndex"
+      const { originalIndex, ...dadosParaAtualizar } = novoItem;
+  
+      // Atualiza o item, mantendo os dados que não foram modificados
+      itinerariosAtuais[index] = { ...itinerariosAtuais[index], ...dadosParaAtualizar };
+  
+      await docRef.update({ itinerarios: itinerariosAtuais });
+  
+      res.status(200).json({ message: "Itinerário atualizado com sucesso." });
+    } catch (error: any) {
+      console.error("Erro ao atualizar itinerário:", error);
+      res.status(500).json({ error: error.message || "Erro interno ao atualizar itinerário." });
+    }
+  };
+  
