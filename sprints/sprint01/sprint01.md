@@ -58,5 +58,7 @@
 <h2>DoD (Definition of Done)</h2>
 
 <h2>Mockups</h2>
+<img src="https://github.com/Ana-Laura-Moratelli/tripWise/blob/main/sprints/sprint01/mvp.mov">
+
 
 
