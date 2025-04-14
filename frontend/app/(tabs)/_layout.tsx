@@ -21,7 +21,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#5B2FD4',   
+        tabBarActiveTintColor: '#5B2FD4',
         tabBarInactiveTintColor: '#aaa',
         headerShown: useClientOnlyValue(false, true),
       }}>
@@ -38,7 +38,7 @@ export default function TabLayout() {
                   <FontAwesome
                     name="info-circle"
                     size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
+                    color="black"  // Altere para "gray" para deixar cinza.
                     style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
                   />
                 )}
@@ -47,7 +47,8 @@ export default function TabLayout() {
           ),
         }}
       />
-        <Tabs.Screen
+
+      <Tabs.Screen
         name="voo"
         options={{
           title: 'Voos',
@@ -55,7 +56,7 @@ export default function TabLayout() {
           tabBarLabelStyle: { marginTop: 4 },
         }}
       />
-       <Tabs.Screen
+      <Tabs.Screen
         name="cart"
         options={{
           title: 'Carrinho',
@@ -63,7 +64,7 @@ export default function TabLayout() {
           tabBarLabelStyle: { marginTop: 4 },
         }}
       />
-      
+
       <Tabs.Screen
         name="trip"
         options={{

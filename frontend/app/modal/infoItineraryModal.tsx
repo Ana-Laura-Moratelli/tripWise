@@ -12,6 +12,7 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { TextInputMask } from 'react-native-masked-text';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { api } from '../../src/services/api';
 
 interface Itinerario {
   nomeLocal: string;
@@ -75,10 +76,8 @@ export default function ItineraryListScreen() {
 
   async function fetchItinerarios() {
     try {
-      const response = await fetch('http://192.168.15.7:5000/api/trip');
-      if (!response.ok) throw new Error("Erro ao buscar dados");
-
-      const data = await response.json();
+      const response = await api.get('/api/trip');
+      const data = response.data;
       const viagem = data.find((item: any) => item.id === id);
       if (viagem) {
         if (!viagem.itinerarios || viagem.itinerarios.length === 0) {
@@ -96,11 +95,12 @@ export default function ItineraryListScreen() {
         Alert.alert("Erro", "Viagem não encontrada.");
       }
     } catch (error) {
+      console.error("Erro ao buscar itinerários:", error);
     } finally {
       setLoading(false);
     }
   }
-
+  
 
   useEffect(() => {
     fetchItinerarios();
@@ -115,44 +115,46 @@ export default function ItineraryListScreen() {
   async function deleteItinerary(itemIndex: number, originalIndex?: number) {
     const indexToUse = originalIndex !== undefined ? originalIndex : itemIndex;
     try {
-      const response = await fetch(`http://192.168.15.7:5000/api/trip/${id}/itinerary/${indexToUse}`, {
-        method: 'DELETE'
-      });
-      if (!response.ok) throw new Error("Erro ao deletar item");
-
+      await api.delete(`/api/trip/${id}/itinerary/${indexToUse}`);
       Alert.alert("Sucesso", "Item deletado com sucesso!");
       fetchItinerarios();
-    } catch (error) {
-      Alert.alert("Erro", "Não foi possível deletar o item.");
+    } catch (error: any) {
+      Alert.alert("Erro", error.response?.data?.error || "Não foi possível deletar o item.");
     }
   }
+  
 
   async function updateItinerary(itemIndex: number, originalIndex?: number) {
     const indexToUse = originalIndex !== undefined ? originalIndex : itemIndex;
     try {
+      
       const { originalIndex, ...dadosParaAtualizar } = editingItem;
-  
-      if (!dadosParaAtualizar.nomeLocal || !dadosParaAtualizar.tipo || !dadosParaAtualizar.localizacao || !dadosParaAtualizar.dia) {
+      
+      if (
+        !dadosParaAtualizar.nomeLocal ||
+        !dadosParaAtualizar.tipo ||
+        !dadosParaAtualizar.localizacao ||
+        !dadosParaAtualizar.dia
+      ) {
         Alert.alert("Preencha todos os campos obrigatórios.");
         return;
       }
-  
+      
       const dataValidada = validarDataAtividade(dadosParaAtualizar.dia || '');
       if (!dataValidada) {
-        Alert.alert("Data inválida", "A data não pode ser anterior ao momento atual e deve estar no formato (dd/mm/aaaa hh:mm).");
+        Alert.alert(
+          "Data inválida", 
+          "A data não pode ser anterior ao momento atual e deve estar no formato (dd/mm/aaaa hh:mm)."
+        );
         return;
       }
-  
+      
       dadosParaAtualizar.dia = dataValidada;
-  
-      const response = await fetch(`http://192.168.15.7:5000/api/trip/${id}/itinerary/${indexToUse}`, {
-        method: 'PUT',
+      
+      await api.put(`/api/trip/${id}/itinerary/${indexToUse}`, dadosParaAtualizar, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dadosParaAtualizar),
       });
-  
-      if (!response.ok) throw new Error("Erro ao atualizar o item");
-  
+      
       Alert.alert("Sucesso", "Item atualizado com sucesso!");
       setEditingIndex(null);
       setEditingItem({});
@@ -161,6 +163,7 @@ export default function ItineraryListScreen() {
       Alert.alert("Erro", error.message || "Não foi possível atualizar o item.");
     }
   }
+  
   
 
   function renderItem({ item, index }: { item: Itinerario; index: number }) {

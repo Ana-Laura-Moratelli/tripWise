@@ -13,6 +13,7 @@ import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { differenceInDays, parseISO, isBefore  } from 'date-fns';
 import { TextInputMask } from 'react-native-masked-text';
+import { api } from '../../src/services/api';
 
 interface Hotel {
   name: string;
@@ -83,10 +84,14 @@ export default function HotelSearchScreen() {
       const diasHospedagem = differenceInDays(parseISO(checkout), parseISO(checkin));
       if (diasHospedagem <= 0) throw new Error("A data de check-out deve ser após a de check-in.");
 
-      const query = `${cidade.trim().replace(/\s+/g, "+")}`;
-      const url = `http://192.168.15.7:5000/api/hotels?cidade=${encodeURIComponent(cidade)}&checkin=${checkin}&checkout=${checkout}`;
+      const response = await api.get('/api/hotels', {
+        params: {
+          cidade: cidade,        
+          checkin: checkin,
+          checkout: checkout,
+        }
+      });
 
-      const response = await axios.get(url);
       const resultados = response.data.properties || [];
 
       if (!resultados.length) {

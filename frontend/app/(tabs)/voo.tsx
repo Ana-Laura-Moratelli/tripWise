@@ -14,7 +14,7 @@ import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { TextInputMask } from 'react-native-masked-text';
 import { parseISO, isBefore } from 'date-fns';
-
+import { api } from '../../src/services/api';
 
 const EXCHANGE_RATE_URL = "https://api.exchangerate.host/latest?base=USD&symbols=BRL";
 
@@ -113,7 +113,7 @@ export default function FlightScreen() {
       if (isBefore(dataPartidaISO, hoje)) {
         throw new Error("A data de ida não pode ser anterior à data de hoje.");
       }
-  
+
       if (idaEVolta) {
         if (isBefore(dataVoltaISO, hoje)) {
           throw new Error("A data de volta não pode ser anterior à data de hoje.");
@@ -130,9 +130,16 @@ export default function FlightScreen() {
           currency: 'BRL',
         }).format(valor);
 
-      const url = `http://192.168.15.7:5000/api/flights?iataOrigem=${iataOrigem}&iataDestino=${iataDestino}&dataPartida=${isoPartida}&dataVolta=${isoVolta}&idaEVolta=${idaEVolta}`;
+      const response = await api.get('/api/flights', {
+        params: {
+          iataOrigem: iataOrigem.toUpperCase(),
+          iataDestino: iataDestino.toUpperCase(),
+          dataPartida: isoPartida,
+          dataVolta: isoVolta,
+          idaEVolta: idaEVolta,
+        },
+      });
 
-      const response = await axios.get(url);
       const resultados = response.data.best_flights;
 
       if (!resultados || resultados.length === 0) {

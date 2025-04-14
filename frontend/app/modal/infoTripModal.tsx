@@ -13,13 +13,7 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
-
-function parseHorarios(horario: string): number {
-    const [start] = horario.split("-");
-    const [hours, minutes] = start.trim().split(":").map(Number);
-    return hours * 60 + (minutes || 0);
-}
+import { api } from "../../src/services/api";
 
 
 function parseDate(dateStr: string): Date {
@@ -46,27 +40,31 @@ export default function InfoViagemScreen() {
 
     async function fetchViagem() {
         try {
-            const res = await fetch("http://192.168.15.7:5000/api/trip");
-            const data = await res.json();
-            const item = data.find((v: any) => v.id === id);
-
-            if (item) {
-                if (item.itinerarios && item.itinerarios.length > 0) {
-                    item.itinerarios.sort((a: any, b: any) => {
-                        const dateA = parseDate(a.dia);
-                        const dateB = parseDate(b.dia);
-                        return dateA.getTime() - dateB.getTime();
-                    });
-                }
-                setViagem(item);
-            } else {
-                setViagem(null);
+          // Faz a requisição GET para "/api/trip" usando axios.
+          const response = await api.get("/api/trip");
+          const data = response.data;
+      
+          // Procura o item cuja id seja igual à variável 'id' (certifique-se de que 'id' esteja definida no escopo).
+          const item = data.find((v: any) => v.id === id);
+      
+          // Se o item existir e tiver itinerários, ordena-os pela data.
+          if (item) {
+            if (item.itinerarios && item.itinerarios.length > 0) {
+              item.itinerarios.sort((a: any, b: any) => {
+                const dateA = parseDate(a.dia);
+                const dateB = parseDate(b.dia);
+                return dateA.getTime() - dateB.getTime();
+              });
             }
+            setViagem(item);
+          } else {
+            setViagem(null);
+          }
         } catch (error) {
-            Alert.alert("Erro", "Não foi possível carregar os dados da viagem.");
+          Alert.alert("Erro", "Não foi possível carregar os dados da viagem.");
         }
-    }
-
+      }
+      
     useFocusEffect(
         useCallback(() => {
             fetchViagem();
@@ -75,17 +73,16 @@ export default function InfoViagemScreen() {
 
     async function cancelarViagem() {
         try {
-            await fetch(`http://192.168.15.7:5000/api/trip/${id}`, {
-                method: "DELETE",
-            });
-            Alert.alert("Sucesso", "Viagem cancelada.");
-            router.back();
-        } catch (error) {
-            const errMessage =
-                error instanceof Error ? error.message : "Erro ao cancelar viagem.";
-            Alert.alert("Erro", errMessage);
+          await api.delete(`/api/trip/${id}`);
+          Alert.alert("Sucesso", "Viagem cancelada.");
+          router.back();
+        } catch (error: any) {
+          const errMessage =
+            error instanceof Error ? error.message : "Erro ao cancelar viagem.";
+          Alert.alert("Erro", errMessage);
         }
-    }
+      }
+      
 
     async function handleShare() {
         if (!viagem) return;

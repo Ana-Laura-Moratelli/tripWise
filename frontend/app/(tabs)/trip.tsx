@@ -10,6 +10,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect, useRouter } from 'expo-router';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { api } from '../../src/services/api';	
 
 interface Viagem {
   id: string;
@@ -46,19 +47,23 @@ export default function ViagemRealizadaScreen() {
           const userId = await AsyncStorage.getItem("@user_id");
           if (!userId) return;
   
-          const response = await fetch(`http://192.168.15.7:5000/api/trip?userId=${userId}`);
-          const json = await response.json();
+          // Usa o axios configurado e envia os parâmetros na query
+          const response = await api.get("/api/trip", {
+            params: { userId }
+          });
+          const json = response.data;
   
+          // Se o backend não filtrar, você pode filtrar no front
           const viagensFiltradas = json.filter((viagem: Viagem) => viagem.userId === userId);
           setViagens(viagensFiltradas);
         } catch (error) {
+          console.error("Erro ao carregar viagens:", error);
         }
       }
       carregarViagens();
     }, [])
   );
-
-
+  
   const renderVoo = (voos: Voo[]) => {
     const origem = voos[0]?.origin;
     const destino = voos[0]?.destination;

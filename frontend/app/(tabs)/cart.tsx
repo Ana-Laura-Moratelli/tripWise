@@ -12,6 +12,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api } from '../../src/services/api';
 
 interface Voo {
   tipo: string;
@@ -82,15 +83,20 @@ export default function CartScreen() {
   const realizarViagem = async () => {
     try {
       const userId = await AsyncStorage.getItem('@user_id');
-
-      const response = await fetch("http://192.168.15.7:5000/api/trip", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, voos: voosCarrinho, hoteis: hoteisCarrinho }),
+      if (!userId) throw new Error("Usuário não autenticado");
+  
+      // Usando axios, a URL é relativa à baseURL definida
+      const response = await api.post("/api/trip", {
+        userId,
+        voos: voosCarrinho,
+        hoteis: hoteisCarrinho,
       });
-
-      if (!response.ok) throw new Error("Erro ao registrar a viagem");
-
+      
+      // Se precisar checar explicitamente, aceite status 2xx:
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error("Erro ao registrar a viagem");
+      }
+  
       Alert.alert("Sucesso!", "Viagem registrada com sucesso!");
       setVoosCarrinho([]);
       setHoteisCarrinho([]);
@@ -98,10 +104,11 @@ export default function CartScreen() {
         `@carrinho_voos_${userId}`,
         `@carrinho_hoteis_${userId}`
       ]);
-          } catch (error: any) {
+    } catch (error: any) {
       Alert.alert("Erro", error.message || "Erro ao registrar viagem");
     }
   };
+  
 
   return (
     <View style={styles.container}>

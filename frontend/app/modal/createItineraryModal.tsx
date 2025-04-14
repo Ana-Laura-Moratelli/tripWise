@@ -15,6 +15,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { TextInputMask } from 'react-native-masked-text';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import  { api } from '../../src/services/api';
+
 export default function ModalScreen() {
 
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -99,25 +101,25 @@ export default function ModalScreen() {
                 dia: dataFormatada,
             };
 
-            const response = await fetch(`http://192.168.15.7:5000/api/trip/${id}/itinerary`, {
-                method: 'POST',
+            const response = await api.post(`/api/trip/${id}/itinerary`, novoItem, {
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(novoItem),
-            });
-
-            console.log("Status da resposta:", response.status);
-            const responseText = await response.text();
-            console.log("Corpo da resposta:", responseText);
-
-            if (!response.ok) throw new Error("Erro ao salvar cronograma");
-
-            Alert.alert("Sucesso", "Item adicionado ao cronograma!");
-            router.back();
-        } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : "Erro ao adicionar cronograma.";
-            Alert.alert("Erro", errorMessage);
-        }
-    }
+              });
+            
+              console.log("Status da resposta:", response.status);
+              console.log("Corpo da resposta:", response.data);
+            
+              if (response.status < 200 || response.status >= 300) {
+                throw new Error("Erro ao salvar cronograma");
+              }
+            
+              Alert.alert("Sucesso", "Item adicionado ao cronograma!");
+              router.back();
+            } catch (error: unknown) {
+              const errorMessage =
+                error instanceof Error ? error.message : "Erro ao adicionar cronograma.";
+              Alert.alert("Erro", errorMessage);
+            }
+        }            
 
     return (
         <KeyboardAvoidingView

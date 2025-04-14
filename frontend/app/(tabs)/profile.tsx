@@ -10,6 +10,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { TextInputMask } from 'react-native-masked-text';
+import { api } from '../../src/services/api';
 
 function formatPhoneForDisplay(phone: string): string {
   if (phone.startsWith('+55')) phone = phone.substring(3);
@@ -58,9 +59,9 @@ export default function Profile() {
   async function verificarDuplicidade(campo: string, valor: string): Promise<boolean> {
     try {
       const userId = await AsyncStorage.getItem('@user_id');
-      const response = await fetch('http://192.168.15.7:5000/api/users');
-      const usuarios = await response.json();
-
+      const response = await api.get('/api/users');
+      const usuarios = response.data;
+  
       return usuarios.some((u: any) => u.id !== userId && u[campo] === valor);
     } catch (error) {
       return false;
@@ -100,23 +101,17 @@ export default function Profile() {
     const payload = { ...user, phoneNumber: phoneTransformed };
 
     try {
-      const response = await fetch(`http://192.168.15.7:5000/api/users/${userId}`, {
-        method: 'PUT',
+      const response = await api.put(`/api/users/${userId}`, payload, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData?.error || 'Erro ao atualizar perfil.');
-      }
-      
-      const updatedData = await response.json();
+  
       Alert.alert('Sucesso', 'Perfil atualizado com sucesso.');
-      await AsyncStorage.setItem('@user', JSON.stringify(updatedData.user));
+      await AsyncStorage.setItem('@user', JSON.stringify(response.data.user));
       setEditing(false);
     } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Erro ao atualizar perfil.');
+      const errorMessage =
+        error.response?.data?.error || error.message || 'Erro ao atualizar perfil.';
+      Alert.alert('Erro', errorMessage);
     }
   }
 
