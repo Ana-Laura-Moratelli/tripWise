@@ -6,12 +6,11 @@ import { Text, View } from '@/components/Themed';
 export default function NotFoundScreen() {
   return (
     <>
-      <Stack.Screen options={{ title: 'Oops!' }} />
+      <Stack.Screen options={{ title: '404' }} />
       <View style={styles.container}>
-        <Text style={styles.title}>This screen doesn't exist.</Text>
-
+        <Text style={styles.title}>Página não encontrada</Text>
         <Link href="/" style={styles.link}>
-          <Text style={styles.linkText}>Go to home screen!</Text>
+          <Text style={styles.linkText}>Voltar para tela inicial</Text>
         </Link>
       </View>
     </>
@@ -21,20 +20,20 @@ export default function NotFoundScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFF',
     alignItems: 'center',
-    justifyContent: 'center',
     padding: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#333',
   },
   link: {
-    marginTop: 15,
-    paddingVertical: 15,
+    paddingVertical: 16,
   },
   linkText: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#2e78b7',
   },
 });

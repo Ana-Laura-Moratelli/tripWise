@@ -38,7 +38,7 @@ export default function TabLayout() {
                   <FontAwesome
                     name="info-circle"
                     size={25}
-                    color="black"  // Altere para "gray" para deixar cinza.
+                    color="black" 
                     style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
                   />
                 )}
@@ -70,6 +70,14 @@ export default function TabLayout() {
         options={{
           title: 'Viagens',
           tabBarIcon: ({ color }) => <TabBarIcon name="globe" color={color} />,
+          tabBarLabelStyle: { marginTop: 4 },
+        }}
+      />
+         <Tabs.Screen
+        name="map"
+        options={{
+          title: 'Mapa',
+          tabBarIcon: ({ color }) => <TabBarIcon name="map" color={color} />,
           tabBarLabelStyle: { marginTop: 4 },
         }}
       />

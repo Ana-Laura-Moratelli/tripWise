@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import axios from 'axios';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -14,15 +15,43 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 export default function InfoHotelModal() {
 
-  const navigation = useNavigation<NativeStackNavigationProp<any>>();
-    
-        useEffect(() => {
-          navigation.setOptions({
-            title: 'Detalhes do Hotel',
-            headerBackTitle: 'Voltar',
-          });
-        }, [navigation]);
+  const [fusoHorario, setFusoHorario] = useState<string | null>(null);
+  const [horaLocal, setHoraLocal] = useState<string | null>(null);
 
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  async function buscarFusoHorario(lat: string, long: string) {
+    try {
+      const timestamp = Math.floor(new Date().getTime() / 1000); 
+      const apiKey = 'AIzaSyBpmchWTIClePxMh-US0DCEe4ZzoVmA5Ms'; 
+      const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${long}&timestamp=${timestamp}&key=${apiKey}`;
+  
+      const response = await fetch(url);
+      const data = await response.json();
+  
+      if (data.status === 'OK') {
+        const totalOffset = data.rawOffset + data.dstOffset; 
+        const localTime = new Date((timestamp + totalOffset) * 1000); 
+  
+        const horaFormatada = new Intl.DateTimeFormat('pt-BR', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+          timeZone: 'UTC',
+        }).format(localTime);
+  
+        setFusoHorario(data.timeZoneName); 
+        setHoraLocal(horaFormatada);       
+      } else {
+        setFusoHorario('Fuso horário indisponível');
+        setHoraLocal(null);
+      }
+    } catch (error) {
+      setFusoHorario('Erro ao buscar fuso');
+      setHoraLocal(null);
+    }
+  }
+  
   const router = useRouter();
   const {
     name,
@@ -33,6 +62,8 @@ export default function InfoHotelModal() {
     checkin,
     checkout,
     total,
+    latitude,
+    longitude
   } = useLocalSearchParams();
 
   async function adicionarAoCarrinho() {
@@ -46,27 +77,41 @@ export default function InfoHotelModal() {
         checkin,
         checkout,
         total,
+        latitude,
+        longitude
       };
-  
+      console.log('LAT:', latitude, 'LONG:', longitude);
+
       const userId = await AsyncStorage.getItem('@user_id');
       if (!userId) {
         Alert.alert('Erro', 'Usuário não identificado.');
         return;
       }
-  
+
       const carrinhoAtual = await AsyncStorage.getItem(`@carrinho_hoteis_${userId}`);
       const carrinho = carrinhoAtual ? JSON.parse(carrinhoAtual) : [];
-  
+
       carrinho.push(novoHotel);
       await AsyncStorage.setItem(`@carrinho_hoteis_${userId}`, JSON.stringify(carrinho));
-  
+
       Alert.alert('Sucesso', 'Hotel adicionado ao carrinho!');
       router.back();
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível adicionar o hotel.');
     }
   }
-  
+
+  useEffect(() => {
+    if (latitude && longitude) {
+      buscarFusoHorario(latitude as string, longitude as string);
+    }
+
+    navigation.setOptions({
+      title: 'Detalhes do Hotel',
+      headerBackTitle: 'Voltar',
+    });
+  }, [navigation, latitude, longitude]);
+
 
   return (
     <View style={styles.container}>
@@ -78,6 +123,8 @@ export default function InfoHotelModal() {
         <Text style={styles.info}>{address}</Text>
         <Text style={styles.info}>Check-in: {checkin}</Text>
         <Text style={styles.info}>Check-out: {checkout}</Text>
+        <Text style={styles.info}>Fuso horário: {fusoHorario} </Text>     
+        <Text style={styles.info}>Horário Local: {horaLocal}</Text>     
         <Text style={styles.hotelPrice}>Preço diária: {price}</Text>
         <Text style={styles.hotelTotal}>Total: {total}</Text>
         <View style={styles.footer}>

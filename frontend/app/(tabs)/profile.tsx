@@ -33,6 +33,11 @@ function formatPhoneForEditing(phone: string): string {
   return digits.startsWith('55') ? digits.substring(2) : digits;
 }
 
+function getInitial(name: string): string {
+  return name?.trim()?.charAt(0)?.toUpperCase() || '';
+}
+
+
 export default function Profile() {
   const router = useRouter();
   const [user, setUser] = useState({ name: '', email: '', cpf: '', phoneNumber: '' });
@@ -51,7 +56,7 @@ export default function Profile() {
             phoneNumber: userObj.phoneNumber || '',
           });
         }
-      } catch (error) {}
+      } catch (error) { }
     }
     carregarUsuario();
   }, []);
@@ -61,7 +66,7 @@ export default function Profile() {
       const userId = await AsyncStorage.getItem('@user_id');
       const response = await api.get('/api/users');
       const usuarios = response.data;
-  
+
       return usuarios.some((u: any) => u.id !== userId && u[campo] === valor);
     } catch (error) {
       return false;
@@ -104,7 +109,7 @@ export default function Profile() {
       const response = await api.put(`/api/users/${userId}`, payload, {
         headers: { 'Content-Type': 'application/json' },
       });
-  
+
       Alert.alert('Sucesso', 'Perfil atualizado com sucesso.');
       await AsyncStorage.setItem('@user', JSON.stringify(response.data.user));
       setEditing(false);
@@ -126,6 +131,12 @@ export default function Profile() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.avatarContainer}>
+        <View style={styles.avatarCircle}>
+          <Text style={styles.avatarText}>{getInitial(user.name)}</Text>
+        </View>
+      </View>
+
       {editing ? (
         <>
           <TextInput
@@ -202,6 +213,24 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: 'white',
   },
+  avatarContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  avatarCircle: {
+    backgroundColor: '#5B2FD4',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    color: '#FFF',
+    fontSize: 36,
+    fontWeight: 'bold',
+  },
+  
   input: {
     padding: 16,
     borderRadius: 40,

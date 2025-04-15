@@ -11,10 +11,9 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { api } from "../../src/services/api";
-
 
 function parseDate(dateStr: string): Date {
     const [dataPart, timePart] = dateStr.split(" ");
@@ -25,46 +24,56 @@ function parseDate(dateStr: string): Date {
     return new Date(isoString);
 }
 
+function parseValor(valorStr: string): number {
+    if (!valorStr) return 0;
+    return Number(valorStr.replace(/[^\d,]/g, "").replace(",", "."));
+}
+
 export default function InfoViagemScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
-
-    useEffect(() => {
-      navigation.setOptions({
-        title: 'Detalhes da Viagem',
-        headerBackTitle: 'Voltar',
-      });
-    }, [navigation]);
     const { id } = useLocalSearchParams();
     const router = useRouter();
     const [viagem, setViagem] = useState<any>(null);
+    const [totalGastos, setTotalGastos] = useState(0);
+
+    useEffect(() => {
+        navigation.setOptions({
+            title: "Detalhes da Viagem",
+            headerBackTitle: "Voltar",
+        });
+    }, [navigation]);
 
     async function fetchViagem() {
         try {
-          // Faz a requisição GET para "/api/trip" usando axios.
-          const response = await api.get("/api/trip");
-          const data = response.data;
-      
-          // Procura o item cuja id seja igual à variável 'id' (certifique-se de que 'id' esteja definida no escopo).
-          const item = data.find((v: any) => v.id === id);
-      
-          // Se o item existir e tiver itinerários, ordena-os pela data.
-          if (item) {
-            if (item.itinerarios && item.itinerarios.length > 0) {
-              item.itinerarios.sort((a: any, b: any) => {
-                const dateA = parseDate(a.dia);
-                const dateB = parseDate(b.dia);
-                return dateA.getTime() - dateB.getTime();
-              });
+            const response = await api.get("/api/trip");
+            const data = response.data;
+            const item = data.find((v: any) => v.id === id);
+
+            if (item) {
+                if (item.itinerarios && item.itinerarios.length > 0) {
+                    item.itinerarios.sort((a: any, b: any) => {
+                        const dateA = parseDate(a.dia);
+                        const dateB = parseDate(b.dia);
+                        return dateA.getTime() - dateB.getTime();
+                    });
+                }
+
+                // 🧮 Soma de gastos
+                let total = 0;
+                item.voos?.forEach((voo: any) => (total += parseValor(voo.price)));
+                item.hoteis?.forEach((hotel: any) => (total += parseValor(hotel.total)));
+                item.itinerarios?.forEach((it: any) => (total += parseValor(it.valor)));
+                setTotalGastos(total);
+
+                setViagem(item);
+            } else {
+                setViagem(null);
             }
-            setViagem(item);
-          } else {
-            setViagem(null);
-          }
         } catch (error) {
-          Alert.alert("Erro", "Não foi possível carregar os dados da viagem.");
+            Alert.alert("Erro", "Não foi possível carregar os dados da viagem.");
         }
-      }
-      
+    }
+
     useFocusEffect(
         useCallback(() => {
             fetchViagem();
@@ -73,23 +82,22 @@ export default function InfoViagemScreen() {
 
     async function cancelarViagem() {
         try {
-          await api.delete(`/api/trip/${id}`);
-          Alert.alert("Sucesso", "Viagem cancelada.");
-          router.back();
+            await api.delete(`/api/trip/${id}`);
+            Alert.alert("Sucesso", "Viagem cancelada.");
+            router.back();
         } catch (error: any) {
-          const errMessage =
-            error instanceof Error ? error.message : "Erro ao cancelar viagem.";
-          Alert.alert("Erro", errMessage);
+            const errMessage =
+                error instanceof Error ? error.message : "Erro ao cancelar viagem.";
+            Alert.alert("Erro", errMessage);
         }
-      }
-      
+    }
 
     async function handleShare() {
         if (!viagem) return;
 
         let message = "Detalhes da Viagem:\n\n";
-        
-        if (viagem.voos && viagem.voos.length > 0) {
+
+        if (viagem.voos?.length > 0) {
             message += "Voos:\n";
             viagem.voos.forEach((voo: any, index: number) => {
                 message += `Voo ${index + 1}:\n`;
@@ -101,7 +109,7 @@ export default function InfoViagemScreen() {
             });
         }
 
-        if (viagem.hoteis && viagem.hoteis.length > 0) {
+        if (viagem.hoteis?.length > 0) {
             message += "Hotéis:\n";
             viagem.hoteis.forEach((hotel: any, index: number) => {
                 message += `Hotel ${index + 1}:\n`;
@@ -110,11 +118,11 @@ export default function InfoViagemScreen() {
                 message += `Avaliação: ${hotel.rating} (${hotel.reviews} reviews)\n`;
                 message += `Check-in: ${hotel.checkin}\n`;
                 message += `Check-out: ${hotel.checkout}\n`;
-                message += `Preço: ${hotel.price}\n\n`;
+                message += `Preço: ${hotel.total}\n\n`;
             });
         }
 
-        if (viagem.itinerarios && viagem.itinerarios.length > 0) {
+        if (viagem.itinerarios?.length > 0) {
             message += "Cronograma:\n";
             viagem.itinerarios.forEach((item: any, index: number) => {
                 message += `Item ${index + 1}:\n`;
@@ -144,7 +152,7 @@ export default function InfoViagemScreen() {
     return (
         <View style={styles.container}>
             <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
-            <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 200 }]}>
+            <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 260 }]}>
 
                 {viagem.voos?.length > 0 && (
                     <>
@@ -175,7 +183,7 @@ export default function InfoViagemScreen() {
                                 </Text>
                                 <Text>Check-in: {hotel.checkin}</Text>
                                 <Text>Check-out: {hotel.checkout}</Text>
-                                <Text style={styles.price}>{hotel.price}</Text>
+                                <Text style={styles.price}>{hotel.total}</Text>
                             </View>
                         ))}
                     </>
@@ -197,8 +205,27 @@ export default function InfoViagemScreen() {
                         ))}
                     </>
                 )}
+                <View style={{ marginTop: 20, padding: 14, backgroundColor: '#F9F9F9', borderRadius: 20 }}>
+                    <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 4 }}>💰 Total estimado da viagem:</Text>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#5B2FD4' }}>
+                        {totalGastos.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </Text>
+                </View>
+
             </ScrollView>
             <View style={styles.footer}>
+                <TouchableOpacity
+                    style={styles.infoAdditionalButton}
+                    onPress={() =>
+                        router.push({
+                            pathname: "/modal/infoAdditionalTripModal",
+                            params: { id },
+                        })
+                    }
+                >
+                    <Text style={styles.cronogramaButtonText}>Mais informações</Text>
+                </TouchableOpacity>
+
                 <TouchableOpacity
                     style={styles.cronogramaButton}
                     onPress={() =>
@@ -208,6 +235,8 @@ export default function InfoViagemScreen() {
                         })
                     }
                 >
+
+
                     <Text style={styles.cronogramaButtonText}>Cronograma</Text>
                 </TouchableOpacity>
 
@@ -285,6 +314,13 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     cronogramaButton: {
+        backgroundColor: "#F68712",
+        width: "100%",
+        padding: 14,
+        borderRadius: 40,
+        alignItems: "center",
+    },
+    infoAdditionalButton: {
         backgroundColor: "#5B2FD4",
         width: "100%",
         padding: 14,
@@ -305,5 +341,12 @@ const styles = StyleSheet.create({
     shareButtonText: {
         color: "#FFF",
         fontWeight: "bold",
+    },
+    maisinfoButton: {
+        backgroundColor: "#5B2FD4",
+        width: "100%",
+        padding: 14,
+        borderRadius: 40,
+        alignItems: "center",
     },
 });

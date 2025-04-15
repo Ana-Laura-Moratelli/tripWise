@@ -12,12 +12,6 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { StatusBar } from 'expo-status-bar';
 
-export const options = {
-  title: 'Dicas de Viagem',
-  presentation: 'dICAS', // garante que o header apareça como modal
-};
-
-
 const travelTips = {
   África: {
     title: 'Dicas para África',
@@ -84,8 +78,6 @@ export default function TravelTipsScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
-      <Text style={styles.title}>Dicas de Viagens</Text>
-
       <Text style={styles.label}>Selecione um continente:</Text>
 
       {Platform.OS === 'ios' ? (
@@ -125,11 +117,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     backgroundColor: '#FFF',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
   },
   label: {
     fontSize: 16,

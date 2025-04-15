@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
-import { differenceInDays, parseISO, isBefore  } from 'date-fns';
+import { differenceInDays, parseISO, isBefore } from 'date-fns';
 import { TextInputMask } from 'react-native-masked-text';
 import { api } from '../../src/services/api';
 
@@ -22,6 +22,8 @@ interface Hotel {
   address: string;
   reviews: string;
   total: string;
+  latitude: string;
+  longitude: string;
 }
 
 export default function HotelSearchScreen() {
@@ -45,7 +47,7 @@ export default function HotelSearchScreen() {
 
   async function converterCoordenadasParaEndereco(lat: number, lng: number): Promise<string> {
     try {
-      const API_KEY = 'AIzaSyBpmchWTIClePxMh-US0DCEe4ZzoVmA5Ms'; 
+      const API_KEY = 'AIzaSyBpmchWTIClePxMh-US0DCEe4ZzoVmA5Ms';
       const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${API_KEY}`;
 
       const response = await fetch(url);
@@ -72,11 +74,11 @@ export default function HotelSearchScreen() {
       const hoje = new Date();
       const dataCheckin = parseISO(checkin);
       const dataCheckout = parseISO(checkout);
-  
+
       if (isBefore(dataCheckin, hoje)) {
         throw new Error("A data de check-in não pode ser anterior ao dia de hoje.");
       }
-  
+
       if (isBefore(dataCheckout, hoje)) {
         throw new Error("A data de check-out não pode ser anterior ao dia de hoje.");
       }
@@ -86,7 +88,7 @@ export default function HotelSearchScreen() {
 
       const response = await api.get('/api/hotels', {
         params: {
-          cidade: cidade,        
+          cidade: cidade,
           checkin: checkin,
           checkout: checkout,
         }
@@ -114,12 +116,17 @@ export default function HotelSearchScreen() {
             new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 
           let endereco = 'Localização não disponível';
+
+          const latitude = hotel.gps_coordinates?.latitude?.toString() ?? '';
+          const longitude = hotel.gps_coordinates?.longitude?.toString() ?? '';
+
           if (hotel.gps_coordinates) {
             endereco = await converterCoordenadasParaEndereco(
               hotel.gps_coordinates.latitude,
               hotel.gps_coordinates.longitude
             );
           }
+
 
           return {
             name: hotel.name ?? 'Nome não disponível',
@@ -128,6 +135,8 @@ export default function HotelSearchScreen() {
             address: endereco,
             reviews: hotel.reviews?.toString() ?? '0 avaliações',
             total: totalUSD ? formatarReal(totalBRL) : 'Total não disponível',
+            latitude,
+            longitude,
           };
         })
       );
@@ -194,6 +203,8 @@ export default function HotelSearchScreen() {
                     checkin: checkinMask,
                     checkout: checkoutMask,
                     total: item.total,
+                    latitude: item.latitude?.toString() ?? '',
+                    longitude: item.longitude?.toString() ?? '',
                   },
                 })
               }

@@ -18,5 +18,5 @@ app.use('/api/hotels', hotels);
 app.use("/api/flights", flightsRoutes);  
 
 const PORT = parseInt(process.env.PORT || "5000", 10);
-const HOST = "192.168.15.9"; 
+const HOST = "192.168.15.12"; 
 app.listen(PORT, HOST, () => console.log(`🚀 Backend rodando em http://${HOST}:${PORT}`));

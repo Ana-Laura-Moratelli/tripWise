@@ -12,6 +12,8 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Calendar from 'expo-calendar';
+import { parse } from 'date-fns';
 import { api } from '../../src/services/api';
 
 interface Voo {
@@ -30,8 +32,11 @@ interface Hotel {
   rating: string;
   reviews: string;
   price: string;
+  total: string;
   checkin: string;
   checkout: string;
+  latitude: string;
+  longitude: string;
 }
 
 export default function CartScreen() {
@@ -45,59 +50,104 @@ export default function CartScreen() {
         try {
           const userId = await AsyncStorage.getItem('@user_id');
           if (!userId) return;
-  
+
           const voosSalvos = await AsyncStorage.getItem(`@carrinho_voos_${userId}`);
           const hoteisSalvos = await AsyncStorage.getItem(`@carrinho_hoteis_${userId}`);
-  
+
           setVoosCarrinho(voosSalvos ? JSON.parse(voosSalvos) : []);
           setHoteisCarrinho(hoteisSalvos ? JSON.parse(hoteisSalvos) : []);
-        } catch (error) {
-        }
+        } catch (error) {}
       }
       carregarCarrinho();
     }, [])
   );
-  
+
+  function parseDataHora(dataHora: string) {
+    return parse(dataHora, 'dd/MM/yyyy, HH:mm', new Date());
+  }
 
   const removerVoo = async (index: number) => {
     const userId = await AsyncStorage.getItem('@user_id');
     if (!userId) return;
-  
+
     const novaLista = [...voosCarrinho];
     novaLista.splice(index, 1);
     setVoosCarrinho(novaLista);
     await AsyncStorage.setItem(`@carrinho_voos_${userId}`, JSON.stringify(novaLista));
   };
-  
+
   const removerHotel = async (index: number) => {
     const userId = await AsyncStorage.getItem('@user_id');
     if (!userId) return;
-  
+
     const novaLista = [...hoteisCarrinho];
     novaLista.splice(index, 1);
     setHoteisCarrinho(novaLista);
     await AsyncStorage.setItem(`@carrinho_hoteis_${userId}`, JSON.stringify(novaLista));
   };
-  
 
+
+  async function criarEventoCalendario(titulo: string, startDate: Date, endDate?: Date) {
+    const { status } = await Calendar.requestCalendarPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permissão necessária', 'Autorize o acesso ao calendário para criar lembretes.');
+      return;
+    }
+  
+    const calendars = await Calendar.getCalendarsAsync();
+    const calendarioPadrao = calendars.find(cal => cal.allowsModifications);
+  
+    if (!calendarioPadrao) {
+      Alert.alert('Erro', 'Não foi encontrado um calendário modificável no dispositivo.');
+      return;
+    }
+  
+    await Calendar.createEventAsync(calendarioPadrao.id, {
+      title: titulo,
+      startDate,
+      endDate: endDate ?? startDate,
+      timeZone: 'America/Sao_Paulo',
+      allDay: !endDate || startDate.toDateString() === endDate.toDateString()
+    });
+  }
+  
   const realizarViagem = async () => {
     try {
       const userId = await AsyncStorage.getItem('@user_id');
       if (!userId) throw new Error("Usuário não autenticado");
   
-      // Usando axios, a URL é relativa à baseURL definida
+      const hoteisComGeo = hoteisCarrinho.map(hotel => ({
+        ...hotel,
+        latitude: hotel.latitude,
+        longitude: hotel.longitude,
+      }));
+  
       const response = await api.post("/api/trip", {
         userId,
         voos: voosCarrinho,
-        hoteis: hoteisCarrinho,
+        hoteis: hoteisComGeo,
       });
-      
-      // Se precisar checar explicitamente, aceite status 2xx:
+  
       if (response.status < 200 || response.status >= 300) {
         throw new Error("Erro ao registrar a viagem");
       }
   
-      Alert.alert("Sucesso!", "Viagem registrada com sucesso!");
+      // Adiciona check-in e check-out como eventos separados
+      for (const hotel of hoteisCarrinho) {
+        const checkinDate = new Date(hotel.checkin.split('/').reverse().join('-') + 'T14:00:00');
+        const checkoutDate = new Date(hotel.checkout.split('/').reverse().join('-') + 'T12:00:00');
+        await criarEventoCalendario(`Check-in no hotel ${hotel.name}`, checkinDate);
+        await criarEventoCalendario(`Check-out do hotel ${hotel.name}`, checkoutDate);
+      }
+  
+      // Adiciona partidas e chegadas dos voos separadamente
+      for (const voo of voosCarrinho) {
+        const partida = parseDataHora(voo.departureTime);
+        const chegada = parseDataHora(voo.arrivalTime);
+        await criarEventoCalendario(`Voo: ${voo.origin} → ${voo.destination}`, partida, chegada);
+      }
+  
+      Alert.alert("Sucesso!", "Viagem registrada e eventos adicionados ao calendário!");
       setVoosCarrinho([]);
       setHoteisCarrinho([]);
       await AsyncStorage.multiRemove([
@@ -113,7 +163,7 @@ export default function CartScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
-      
+
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 100 }]}>
         <Text style={styles.title}>Voos no Carrinho</Text>
         {voosCarrinho.length === 0 ? (
@@ -162,7 +212,7 @@ export default function CartScreen() {
                 <Text>Avaliação: {item.rating} ({item.reviews})</Text>
                 <Text>Check-in: {item.checkin}</Text>
                 <Text>Check-out: {item.checkout}</Text>
-                <Text style={styles.preco}>{item.price}</Text>
+                <Text style={styles.preco}>{item.total}</Text>
               </View>
             )}
           />
