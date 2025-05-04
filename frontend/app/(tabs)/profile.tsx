@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { TextInputMask } from 'react-native-masked-text';
 import { api } from '../../src/services/api';
+import styles  from '@/src/styles/global';
+import stylesProfile from '@/src/styles/profile';
+import { colors } from '@/src/styles/global';
 
 function formatPhoneForDisplay(phone: string): string {
   if (phone.startsWith('+55')) phone = phone.substring(3);
@@ -131,9 +127,9 @@ export default function Profile() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.avatarContainer}>
-        <View style={styles.avatarCircle}>
-          <Text style={styles.avatarText}>{getInitial(user.name)}</Text>
+      <View style={stylesProfile.avatarContainer}>
+        <View style={stylesProfile.avatarCircle}>
+          <Text style={stylesProfile.avatarText}>{getInitial(user.name)}</Text>
         </View>
       </View>
 
@@ -144,14 +140,14 @@ export default function Profile() {
             placeholder="Nome"
             value={user.name}
             onChangeText={(text) => setUser({ ...user, name: text })}
-            placeholderTextColor="#888"
+            placeholderTextColor={colors.mediumGray}
           />
           <TextInput
             style={styles.input}
             placeholder="E-mail"
             value={user.email}
             onChangeText={(text) => setUser({ ...user, email: text })}
-            placeholderTextColor="#888"
+            placeholderTextColor={colors.mediumGray}
           />
           <TextInputMask
             type={'cpf'}
@@ -159,7 +155,7 @@ export default function Profile() {
             onChangeText={(text) => setUser({ ...user, cpf: text })}
             style={styles.input}
             placeholder="CPF"
-            placeholderTextColor="#888"
+            placeholderTextColor={colors.mediumGray}
           />
           <TextInputMask
             type={'cel-phone'}
@@ -168,115 +164,47 @@ export default function Profile() {
             onChangeText={(text) => setUser({ ...user, phoneNumber: text })}
             style={styles.input}
             placeholder="Telefone"
-            placeholderTextColor="#888"
+            placeholderTextColor={colors.mediumGray}
           />
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.buttonText}>Salvar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton} onPress={() => setEditing(false)}>
-            <Text style={styles.buttonText}>Cancelar</Text>
-          </TouchableOpacity>
+          <View style={styles.flexColumn}>
+            <TouchableOpacity style={styles.buttonThird} onPress={handleSave}>
+              <Text style={styles.buttonText}>Salvar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonFourth} onPress={() => setEditing(false)}>
+              <Text style={styles.buttonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
         </>
       ) : (
         <>
-          <TextInput style={styles.input} value={user.name} editable={false} placeholder="Nome" placeholderTextColor="#888" />
-          <TextInput style={styles.input} value={user.email} editable={false} placeholder="E-mail" placeholderTextColor="#888" />
+          <TextInput style={styles.input} value={user.name} editable={false} placeholder="Nome" placeholderTextColor={colors.mediumGray} />
+          <TextInput style={styles.input} value={user.email} editable={false} placeholder="E-mail" placeholderTextColor={colors.mediumGray} />
           <TextInput
             style={styles.input}
             value={user.cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4")}
             editable={false}
             placeholder="CPF"
-            placeholderTextColor="#888"
+            placeholderTextColor={colors.mediumGray}
           />
           <TextInput
             style={styles.input}
             value={formatPhoneForDisplay(user.phoneNumber)}
             editable={false}
             placeholder="Telefone"
-            placeholderTextColor="#888"
+            placeholderTextColor={colors.mediumGray}
           />
-          <TouchableOpacity style={styles.editButton} onPress={() => setEditing(true)}>
-            <Text style={styles.editButtonText}>Editar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Text style={styles.logoutText}>Sair</Text>
-          </TouchableOpacity>
+          <View style={styles.flexColumn}>
+
+            <TouchableOpacity style={styles.buttonSecondary} onPress={() => setEditing(true)}>
+              <Text style={styles.buttonText}>Editar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonFourth} onPress={handleLogout}>
+              <Text style={styles.buttonText}>Sair</Text>
+            </TouchableOpacity>
+          </View>
+
         </>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: 'white',
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  avatarCircle: {
-    backgroundColor: '#5B2FD4',
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    color: '#FFF',
-    fontSize: 36,
-    fontWeight: 'bold',
-  },
-  
-  input: {
-    padding: 16,
-    borderRadius: 40,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    color: 'black',
-  },
-  editButton: {
-    padding: 15,
-    borderRadius: 40,
-    backgroundColor: '#FFA500',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  editButtonText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-  },
-  saveButton: {
-    padding: 15,
-    borderRadius: 40,
-    backgroundColor: '#34A853',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  cancelButton: {
-    padding: 15,
-    borderRadius: 40,
-    backgroundColor: '#E53935',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  logoutButton: {
-    padding: 15,
-    borderRadius: 40,
-    backgroundColor: '#D00',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  logoutText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-  },
-  buttonText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-  },
-});

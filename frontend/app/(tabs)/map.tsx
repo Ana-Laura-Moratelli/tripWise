@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  ActivityIndicator,
-  Alert,
-  Platform,
-  Linking,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, ActivityIndicator, Alert, Platform, Linking, TouchableOpacity } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { api } from '../../src/services/api';
+import Constants from 'expo-constants';
+import styles from '@/src/styles/map';
+/*
+import { Itinerario } from '../../src/types/itinerary';
+import { Hotel } from '../../src/types/hotel';
+*/
 
 interface Hotel {
   name: string;
@@ -20,13 +16,23 @@ interface Hotel {
   longitude: string;
 }
 
+interface Itinerario {
+  nomeLocal: string;
+  endereco: {
+    latitude: string;
+    longitude: string;
+  };
+}
+
 export default function MapModal() {
   const [hoteis, setHoteis] = useState<Hotel[]>([]);
+  const [itinerarios, setItinerarios] = useState<Itinerario[]>([]);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [rotaCoords, setRotaCoords] = useState<any[]>([]);
   const [tempo, setTempo] = useState('');
   const [destino, setDestino] = useState<{ latitude: string; longitude: string } | null>(null);
+  const apiKey = Constants.expoConfig?.extra?.googleMapsApiKey;
 
   useEffect(() => {
     async function obterLocalizacao() {
@@ -43,11 +49,12 @@ export default function MapModal() {
       });
     }
 
-    async function carregarHoteis() {
+    async function carregarDados() {
       try {
         const response = await api.get('/api/trip');
         const viagens = response.data;
         const todosHoteis: Hotel[] = [];
+        const todosItinerarios: Itinerario[] = [];
 
         viagens.forEach((viagem: any) => {
           viagem.hoteis?.forEach((hotel: any) => {
@@ -59,18 +66,31 @@ export default function MapModal() {
               });
             }
           });
+
+          viagem.itinerarios?.forEach((item: any) => {
+            if (item.endereco?.latitude && item.endereco?.longitude) {
+              todosItinerarios.push({
+                nomeLocal: item.nomeLocal,
+                endereco: {
+                  latitude: item.endereco.latitude,
+                  longitude: item.endereco.longitude,
+                },
+              });
+            }
+          });
         });
 
         setHoteis(todosHoteis);
+        setItinerarios(todosItinerarios);
       } catch (error) {
-        Alert.alert("Erro", "Não foi possível carregar os hotéis no mapa.");
+        Alert.alert("Erro", "Erro ao carregar dados do mapa.");
       } finally {
         setLoading(false);
       }
     }
 
     obterLocalizacao();
-    carregarHoteis();
+    carregarDados();
   }, []);
 
   async function calcularRota(destLat: string, destLng: string) {
@@ -78,7 +98,7 @@ export default function MapModal() {
       if (!location) return;
 
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${location.latitude},${location.longitude}&destination=${destLat},${destLng}&key=AIzaSyBpmchWTIClePxMh-US0DCEe4ZzoVmA5Ms`
+        `https://maps.googleapis.com/maps/api/directions/json?origin=${location.latitude},${location.longitude}&destination=${destLat},${destLng}&key=${apiKey}`
       );
 
       const data = await response.json();
@@ -88,7 +108,7 @@ export default function MapModal() {
 
         setRotaCoords(pontos);
         setTempo(tempoTexto);
-        setDestino({ latitude: destLat, longitude: destLng });
+        setDestino({ latitude: String(destLat), longitude: String(destLng) });
       } else {
         Alert.alert('Erro', 'Não foi possível traçar a rota.');
       }
@@ -151,7 +171,6 @@ export default function MapModal() {
   return (
     <View style={styles.container}>
       <MapView
-       // provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={{
           latitude: location.latitude,
@@ -163,13 +182,28 @@ export default function MapModal() {
       >
         {hoteis.map((hotel, index) => (
           <Marker
-            key={index}
+            key={`hotel-${index}`}
             coordinate={{
               latitude: parseFloat(hotel.latitude),
               longitude: parseFloat(hotel.longitude),
             }}
             title={hotel.name}
+            pinColor="purple"
             onCalloutPress={() => calcularRota(hotel.latitude, hotel.longitude)}
+          />
+        ))}
+
+        {itinerarios.map((item, index) => (
+          <Marker
+            key={`itinerario-${index}`}
+            coordinate={{
+              latitude: parseFloat(item.endereco.latitude),
+              longitude: parseFloat(item.endereco.longitude),
+            }}
+            title={item.nomeLocal}
+            description="Itinerário"
+            pinColor="purple"
+            onCalloutPress={() => calcularRota(String(item.endereco.latitude), String(item.endereco.longitude))}
           />
         ))}
 
@@ -193,42 +227,3 @@ export default function MapModal() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
-  },
-  infoBox: {
-    position: 'absolute',
-    bottom: 10,
-    left: 20,
-    right: 20,
-    backgroundColor: '#FFF',
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  infoText: {
-    fontSize: 16,
-    marginBottom: 10,
-    color: '#333',
-  },
-  button: {
-    backgroundColor: '#5B2FD4',
-    padding: 14,
-    borderRadius: 40,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-  },
-});

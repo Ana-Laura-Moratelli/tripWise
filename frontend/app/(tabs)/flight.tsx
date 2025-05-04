@@ -1,34 +1,17 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  FlatList,
-  Alert,
-  ActivityIndicator,
-  Switch,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, ActivityIndicator, Switch } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { TextInputMask } from 'react-native-masked-text';
 import { parseISO, isBefore } from 'date-fns';
 import { api } from '../../src/services/api';
+import { Voo } from '../../src/types/flight';
+import styles from '@/src/styles/global';
+import { colors } from '@/src/styles/global';
 
 const EXCHANGE_RATE_URL = "https://api.exchangerate.host/latest?base=USD&symbols=BRL";
 
-interface Voo {
-  tipo: 'Ida' | 'Volta';
-  origin: string;
-  destination: string;
-  airline: string;
-  departureTime: string;
-  arrivalTime: string;
-  price: string;
-}
-
-export default function FlightScreen() {
+export default function FlightSearch() {
   const [iataOrigem, setIataOrigem] = useState('');
   const [iataDestino, setIataDestino] = useState('');
   const [dataPartida, setDataPartida] = useState('');
@@ -233,42 +216,40 @@ export default function FlightScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Código IATA Origem (Ex: GRU)"
-          value={iataOrigem}
-          onChangeText={setIataOrigem}
-          autoCapitalize="characters"
-          placeholderTextColor="#888"
+      <TextInput
+        style={styles.input}
+        placeholder="Código IATA Origem (Ex: GRU)"
+        value={iataOrigem}
+        onChangeText={setIataOrigem}
+        autoCapitalize="characters"
+        placeholderTextColor={colors.mediumGray}
 
-        />
+      />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Código IATA Destino (Ex: AUA)"
-          value={iataDestino}
-          onChangeText={setIataDestino}
-          autoCapitalize="characters"
-          placeholderTextColor="#888"
+      <TextInput
+        style={styles.input}
+        placeholder="Código IATA Destino (Ex: AUA)"
+        value={iataDestino}
+        onChangeText={setIataDestino}
+        autoCapitalize="characters"
+        placeholderTextColor={colors.mediumGray}
 
-        />
+      />
 
-        <TextInputMask
-          type={'datetime'}
-          options={{ format: 'DD/MM/YYYY' }}
-          style={styles.input}
-          placeholder="Data de Ida"
-          value={dataPartida}
-          onChangeText={setDataPartida}
-          placeholderTextColor="#888"
+      <TextInputMask
+        type={'datetime'}
+        options={{ format: 'DD/MM/YYYY' }}
+        style={styles.input}
+        placeholder="Data de Ida"
+        value={dataPartida}
+        onChangeText={setDataPartida}
+        placeholderTextColor={colors.mediumGray}
 
-        />
+      />
 
-        <View style={styles.switchContainer}>
-          <Text>Ida e Volta?</Text>
-          <Switch value={idaEVolta} onValueChange={setIdaEVolta} />
-        </View>
+      <View style={styles.switchContainer}>
+        <Text>Ida e Volta?</Text>
+        <Switch value={idaEVolta} onValueChange={setIdaEVolta} />
       </View>
 
       {idaEVolta && (
@@ -279,19 +260,20 @@ export default function FlightScreen() {
           placeholder="Data de Volta"
           value={dataVolta}
           onChangeText={setDataVolta}
-          placeholderTextColor="#888"
+          placeholderTextColor={colors.mediumGray}
 
         />
       )}
 
-      <TouchableOpacity style={styles.searchButton} onPress={buscarVoos}>
-        <Text style={styles.searchButtonText}>Buscar</Text>
+      <TouchableOpacity style={styles.buttonPrimary} onPress={buscarVoos}>
+        <Text style={styles.buttonText}>Buscar</Text>
       </TouchableOpacity>
-
+      <View style={styles.content}></View>
       {loading ? (
         <ActivityIndicator size="large" color="#5B2FD4" />
       ) : (
         <>
+
           <FlatList
             data={voos}
             keyExtractor={(item, index) => index.toString()}
@@ -299,7 +281,7 @@ export default function FlightScreen() {
               <TouchableOpacity
                 onPress={() =>
                   router.push({
-                    pathname: "/modal/infoVooModal",
+                    pathname: "/modal/flight/infoFlight",
                     params: {
                       tipo: item.tipo,
                       origin: item.origin,
@@ -312,22 +294,24 @@ export default function FlightScreen() {
                   })
                 }
               >
-                <View style={styles.vooItem}>
-                  <Text style={styles.vooDestino}>{item.tipo} - {item.origin} → {item.destination}</Text>
-                  <Text>Companhia: {item.airline}</Text>
-                  <Text>Partida: {item.departureTime}</Text>
-                  <Text>Chegada: {item.arrivalTime}</Text>
-                  <Text style={styles.vooPrice}>Preço: {item.price}</Text>
-                </View>
+                  <View style={styles.card}>
+                    <Text style={styles.cardTitle}>{item.tipo} - {item.origin} → {item.destination}</Text>
+                    <Text style={styles.cardInfo}>Companhia: {item.airline}</Text>
+                    <Text style={styles.cardInfo}>Partida: {item.departureTime}</Text>
+                    <Text style={styles.cardInfo}>Chegada: {item.arrivalTime}</Text>
+                    <Text style={styles.cardInfoPrimary}>Preço: {item.price}</Text>
+                  </View>
               </TouchableOpacity>
+
+
             )}
           />
 
           {voos.length > 0 && (
-            <View style={styles.comparadorContainer}>
-              <Text style={styles.comparadorTitulo}>Comparativo de Preços</Text>
+            <View style={styles.comparatorContainer}>
+              <Text style={styles.comparatorTitle}>Comparativo de Preços</Text>
               {Object.entries(obterComparativoPrecos(voos)).map(([companhia, preco]) => (
-                <Text key={companhia} style={styles.comparadorItem}>
+                <Text key={companhia} style={styles.comparatorItem}>
                   {companhia}: {preco}
                 </Text>
               ))}
@@ -338,69 +322,3 @@ export default function FlightScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: 'white',
-  },
-  inputContainer: {
-    width: '100%',
-  },
-  input: {
-    padding: 16,
-    borderRadius: 40,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    color: 'black',
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  searchButton: {
-    backgroundColor: '#5B2FD4',
-    padding: 15,
-    borderRadius: 40,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  searchButtonText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-  },
-  vooItem: {
-    backgroundColor: '#F9F9F9',
-    padding: 15,
-    borderRadius: 20,
-    marginBottom: 10,
-  },
-  vooDestino: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  comparadorContainer: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#EFEFEF',
-    borderRadius: 20,
-  },
-  comparadorTitulo: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  comparadorItem: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  vooPrice: {
-    marginTop: 6,
-    color: '#5B2FD4',
-    fontWeight: 'bold',
-  },
-});

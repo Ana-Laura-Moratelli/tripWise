@@ -1,38 +1,22 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  FlatList,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
-import axios from 'axios';
+import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { differenceInDays, parseISO, isBefore } from 'date-fns';
 import { TextInputMask } from 'react-native-masked-text';
 import { api } from '../../src/services/api';
+import { Hotel } from '../../src/types/hotel';
+import Constants from 'expo-constants';
+import styles from '@/src/styles/global';
+import { colors } from '@/src/styles/global';
 
-interface Hotel {
-  name: string;
-  price: string;
-  rating: string;
-  address: string;
-  reviews: string;
-  total: string;
-  latitude: string;
-  longitude: string;
-}
-
-export default function HotelSearchScreen() {
+export default function HotelSearch() {
   const [cidade, setCidade] = useState('');
   const [checkinMask, setCheckinMask] = useState('');
   const [checkoutMask, setCheckoutMask] = useState('');
   const [hoteis, setHoteis] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey;
 
   function formatarParaISO(dataBR: string) {
     const [dia, mes, ano] = dataBR.split('/');
@@ -47,7 +31,6 @@ export default function HotelSearchScreen() {
 
   async function converterCoordenadasParaEndereco(lat: number, lng: number): Promise<string> {
     try {
-      const API_KEY = 'AIzaSyBpmchWTIClePxMh-US0DCEe4ZzoVmA5Ms';
       const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${API_KEY}`;
 
       const response = await fetch(url);
@@ -156,7 +139,7 @@ export default function HotelSearchScreen() {
         placeholder="Destino"
         value={cidade}
         onChangeText={setCidade}
-        placeholderTextColor="#888"
+        placeholderTextColor={colors.mediumGray}
       />
 
       <TextInputMask
@@ -166,7 +149,7 @@ export default function HotelSearchScreen() {
         placeholder="Check-in"
         value={checkinMask}
         onChangeText={setCheckinMask}
-        placeholderTextColor="#888"
+        placeholderTextColor={colors.mediumGray}
       />
 
       <TextInputMask
@@ -176,97 +159,51 @@ export default function HotelSearchScreen() {
         placeholder="Check-out"
         value={checkoutMask}
         onChangeText={setCheckoutMask}
-        placeholderTextColor="#888"
+        placeholderTextColor={colors.mediumGray}
       />
 
-      <TouchableOpacity style={styles.searchButton} onPress={buscarHoteis}>
-        <Text style={styles.searchButtonText}>Buscar</Text>
+      <TouchableOpacity style={styles.buttonPrimary} onPress={buscarHoteis}>
+        <Text style={styles.buttonText}>Buscar</Text>
       </TouchableOpacity>
-
-      {loading ? (
-        <ActivityIndicator size="large" color="#5B2FD4" />
-      ) : (
-        <FlatList
-          data={hoteis}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: "/modal/infoHotelModal",
-                  params: {
-                    name: item.name,
-                    price: item.price,
-                    address: item.address,
-                    rating: item.rating,
-                    reviews: item.reviews,
-                    checkin: checkinMask,
-                    checkout: checkoutMask,
-                    total: item.total,
-                    latitude: item.latitude?.toString() ?? '',
-                    longitude: item.longitude?.toString() ?? '',
-                  },
-                })
-              }
-            >
-              <View style={styles.hotelItem}>
-                <Text style={styles.hotelTitle}>{item.name}</Text>
-                <Text>{item.address}</Text>
-                <Text>Avaliação: {item.rating} ({item.reviews})</Text>
-                <Text style={styles.hotelPrice}>Diária: {item.price}</Text>
-                <Text style={styles.hotelTotal}>Total: {item.total}</Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
-      )}
+      <View style={styles.content}>
+        {loading ? (
+          <ActivityIndicator size="large" color="#5B2FD4" />
+        ) : (
+          <FlatList
+            data={hoteis}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: "/modal/hotel/infoHotel",
+                    params: {
+                      name: item.name,
+                      price: item.price,
+                      address: item.address,
+                      rating: item.rating,
+                      reviews: item.reviews,
+                      checkin: checkinMask,
+                      checkout: checkoutMask,
+                      total: item.total,
+                      latitude: item.latitude?.toString() ?? '',
+                      longitude: item.longitude?.toString() ?? '',
+                    },
+                  })
+                }
+              >
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>{item.name}</Text>
+                  <Text style={styles.cardInfo}>{item.address}</Text>
+                  <Text style={styles.cardInfo}>Avaliação: {item.rating} ({item.reviews})</Text>
+                  <Text style={styles.cardInfo}>Diária: {item.price}</Text>
+                  <Text style={styles.cardInfoPrimary}>Total: {item.total}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#FFF',
-  },
-  input: {
-    padding: 16,
-    borderRadius: 40,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    marginBottom: 10,
-    color: 'black',
-  },
-  searchButton: {
-    backgroundColor: '#5B2FD4',
-    padding: 15,
-    borderRadius: 40,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  searchButtonText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-  },
-  hotelItem: {
-    backgroundColor: '#F9F9F9',
-    padding: 15,
-    borderRadius: 20,
-    marginBottom: 10,
-  },
-  hotelTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  hotelPrice: {
-    marginTop: 6,
-    color: '#5B2FD4',
-    fontWeight: 'bold',
-  },
-  hotelTotal: {
-    marginTop: 4,
-    color: '#333',
-    fontWeight: '600',
-  },
-});

@@ -1,12 +1,13 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-export default function InfoAdditionalTripModal() {
+import styles from '@/src/styles/global';
+
+export default function InfoAdditionalTrip() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-
 
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
@@ -17,26 +18,24 @@ export default function InfoAdditionalTripModal() {
     });
   }, [navigation]);
 
-
-
-
   const botoes = [
-    { titulo: 'Documentos', rota: 'infoDocumentsModal' },
-    { titulo: 'Contatos de Emergência', rota: 'infoEmergencyContactModal' },
-    { titulo: 'Informações de Seguro', rota: 'infoInsuranceModal' },
-    { titulo: 'Dados de Transporte', rota: 'infoTransportModal' },
-    { titulo: 'Fotos', rota: 'infoPhotoModal' },
-    { titulo: 'Notas', rota: 'infoNotesModal' },
+    { titulo: 'Documentos', rota: 'documents/infoDocuments' },
+    { titulo: 'Contatos de Emergência', rota: 'emergencyContact/infoEmergencyContact' },
+    { titulo: 'Informações de Seguro', rota: 'insurance/infoInsurance' },
+    { titulo: 'Dados de Transporte', rota: 'transport/infoTransport' },
+    { titulo: 'Fotos', rota: '/photo/infoPhoto' },
+    { titulo: 'Notas', rota: 'notes/infoNotes' },
   ];
 
 
   return (
     <View style={styles.container}>
       <Text style={styles.subtitle}>Selecione uma opção para gerenciar:</Text>
+      <View style={styles.flexColumn}>
       {botoes.map((botao, index) => (
         <TouchableOpacity
           key={index}
-          style={styles.button}
+          style={styles.buttonPrimary}
           onPress={() =>
             router.push({
               pathname: `/modal/${botao.rota}` as unknown as any,
@@ -47,35 +46,9 @@ export default function InfoAdditionalTripModal() {
           <Text style={styles.buttonText}>{botao.titulo}</Text>
         </TouchableOpacity>
       ))}
-
-
     </View>
+
+    </View >
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: '#FFF',
-    flexGrow: 1,
-
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  button: {
-    backgroundColor: '#5B2FD4',
-    padding: 16,
-    borderRadius: 40,
-    marginBottom: 16,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-});

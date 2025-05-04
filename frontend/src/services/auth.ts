@@ -1,14 +1,6 @@
 import { api } from "./api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-
-interface RegisterData {
-    name: string;
-    phoneNumber: string;
-    cpf: string;
-    email: string;
-    password: string;
-}
+import { RegisterData } from '../../src/types/registerData'; 
 
 export async function loginUser(email: string, password: string) {
   try {

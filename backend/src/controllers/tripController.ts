@@ -45,46 +45,48 @@ export const deletarViagem = async (req: Request, res: Response) => {
 };
 
 export const adicionarItinerario: RequestHandler = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { nomeLocal, tipo, localizacao, valor, descricao, dia } = req.body;
-  
-      if (!nomeLocal || !tipo || !localizacao || !valor) {
-        res.status(400).json({ error: "Campos obrigatórios não preenchidos." });
-        return;
-      }
-  
-      const docRef = db.collection("trip").doc(id);
-      const docSnap = await docRef.get();
-  
-      if (!docSnap.exists) {
-        res.status(404).json({ error: "Viagem não encontrada." });
-        return;
-      }
-  
-      const dados = docSnap.data();
-      const itinerariosAtuais = dados?.itinerarios || [];
-  
-      const novoItem = {
-        nomeLocal,
-        tipo,
-        localizacao,
-        valor,
-        descricao,
-        dia,
-        criadoEm: new Date(),
-      };
-  
-      await docRef.update({
-        itinerarios: [...itinerariosAtuais, novoItem],
-      });
-  
-      res.status(200).json({ message: "Itinerário adicionado com sucesso." });
-    } catch (error: any) {
-      console.error("Erro ao adicionar itinerário:", error);
-      res.status(500).json({ error: error.message || "Erro interno" });
+  try {
+    const { id } = req.params;
+    const { nomeLocal, tipo, valor, descricao, dia, endereco } = req.body;
+
+    if (!nomeLocal || !tipo || !dia) {
+      res.status(400).json({ error: "Campos obrigatórios não preenchidos." });
+      return;
     }
-  };
+
+    const docRef = db.collection("trip").doc(id);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      res.status(404).json({ error: "Viagem não encontrada." });
+      return;
+    }
+
+    const dados = docSnap.data();
+    const itinerariosAtuais = dados?.itinerarios || [];
+
+    const novoItem = {
+      nomeLocal,
+      tipo,
+      valor: valor || '',
+      descricao: descricao || '',
+      dia,
+      endereco: endereco || {}, // <-- aqui tratamos como opcional
+      criadoEm: new Date(),
+    };
+
+    await docRef.update({
+      itinerarios: [...itinerariosAtuais, novoItem],
+    });
+
+    res.status(200).json({ message: "Itinerário adicionado com sucesso." });
+  } catch (error: any) {
+    console.error("Erro ao adicionar itinerário:", error);
+    res.status(500).json({ error: error.message || "Erro interno" });
+  }
+};
+
+
 
   export const deletarItinerario: RequestHandler = async (req, res) => {
     try {
@@ -163,4 +165,6 @@ export const adicionarItinerario: RequestHandler = async (req, res) => {
       res.status(500).json({ error: error.message || "Erro interno ao atualizar itinerário." });
     }
   };
+  
+ 
   

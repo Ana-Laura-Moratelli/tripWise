@@ -2,8 +2,6 @@ import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, Tabs } from 'expo-router';
 import { Pressable } from 'react-native';
-
-import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
@@ -32,13 +30,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="hotel" color={color} />,
           tabBarLabelStyle: { marginTop: 4 },
           headerRight: () => (
-            <Link href="/modal" asChild>
+            <Link href="/modal/travelTips/travelTips" asChild>
               <Pressable>
                 {({ pressed }) => (
                   <FontAwesome
                     name="info-circle"
                     size={25}
-                    color="black" 
+                    color="black"
                     style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
                   />
                 )}
@@ -49,7 +47,7 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="voo"
+        name="flight"
         options={{
           title: 'Voos',
           tabBarIcon: ({ color }) => <TabBarIcon name="plane" color={color} />,
@@ -73,7 +71,7 @@ export default function TabLayout() {
           tabBarLabelStyle: { marginTop: 4 },
         }}
       />
-         <Tabs.Screen
+      <Tabs.Screen
         name="map"
         options={{
           title: 'Mapa',

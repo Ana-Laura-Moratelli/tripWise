@@ -1,19 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Alert,
-    ScrollView,
-    Share,
-    Platform,
-} from "react-native";
+import { View, Text, TouchableOpacity, Alert, ScrollView, Share } from "react-native";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { api } from "../../src/services/api";
+import { api } from "../../../src/services/api";
+import styles from '@/src/styles/global';
 
 function parseDate(dateStr: string): Date {
     const [dataPart, timePart] = dateStr.split(" ");
@@ -29,7 +20,7 @@ function parseValor(valorStr: string): number {
     return Number(valorStr.replace(/[^\d,]/g, "").replace(",", "."));
 }
 
-export default function InfoViagemScreen() {
+export default function InfoTrip() {
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
     const { id } = useLocalSearchParams();
     const router = useRouter();
@@ -58,7 +49,7 @@ export default function InfoViagemScreen() {
                     });
                 }
 
-                // 🧮 Soma de gastos
+                // Soma de gastos 
                 let total = 0;
                 item.voos?.forEach((voo: any) => (total += parseValor(voo.price)));
                 item.hoteis?.forEach((hotel: any) => (total += parseValor(hotel.total)));
@@ -146,26 +137,30 @@ export default function InfoViagemScreen() {
     }
 
     if (!viagem) {
-        return <Text style={{ padding: 20 }}>Carregando...</Text>;
+        return <View style={styles.container}><Text style={styles.loading}>Carregando...</Text></View>;
     }
 
+    function renderEndereco(endereco?: any): string {
+        if (!endereco) return '';
+        return [endereco.rua, endereco.numero, endereco.bairro, endereco.cidade, endereco.estado]
+          .filter(Boolean).join(', ');
+      }
+    
     return (
         <View style={styles.container}>
-            <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
-            <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 260 }]}>
-
+            <ScrollView contentContainerStyle={[{ paddingBottom: 10 }]}>
                 {viagem.voos?.length > 0 && (
                     <>
-                        <Text style={styles.sectionTitle}>Voos</Text>
+                        <Text style={styles.cardTitle}>Voos</Text>
                         {viagem.voos.map((voo: any, index: number) => (
                             <View key={index} style={styles.card}>
                                 <Text style={styles.cardTitle}>
                                     {voo.tipo} - {voo.origin} → {voo.destination}
                                 </Text>
-                                <Text>Companhia: {voo.airline}</Text>
-                                <Text>Partida: {voo.departureTime}</Text>
-                                <Text>Chegada: {voo.arrivalTime}</Text>
-                                <Text style={styles.price}>{voo.price}</Text>
+                                <Text style={styles.cardInfo}>Companhia: {voo.airline}</Text>
+                                <Text style={styles.cardInfo}>Partida: {voo.departureTime}</Text>
+                                <Text style={styles.cardInfo}>Chegada: {voo.arrivalTime}</Text>
+                                <Text style={styles.cardInfoPrimary}>{voo.price}</Text>
                             </View>
                         ))}
                     </>
@@ -173,17 +168,15 @@ export default function InfoViagemScreen() {
 
                 {viagem.hoteis?.length > 0 && (
                     <>
-                        <Text style={styles.sectionTitle}>Hotéis</Text>
+                        <Text style={styles.cardTitle}>Hotéis</Text>
                         {viagem.hoteis.map((hotel: any, index: number) => (
                             <View key={index} style={styles.card}>
                                 <Text style={styles.cardTitle}>{hotel.name}</Text>
-                                <Text>Endereço: {hotel.address}</Text>
-                                <Text>
-                                    Avaliação: {hotel.rating} ({hotel.reviews} reviews)
-                                </Text>
-                                <Text>Check-in: {hotel.checkin}</Text>
-                                <Text>Check-out: {hotel.checkout}</Text>
-                                <Text style={styles.price}>{hotel.total}</Text>
+                                <Text style={styles.cardInfo}>Endereço: {hotel.address}</Text>
+                                <Text style={styles.cardInfo}> Avaliação: {hotel.rating} ({hotel.reviews} reviews)</Text>
+                                <Text style={styles.cardInfo}>Check-in: {hotel.checkin}</Text>
+                                <Text style={styles.cardInfo}>Check-out: {hotel.checkout}</Text>
+                                <Text style={styles.cardInfoPrimary}>{hotel.total}</Text>
                             </View>
                         ))}
                     </>
@@ -191,23 +184,23 @@ export default function InfoViagemScreen() {
 
                 {viagem.itinerarios?.length > 0 && (
                     <>
-                        <Text style={styles.sectionTitle}>Cronograma</Text>
+                        <Text style={styles.cardTitle}>Cronograma</Text>
                         {viagem.itinerarios.map((item: any, index: number) => (
                             <View key={index} style={styles.card}>
                                 <Text style={styles.cardTitle}>Item {index + 1}</Text>
-                                <Text>Nome: {item.nomeLocal}</Text>
-                                <Text>Tipo: {item.tipo}</Text>
-                                <Text>Local: {item.localizacao}</Text>
-                                <Text>Valor: {item.valor}</Text>
-                                <Text>Dia: {item.dia}</Text>
-                                {item.descricao && <Text>Descrição: {item.descricao}</Text>}
+                                <Text style={styles.cardInfo}>Nome: {item.nomeLocal}</Text>
+                                <Text style={styles.cardInfo}>Tipo: {item.tipo}</Text>
+                                {item.endereco && <Text style={styles.cardInfo}>Endereço: {renderEndereco(item.endereco)}</Text>}
+                                <Text style={styles.cardInfoPrimary}>Valor: {item.valor}</Text>
+                                <Text style={styles.cardInfo}>Dia: {item.dia}</Text>
+                                {item.descricao && <Text style={styles.cardInfo}>Descrição: {item.descricao}</Text>}
                             </View>
                         ))}
                     </>
                 )}
-                <View style={{ marginTop: 20, padding: 14, backgroundColor: '#F9F9F9', borderRadius: 20 }}>
-                    <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 4 }}>💰 Total estimado da viagem:</Text>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#5B2FD4' }}>
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>💰 Total estimado da viagem:</Text>
+                    <Text style={styles.cardInfoPrimary}>
                         {totalGastos.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </Text>
                 </View>
@@ -215,138 +208,37 @@ export default function InfoViagemScreen() {
             </ScrollView>
             <View style={styles.footer}>
                 <TouchableOpacity
-                    style={styles.infoAdditionalButton}
+                    style={styles.buttonPrimary}
                     onPress={() =>
                         router.push({
-                            pathname: "/modal/infoAdditionalTripModal",
+                            pathname: "/modal/infoAdditional/infoAdditionalTrip",
                             params: { id },
                         })
                     }
                 >
-                    <Text style={styles.cronogramaButtonText}>Mais informações</Text>
+                    <Text style={styles.buttonText}>Mais informações</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={styles.cronogramaButton}
+                    style={styles.buttonSecondary}
                     onPress={() =>
                         router.push({
-                            pathname: "/modal/infoItineraryModal",
+                            pathname: "/modal/itinerary/infoItinerary",
                             params: { id },
                         })
                     }
                 >
-
-
-                    <Text style={styles.cronogramaButtonText}>Cronograma</Text>
+                    <Text style={styles.buttonText}>Cronograma</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-                    <Text style={styles.shareButtonText}>Compartilhar Viagem</Text>
+                <TouchableOpacity style={styles.buttonThird} onPress={handleShare}>
+                    <Text style={styles.buttonText}>Compartilhar Viagem</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.cancelButton} onPress={cancelarViagem}>
-                    <Text style={styles.cancelButtonText}>Cancelar Viagem</Text>
+                <TouchableOpacity style={styles.buttonFourth} onPress={cancelarViagem}>
+                    <Text style={styles.buttonText}>Cancelar Viagem</Text>
                 </TouchableOpacity>
             </View>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#FFF",
-    },
-    content: {
-        padding: 20,
-    },
-    title: {
-        fontSize: 22,
-        fontWeight: "bold",
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        marginTop: 20,
-        marginBottom: 10,
-        color: "#333",
-    },
-    card: {
-        backgroundColor: "#EFEFEF",
-        padding: 14,
-        borderRadius: 20,
-        marginBottom: 12,
-    },
-    cardTitle: {
-        fontWeight: "bold",
-        fontSize: 16,
-        marginBottom: 4,
-    },
-    price: {
-        marginTop: 4,
-        color: "#5B2FD4",
-        fontWeight: "bold",
-    },
-    cancelButton: {
-        width: "100%",
-        backgroundColor: "#D00",
-        padding: 14,
-        borderRadius: 40,
-        alignItems: "center",
-    },
-    footer: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-        paddingTop: 10,
-        padding: 20,
-        position: "absolute",
-        bottom: 0,
-        width: "100%",
-        backgroundColor: "#FFF",
-        alignItems: "center",
-        borderTopWidth: 1,
-        borderColor: "#ddd",
-    },
-    cancelButtonText: {
-        color: "#FFF",
-        fontWeight: "bold",
-    },
-    cronogramaButton: {
-        backgroundColor: "#F68712",
-        width: "100%",
-        padding: 14,
-        borderRadius: 40,
-        alignItems: "center",
-    },
-    infoAdditionalButton: {
-        backgroundColor: "#5B2FD4",
-        width: "100%",
-        padding: 14,
-        borderRadius: 40,
-        alignItems: "center",
-    },
-    cronogramaButtonText: {
-        color: "#FFF",
-        fontWeight: "bold",
-    },
-    shareButton: {
-        width: "100%",
-        backgroundColor: "#34A853",
-        padding: 14,
-        borderRadius: 40,
-        alignItems: "center",
-    },
-    shareButtonText: {
-        color: "#FFF",
-        fontWeight: "bold",
-    },
-    maisinfoButton: {
-        backgroundColor: "#5B2FD4",
-        width: "100%",
-        padding: 14,
-        borderRadius: 40,
-        alignItems: "center",
-    },
-});

@@ -1,28 +1,16 @@
 import React, { useState } from "react";
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    Image,
-    StyleSheet,
-    ImageBackground,
-    Alert,
-    KeyboardAvoidingView,
-    ScrollView,
-    Platform,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, Alert, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { loginUser, registerUser } from "../../../src/services/auth";
+import { loginUser, registerUser } from "@/src/services/auth";
 import { TextInputMask } from 'react-native-masked-text';
+import styles from "../../../src/styles/auth";
+import { colors } from "../../../src/styles/global";
 
 export default function AuthScreen() {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<"login" | "register">("login");
-
- 
+    const [activeTab, setActiveTab] = useState<"login" | "register">("login"); 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loginLoading, setLoginLoading] = useState(false);
@@ -43,14 +31,20 @@ export default function AuthScreen() {
 
         try {
             const response = await loginUser(email, password);
-
-            const { token, user } = response;
-
+            console.log("🔁 Resposta da API:", response);
+            
+            const { token, user } = response || {};
+            
+            if (!token || !user) {
+              throw new Error("Resposta inválida do servidor");
+            }
+            
             await AsyncStorage.setItem("@token", token);
             await AsyncStorage.setItem("@user_id", user.uid);
-
+            
             console.log("✅ Usuário logado:", user);
             router.replace("/(tabs)");
+            
         } catch (error: any) {
 
             const mensagemErro = error?.message?.toLowerCase() || "";
@@ -188,7 +182,7 @@ export default function AuthScreen() {
                                     value={email}
                                     onChangeText={setEmail}
                                     style={styles.input}
-                                    placeholderTextColor="#888"
+                                    placeholderTextColor={colors.mediumGray}
                                 />
                                 <TextInput
                                     placeholder="Senha"
@@ -196,7 +190,7 @@ export default function AuthScreen() {
                                     value={password}
                                     onChangeText={setPassword}
                                     style={styles.input}
-                                    placeholderTextColor="#888"
+                                    placeholderTextColor={colors.mediumGray}
                                 />
                                 <TouchableOpacity
                                     onPress={handleLogin}
@@ -215,7 +209,7 @@ export default function AuthScreen() {
                                     style={styles.input}
                                     value={name}
                                     onChangeText={setName}
-                                    placeholderTextColor="#888"
+                                    placeholderTextColor={colors.mediumGray}
                                 />
                                 <TextInputMask
                                     type={'cel-phone'}
@@ -229,7 +223,7 @@ export default function AuthScreen() {
                                     value={phoneNumber}
                                     onChangeText={setPhoneNumber}
                                     keyboardType="phone-pad"
-                                    placeholderTextColor="#888"
+                                    placeholderTextColor={colors.mediumGray}
                                 />
 
                                 <TextInputMask
@@ -238,7 +232,7 @@ export default function AuthScreen() {
                                     onChangeText={setCpf}
                                     style={styles.input}
                                     placeholder="CPF"
-                                    placeholderTextColor="#888"
+                                    placeholderTextColor={colors.mediumGray}
                                     keyboardType="numeric"
                                 />
 
@@ -247,7 +241,7 @@ export default function AuthScreen() {
                                     style={styles.input}
                                     value={regEmail}
                                     onChangeText={setRegEmail}
-                                    placeholderTextColor="#888"
+                                    placeholderTextColor={colors.mediumGray}
                                 />
                                 <TextInput
                                     placeholder="Senha"
@@ -255,7 +249,7 @@ export default function AuthScreen() {
                                     style={styles.input}
                                     value={regPassword}
                                     onChangeText={setRegPassword}
-                                    placeholderTextColor="#888"
+                                    placeholderTextColor={colors.mediumGray}
                                 />
                                 <TouchableOpacity
                                     onPress={handleRegister}
@@ -274,107 +268,3 @@ export default function AuthScreen() {
         </KeyboardAvoidingView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "flex-start",
-        backgroundColor: "white",
-    },
-    headerBackground: {
-        width: "100%",
-        height: 300,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    header: {
-        alignItems: "flex-start",
-        paddingTop: 32,
-    },
-    logo: {
-        width: 200,
-        height: 50,
-        resizeMode: "contain",
-        marginBottom: 12,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: "white",
-        textAlign: "left",
-    },
-    subtitle: {
-        fontSize: 14,
-        color: "white",
-        textAlign: "left",
-        marginBottom: 20,
-    },
-    loginContainer: {
-        width: "100%",
-        height: "100%",
-        marginTop: -40,
-        backgroundColor: "white",
-        borderRadius: 40,
-        padding: 20,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        elevation: 5,
-    },
-    tabs: {
-        flexDirection: "row",
-        backgroundColor: "white",
-        borderRadius: 40,
-        borderWidth: 1,
-        borderColor: "#E2E8F0",
-        padding: 5,
-        width: "100%",
-        justifyContent: "center",
-    },
-    inactiveTab: {
-        flex: 1,
-        backgroundColor: "white",
-        borderRadius: 40,
-        padding: 16,
-        alignItems: "center",
-    },
-    activeTab: {
-        flex: 1,
-        backgroundColor: "#EEE",
-        borderRadius: 40,
-        padding: 16,
-        alignItems: "center",
-    },
-    inactiveTabText: {
-        fontWeight: "bold",
-    },
-    activeTabText: {
-        color: "#888",
-    },
-    inputContainer: {
-        width: "100%",
-        marginVertical: 16,
-    },
-    input: {
-        padding: 16,
-        borderRadius: 40,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: "#ddd",
-        color: "black",
-    },
-    loginButton: {
-        backgroundColor: "#5B2FD4",
-        padding: 16,
-        borderRadius: 40,
-        width: "100%",
-        alignItems: "center",
-    },
-    loginButtonText: {
-        color: "white",
-        fontWeight: "bold",
-    },
-});

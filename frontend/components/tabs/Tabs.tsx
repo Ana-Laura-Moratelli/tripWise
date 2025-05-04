@@ -3,7 +3,7 @@ import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 interface TabsProps {
   activeTab: 'Login' | 'Register';
-  setActiveTab: (tab: 'Login' | 'Register') => void; // 🔥 Tipo restrito
+  setActiveTab: (tab: 'Login' | 'Register') => void; 
 }
 
 const Tabs: React.FC<TabsProps> = ({ activeTab, setActiveTab }) => {
@@ -11,14 +11,14 @@ const Tabs: React.FC<TabsProps> = ({ activeTab, setActiveTab }) => {
     <View style={styles.tabs}>
       <TouchableOpacity
         style={[styles.tab, activeTab === 'Login' && styles.activeTab]}
-        onPress={() => setActiveTab('Login')} // 🔥 Passando string correta
+        onPress={() => setActiveTab('Login')} 
       >
         <Text style={[styles.tabText, activeTab === 'Login' && styles.activeTabText]}>Login</Text>
       </TouchableOpacity>
       
       <TouchableOpacity
         style={[styles.tab, activeTab === 'Register' && styles.activeTab]}
-        onPress={() => setActiveTab('Register')} // 🔥 Passando string correta
+        onPress={() => setActiveTab('Register')} 
       >
         <Text style={[styles.tabText, activeTab === 'Register' && styles.activeTabText]}>Register</Text>
       </TouchableOpacity>

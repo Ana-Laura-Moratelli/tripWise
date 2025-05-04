@@ -1,46 +1,15 @@
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Platform,
-  FlatList,
-  Alert,
-  ScrollView,
-} from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { View, Text, TouchableOpacity, FlatList, Alert, ScrollView } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Calendar from 'expo-calendar';
 import { parse } from 'date-fns';
 import { api } from '../../src/services/api';
+import { Voo } from '../../src/types/flight';
+import { Hotel } from '../../src/types/hotel';
+import styles from '@/src/styles/global';
 
-interface Voo {
-  tipo: string;
-  origin: string;
-  destination: string;
-  airline: string;
-  departureTime: string;
-  arrivalTime: string;
-  price: string;
-}
-
-interface Hotel {
-  name: string;
-  address: string;
-  rating: string;
-  reviews: string;
-  price: string;
-  total: string;
-  checkin: string;
-  checkout: string;
-  latitude: string;
-  longitude: string;
-}
-
-export default function CartScreen() {
-  const router = useRouter();
+export default function Cart() {
   const [voosCarrinho, setVoosCarrinho] = useState<Voo[]>([]);
   const [hoteisCarrinho, setHoteisCarrinho] = useState<Hotel[]>([]);
 
@@ -56,7 +25,7 @@ export default function CartScreen() {
 
           setVoosCarrinho(voosSalvos ? JSON.parse(voosSalvos) : []);
           setHoteisCarrinho(hoteisSalvos ? JSON.parse(hoteisSalvos) : []);
-        } catch (error) {}
+        } catch (error) { }
       }
       carregarCarrinho();
     }, [])
@@ -93,15 +62,15 @@ export default function CartScreen() {
       Alert.alert('Permissão necessária', 'Autorize o acesso ao calendário para criar lembretes.');
       return;
     }
-  
+
     const calendars = await Calendar.getCalendarsAsync();
     const calendarioPadrao = calendars.find(cal => cal.allowsModifications);
-  
+
     if (!calendarioPadrao) {
       Alert.alert('Erro', 'Não foi encontrado um calendário modificável no dispositivo.');
       return;
     }
-  
+
     await Calendar.createEventAsync(calendarioPadrao.id, {
       title: titulo,
       startDate,
@@ -110,28 +79,28 @@ export default function CartScreen() {
       allDay: !endDate || startDate.toDateString() === endDate.toDateString()
     });
   }
-  
+
   const realizarViagem = async () => {
     try {
       const userId = await AsyncStorage.getItem('@user_id');
       if (!userId) throw new Error("Usuário não autenticado");
-  
+
       const hoteisComGeo = hoteisCarrinho.map(hotel => ({
         ...hotel,
         latitude: hotel.latitude,
         longitude: hotel.longitude,
       }));
-  
+
       const response = await api.post("/api/trip", {
         userId,
         voos: voosCarrinho,
         hoteis: hoteisComGeo,
       });
-  
+
       if (response.status < 200 || response.status >= 300) {
         throw new Error("Erro ao registrar a viagem");
       }
-  
+
       // Adiciona check-in e check-out como eventos separados
       for (const hotel of hoteisCarrinho) {
         const checkinDate = new Date(hotel.checkin.split('/').reverse().join('-') + 'T14:00:00');
@@ -139,14 +108,14 @@ export default function CartScreen() {
         await criarEventoCalendario(`Check-in no hotel ${hotel.name}`, checkinDate);
         await criarEventoCalendario(`Check-out do hotel ${hotel.name}`, checkoutDate);
       }
-  
+
       // Adiciona partidas e chegadas dos voos separadamente
       for (const voo of voosCarrinho) {
         const partida = parseDataHora(voo.departureTime);
         const chegada = parseDataHora(voo.arrivalTime);
         await criarEventoCalendario(`Voo: ${voo.origin} → ${voo.destination}`, partida, chegada);
       }
-  
+
       Alert.alert("Sucesso!", "Viagem registrada e eventos adicionados ao calendário!");
       setVoosCarrinho([]);
       setHoteisCarrinho([]);
@@ -158,61 +127,63 @@ export default function CartScreen() {
       Alert.alert("Erro", error.message || "Erro ao registrar viagem");
     }
   };
-  
+
 
   return (
     <View style={styles.container}>
-      <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
-
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 100 }]}>
+      <ScrollView contentContainerStyle={[{ paddingBottom: 80 }]}>
         <Text style={styles.title}>Voos no Carrinho</Text>
         {voosCarrinho.length === 0 ? (
-          <Text style={styles.textoVazio}>Nenhum voo adicionado.</Text>
+          <Text style={styles.noitens}>Nenhum voo adicionado.</Text>
         ) : (
           <FlatList
             scrollEnabled={false}
             data={voosCarrinho}
             keyExtractor={(_, index) => `voo-${index}`}
             renderItem={({ item, index }) => (
-              <View style={styles.item}>
-                <View style={styles.itemHeader}>
-                  <Text style={styles.itemTitle}>
-                    {item.tipo} - {item.origin} → {item.destination}
-                  </Text>
+              <View style={styles.card}>
+                <View style={styles.flexRow}>
+                  <View>
+                    <Text style={styles.cardTitle}>
+                      {item.tipo} - {item.origin} → {item.destination}
+                    </Text>
+                    <Text>Companhia: {item.airline}</Text>
+                    <Text>Partida: {item.departureTime}</Text>
+                    <Text>Chegada: {item.arrivalTime}</Text>
+                    <Text style={styles.cardInfoPrimary}>{item.price}</Text>
+                  </View>
                   <TouchableOpacity onPress={() => removerVoo(index)}>
-                    <Text style={styles.removerTexto}>Remover</Text>
+                    <Text style={styles.removeText}>Remover</Text>
                   </TouchableOpacity>
                 </View>
-                <Text>Companhia: {item.airline}</Text>
-                <Text>Partida: {item.departureTime}</Text>
-                <Text>Chegada: {item.arrivalTime}</Text>
-                <Text style={styles.preco}>{item.price}</Text>
               </View>
             )}
           />
         )}
 
-        <Text style={[styles.title, { marginTop: 24 }]}>Hotéis no Carrinho</Text>
+        <Text style={styles.title}>Hotéis no Carrinho</Text>
         {hoteisCarrinho.length === 0 ? (
-          <Text style={styles.textoVazio}>Nenhum hotel adicionado.</Text>
+          <Text style={styles.noitens}>Nenhum hotel adicionado.</Text>
         ) : (
           <FlatList
             scrollEnabled={false}
             data={hoteisCarrinho}
             keyExtractor={(_, index) => `hotel-${index}`}
             renderItem={({ item, index }) => (
-              <View style={styles.item}>
-                <View style={styles.itemHeader}>
-                  <Text style={styles.itemTitle}>{item.name}</Text>
-                  <TouchableOpacity onPress={() => removerHotel(index)}>
-                    <Text style={styles.removerTexto}>Remover</Text>
-                  </TouchableOpacity>
+              <View style={styles.card}>
+                <View style={styles.flexRow}>
+                  <View>
+                    <Text style={styles.cardTitle}>{item.name}</Text>
+                  </View>
+                  <Text>{item.address}</Text>
+                  <Text>Avaliação: {item.rating} ({item.reviews})</Text>
+                  <Text>Check-in: {item.checkin}</Text>
+                  <Text>Check-out: {item.checkout}</Text>
+                  <Text style={styles.cardInfoPrimary}>{item.total}</Text>
                 </View>
-                <Text>{item.address}</Text>
-                <Text>Avaliação: {item.rating} ({item.reviews})</Text>
-                <Text>Check-in: {item.checkin}</Text>
-                <Text>Check-out: {item.checkout}</Text>
-                <Text style={styles.preco}>{item.total}</Text>
+                <TouchableOpacity onPress={() => removerHotel(index)}>
+                  <Text style={styles.removeText}>Remover</Text>
+                </TouchableOpacity>
               </View>
             )}
           />
@@ -221,77 +192,11 @@ export default function CartScreen() {
 
       {(voosCarrinho.length > 0 || hoteisCarrinho.length > 0) && (
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.botaoViagem} onPress={realizarViagem}>
-            <Text style={styles.botaoViagemTexto}>Realizar Viagem</Text>
+          <TouchableOpacity style={styles.buttonPrimary} onPress={realizarViagem}>
+            <Text style={styles.buttonText}>Realizar Viagem</Text>
           </TouchableOpacity>
         </View>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF'
-  },
-  content: {
-    padding: 20
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16
-  },
-  textoVazio: {
-    color: '#666',
-    marginBottom: 12
-  },
-  item: {
-    backgroundColor: '#F9F9F9',
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 12,
-  },
-  itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  itemTitle: {
-    width: '70%',
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  removerTexto: {
-    color: '#D00',
-    fontWeight: 'bold',
-  },
-  preco: {
-    marginTop: 6,
-    color: '#5B2FD4',
-    fontWeight: 'bold',
-  },
-  botaoViagem: {
-    paddingVertical: 14,
-    borderRadius: 40,
-    backgroundColor: '#5B2FD4',
-    alignItems: 'center',
-    width: '90%',
-  },
-  botaoViagemTexto: {
-    color: 'white',
-    fontWeight: '600',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    backgroundColor: '#FFF',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderColor: '#ddd',
-  },
-});

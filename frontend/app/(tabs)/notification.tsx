@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import { parse, subDays, format, isAfter, isBefore } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { api } from '../../src/services/api';
+import styles from '@/src/styles/global';
 
-export default function NotificationScreen() {
+export default function Notification() {
   const [alertas, setAlertas] = useState<any[]>([]);
 
   useFocusEffect(
@@ -87,14 +88,14 @@ export default function NotificationScreen() {
   return (
     <View style={styles.container}>
       {alertas.length === 0 ? (
-        <Text style={styles.semAlerta}>Nenhum alerta para as próximas 24 horas.</Text>
+        <Text style={styles.noitens}>Nenhum alerta para as próximas 24 horas.</Text>
       ) : (
         <FlatList
           data={alertas}
           keyExtractor={(_, index) => index.toString()}
           renderItem={({ item }) => (
-            <View style={styles.alertaItem}>
-              <Text style={styles.alertaTipo}>{item.tipo}</Text>
+            <View style={styles.card}>
+              <Text style={styles.typeAlert}>{item.tipo}</Text>
               <Text>{item.local}</Text>
               <Text>📅 {item.data}{item.hora ? ` - 🕒 ${item.hora}` : ''}</Text>
             </View>
@@ -105,26 +106,3 @@ export default function NotificationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#FFF',
-  },
-  semAlerta: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 30,
-    color: '#888',
-  },
-  alertaItem: {
-    backgroundColor: '#F9F9F9',
-    padding: 16,
-    borderRadius: 20,
-    marginBottom: 12,
-  },
-  alertaTipo: {
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-});

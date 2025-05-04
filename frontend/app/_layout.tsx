@@ -5,7 +5,6 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-
 import { useColorScheme } from '@/components/useColorScheme';
 
 export {
@@ -47,21 +46,42 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
+
+        {/* Tabs principais */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+        {/* Modais */}
         <Stack.Screen
-          name="modal"
+          name="modal/travelTips/travelTips"
           options={{
             presentation: 'modal',
-            title: 'Dicas de Viagem', 
+            title: 'Dicas de Viagem',
           }}
         />
+
+        <Stack.Screen
+          name="modal/hotel/infoHotel"
+          options={{
+            presentation: 'modal',
+            title: 'Informações do Hotel',
+          }}
+        />
+
+        <Stack.Screen
+          name="modal/flight/infoFlight"
+          options={{
+            presentation: 'modal',
+            title: 'Informações do Voo',
+          }}
+        />
+
+        {/* Login */}
         <Stack.Screen name="index" options={{ title: "Login" }} />
         <Stack.Screen name="screens/auth/Login" options={{ headerShown: false }} />
 
       </Stack>
-
     </ThemeProvider>
   );
 }
