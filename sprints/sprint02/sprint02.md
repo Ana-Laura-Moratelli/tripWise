@@ -88,6 +88,6 @@
 <h2>DoD (Definition of Done)</h2>
 
 <h2>Mockups</h2>
-<img src="https://github.com/Ana-Laura-Moratelli/tripWise/blob/main/assets/962d678f-ba15-4af0-ae26-03008836a99d">
+<img src="https://github.com/Ana-Laura-Moratelli/tripWise/blob/main/assets/c2d01920-9b06-473a-84bb-2c61fa7716af">
 
 

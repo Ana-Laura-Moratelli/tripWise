@@ -259,6 +259,8 @@ export default StyleSheet.create({
         marginBottom: spacing.small,
     },
     width70: {
+        display: "flex",
+        gap: spacing.small,
         width: "70%",
     },
     /* Informações do card */

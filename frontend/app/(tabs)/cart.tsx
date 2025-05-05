@@ -153,9 +153,9 @@ export default function Cart() {
                     <Text style={styles.cardTitle}>
                       {item.tipo} - {item.origin} → {item.destination}
                     </Text>
-                    <Text>Companhia: {item.airline}</Text>
-                    <Text>Partida: {item.departureTime}</Text>
-                    <Text>Chegada: {item.arrivalTime}</Text>
+                    <Text  style={styles.cardInfo}>Companhia: {item.airline}</Text>
+                    <Text  style={styles.cardInfo}>Partida: {item.departureTime}</Text>
+                    <Text  style={styles.cardInfo}>Chegada: {item.arrivalTime}</Text>
                     <Text style={styles.cardInfoPrimary}>{item.price}</Text>
                   </View>
                   <TouchableOpacity onPress={() => removerVoo(index)}>
@@ -180,10 +180,10 @@ export default function Cart() {
                 <View style={styles.flexRow}>
                   <View style={styles.width70}>
                     <Text style={styles.cardTitle}>{item.name}</Text>
-                    <Text>{item.address}</Text>
-                    <Text>Avaliação: {item.rating} ({item.reviews})</Text>
-                    <Text>Check-in: {item.checkin}</Text>
-                    <Text>Check-out: {item.checkout}</Text>
+                    <Text style={styles.cardInfo}>{item.address}</Text>
+                    <Text style={styles.cardInfo}>Avaliação: {item.rating} ({item.reviews})</Text>
+                    <Text style={styles.cardInfo}>Check-in: {item.checkin}</Text>
+                    <Text style={styles.cardInfo}>Check-out: {item.checkout}</Text>
                     <Text style={styles.cardInfoPrimary}>{item.total}</Text>
                   </View>
                

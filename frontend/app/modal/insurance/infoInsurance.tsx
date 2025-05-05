@@ -101,6 +101,7 @@ export default function InfoInsurance() {
                     onChangeText={(text) => setEditingItem({ ...editingItem, numeroApolice: text })}
                     placeholder="Número da Apólice"
                     placeholderTextColor={colors.mediumGray}
+                    keyboardType="numeric"
                   />
                   <Text style={styles.cardLabel}><Text style={styles.bold}>Data Início</Text></Text>
                   <TextInputMask

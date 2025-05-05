@@ -181,6 +181,7 @@ export default function CreateTransport() {
           value={numeroLinha}
           onChangeText={setNumeroLinha}
           placeholderTextColor={colors.mediumGray}
+          keyboardType="numeric"
         />
       )}
 

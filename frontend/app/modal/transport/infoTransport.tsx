@@ -153,6 +153,7 @@ export default function InfoTransport() {
                         placeholder="Número da Linha"
                         value={editingItem.numeroLinha ?? item.numeroLinha}
                         onChangeText={(text) => setEditingItem({ ...editingItem, numeroLinha: text })}
+                        keyboardType="numeric"
                       />
                     </>
                   )}
