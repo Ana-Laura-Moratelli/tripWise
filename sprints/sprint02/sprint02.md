@@ -83,7 +83,7 @@
 
 
 <h2>Modelo de dados</h2>
-<img src="https://github.com/Ana-Laura-Moratelli/tripWise/blob/main/sprints/sprint01/modelo-de-dados.png">
+<img src="https://github.com/Ana-Laura-Moratelli/tripWise/blob/main/sprints/sprint02/modelo-de-dados.png">
 
 <h2>DoD (Definition of Done)</h2>
 
