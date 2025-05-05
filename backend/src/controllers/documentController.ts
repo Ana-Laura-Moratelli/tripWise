@@ -4,7 +4,7 @@ import { db } from "../services/firebase";
 export const adicionarDocumento: RequestHandler = async (req, res) => {
   try {
     const { tripId } = req.params;
-    const { tipo, numero, validade, observacoes } = req.body;
+    const { tipo, numero, validade } = req.body;
 
     if (!tipo || !numero || !validade) {
       res.status(400).json({ error: "Campos obrigatórios não preenchidos." });
@@ -24,7 +24,6 @@ export const adicionarDocumento: RequestHandler = async (req, res) => {
       tipo,
       numero,
       validade,
-      observacoes,
       criadoEm: new Date(),
     });
 
@@ -62,7 +61,7 @@ export const listarDocumentos: RequestHandler = async (req, res) => {
 export const atualizarDocumento: RequestHandler = async (req, res) => {
   try {
     const { docId } = req.params;
-    const { tipo, numero, validade, observacoes } = req.body;
+    const { tipo, numero, validade } = req.body;
 
     if (!tipo?.trim() || !numero?.trim() || !validade?.trim()) {
       res.status(400).json({ error: "Campos obrigatórios não preenchidos." });
@@ -81,7 +80,6 @@ export const atualizarDocumento: RequestHandler = async (req, res) => {
       tipo,
       numero,
       validade,
-      observacoes: observacoes || "", 
       atualizadoEm: new Date(),
     });
 

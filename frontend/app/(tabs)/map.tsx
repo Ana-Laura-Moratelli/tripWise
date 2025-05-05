@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { View, Text, ActivityIndicator, Alert, Platform, Linking, TouchableOpacity } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -34,68 +36,76 @@ export default function MapModal() {
   const [destino, setDestino] = useState<{ latitude: string; longitude: string } | null>(null);
   const apiKey = Constants.expoConfig?.extra?.googleMapsApiKey;
 
-  useEffect(() => {
-    async function obterLocalizacao() {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert("Permissão negada", "Ative o GPS para usar o mapa.");
-        return;
-      }
 
-      const local = await Location.getCurrentPositionAsync({});
-      setLocation({
-        latitude: local.coords.latitude,
-        longitude: local.coords.longitude,
-      });
+  async function obterLocalizacao() {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert("Permissão negada", "Ative o GPS para usar o mapa.");
+      return;
     }
 
-    async function carregarDados() {
-      try {
-        const response = await api.get('/api/trip');
-        const viagens = response.data;
-        const todosHoteis: Hotel[] = [];
-        const todosItinerarios: Itinerario[] = [];
+    const local = await Location.getCurrentPositionAsync({});
+    setLocation({
+      latitude: local.coords.latitude,
+      longitude: local.coords.longitude,
+    });
+  }
 
-        viagens.forEach((viagem: any) => {
-          viagem.hoteis?.forEach((hotel: any) => {
-            if (hotel.latitude && hotel.longitude) {
-              todosHoteis.push({
-                name: hotel.name,
-                latitude: hotel.latitude,
-                longitude: hotel.longitude,
-              });
-            }
-          });
+  async function carregarDados() {
+    try {
+      const response = await api.get('/api/trip');
+      const viagens = response.data;
+      const todosHoteis: Hotel[] = [];
+      const todosItinerarios: Itinerario[] = [];
 
-          viagem.itinerarios?.forEach((item: any) => {
-            if (item.endereco?.latitude && item.endereco?.longitude) {
-              todosItinerarios.push({
-                nomeLocal: item.nomeLocal,
-                endereco: {
-                  latitude: item.endereco.latitude,
-                  longitude: item.endereco.longitude,
-                },
-              });
-            }
-          });
+      viagens.forEach((viagem: any) => {
+        viagem.hoteis?.forEach((hotel: any) => {
+          if (hotel.latitude && hotel.longitude) {
+            todosHoteis.push({
+              name: hotel.name,
+              latitude: hotel.latitude,
+              longitude: hotel.longitude,
+            });
+          }
         });
 
-        setHoteis(todosHoteis);
-        setItinerarios(todosItinerarios);
-      } catch (error) {
-        Alert.alert("Erro", "Erro ao carregar dados do mapa.");
-      } finally {
-        setLoading(false);
-      }
-    }
+        viagem.itinerarios?.forEach((item: any) => {
+          if (item.endereco?.latitude && item.endereco?.longitude) {
+            todosItinerarios.push({
+              nomeLocal: item.nomeLocal,
+              endereco: {
+                latitude: item.endereco.latitude,
+                longitude: item.endereco.longitude,
+              },
+            });
+          }
+        });
+      });
 
-    obterLocalizacao();
-    carregarDados();
-  }, []);
+      setHoteis(todosHoteis);
+      setItinerarios(todosItinerarios);
+    } catch (error) {
+      Alert.alert("Erro", "Erro ao carregar dados do mapa.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      obterLocalizacao();
+      carregarDados();
+      setRotaCoords([]);
+      setTempo('');
+    }, [])
+  );  
+
 
   async function calcularRota(destLat: string, destLng: string) {
     try {
       if (!location) return;
+      
 
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/directions/json?origin=${location.latitude},${location.longitude}&destination=${destLat},${destLng}&key=${apiKey}`

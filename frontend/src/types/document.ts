@@ -4,5 +4,4 @@ export interface Documento{
     tipo: string;
     numero: string;
     validade: string;
-    observacoes?: string;
   }

@@ -73,138 +73,168 @@ export default function InfoInsurance() {
   return (
     <View style={styles.container}>
       {loading ? (
-        <View style={styles.container}><Text style={styles.loading}>Carregando...</Text></View>
+        <View style={styles.container}>
+          <Text style={styles.loading}>Carregando...</Text>
+        </View>
       ) : (
         <FlatList
           data={seguros}
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => {
             const isEditing = editingIndex === index;
-            return (
-              <View style={styles.card}>
-                {isEditing ? (
-                  <>
-                    <TextInput
-                      style={styles.input}
-                      value={editingItem.seguradora ?? item.seguradora}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, seguradora: text })}
-                      placeholder="Seguradora"
-                      placeholderTextColor={colors.mediumGray}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      value={editingItem.numeroApolice ?? item.numeroApolice}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, numeroApolice: text })}
-                      placeholder="Número da Apólice"
-                      placeholderTextColor={colors.mediumGray}
-                    />
-                    <TextInputMask
-                      type={'datetime'}
-                      options={{ format: 'DD/MM/YYYY' }}
-                      value={editingItem.dataInicio ?? item.dataInicio}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, dataInicio: text })}
-                      placeholder="Data Início"
-                      placeholderTextColor={colors.mediumGray}
-                      style={styles.input}
-                      keyboardType="numeric"
-                    />
-                    <TextInputMask
-                      type={'datetime'}
-                      options={{ format: 'DD/MM/YYYY' }}
-                      value={editingItem.dataFim ?? item.dataFim}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, dataFim: text })}
-                      placeholder="Data Fim"
-                      placeholderTextColor={colors.mediumGray}
-                      style={styles.input}
-                      keyboardType="numeric"
-                    />
-                    <TextInputMask
-                      type={'custom'}
-                      options={{ mask: '(99) 99999-9999' }}
-                      value={editingItem.telefoneEmergencia ?? item.telefoneEmergencia}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, telefoneEmergencia: text })}
-                      placeholder="Telefone de Emergência"
-                      placeholderTextColor={colors.mediumGray}
-                      style={styles.input}
-                      keyboardType="phone-pad"
-                    />
-                    <TextInput
-                      style={styles.input}
-                      value={editingItem.observacoes ?? item.observacoes}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, observacoes: text })}
-                      placeholder="Observações"
-                      placeholderTextColor={colors.mediumGray}
-                    />
 
-                    <View style={styles.flexRow}>
+            if (isEditing) {
+              return (
+                <View style={styles.cardEditing}>
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Seguradora</Text></Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editingItem.seguradora ?? item.seguradora}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, seguradora: text })}
+                    placeholder="Seguradora"
+                    placeholderTextColor={colors.mediumGray}
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Número da Apólice</Text></Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editingItem.numeroApolice ?? item.numeroApolice}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, numeroApolice: text })}
+                    placeholder="Número da Apólice"
+                    placeholderTextColor={colors.mediumGray}
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Data Início</Text></Text>
+                  <TextInputMask
+                    type={'datetime'}
+                    options={{ format: 'DD/MM/YYYY' }}
+                    value={editingItem.dataInicio ?? item.dataInicio}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, dataInicio: text })}
+                    placeholder="Data Início"
+                    placeholderTextColor={colors.mediumGray}
+                    style={styles.input}
+                    keyboardType="numeric"
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Data Fim</Text></Text>
+                  <TextInputMask
+                    type={'datetime'}
+                    options={{ format: 'DD/MM/YYYY' }}
+                    value={editingItem.dataFim ?? item.dataFim}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, dataFim: text })}
+                    placeholder="Data Fim"
+                    placeholderTextColor={colors.mediumGray}
+                    style={styles.input}
+                    keyboardType="numeric"
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Telefone de Emergência</Text></Text>
+                  <TextInputMask
+                    type={'custom'}
+                    options={{ mask: '(99) 99999-9999' }}
+                    value={editingItem.telefoneEmergencia ?? item.telefoneEmergencia}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, telefoneEmergencia: text })}
+                    placeholder="Telefone de Emergência"
+                    placeholderTextColor={colors.mediumGray}
+                    style={styles.input}
+                    keyboardType="phone-pad"
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Valor</Text></Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Valor"
+                    value={editingItem.valor ?? item.valor}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, valor: text })}
+                    keyboardType="numeric"
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Observações</Text></Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editingItem.observacoes ?? item.observacoes}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, observacoes: text })}
+                    placeholder="Observações"
+                    placeholderTextColor={colors.mediumGray}
+                  />
+                  <View style={styles.flexRow}>
                     <View style={{ flex: 1 }}>
                       <TouchableOpacity style={styles.buttonThird} onPress={() => atualizarSeguro(item.id)}>
                         <Text style={styles.buttonText}>Salvar</Text>
                       </TouchableOpacity>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                      <TouchableOpacity style={styles.buttonFourth} onPress={() => {
-                        setEditingIndex(null);
-                        setEditingItem({});
-                      }}>
-                        <Text style={styles.buttonText}>Cancelar</Text>
-                      </TouchableOpacity>
-                      </View>
                     </View>
-                  </>
-                ) : (
-                  <>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Seguradora:</Text> {item.seguradora}</Text>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Apólice:</Text> {item.numeroApolice}</Text>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Início:</Text> {item.dataInicio}</Text>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Fim:</Text> {item.dataFim}</Text>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Tel Emergência:</Text> {item.telefoneEmergencia}</Text>
-                    {item.observacoes && (
-                      <Text style={styles.cardInfo}><Text style={styles.bold}>Observações:</Text> {item.observacoes}</Text>
-                    )}
-
-                    <View style={styles.flexRow}>
                     <View style={{ flex: 1 }}>
                       <TouchableOpacity
-                        style={styles.buttonSecondary}
+                        style={styles.buttonFourth}
                         onPress={() => {
-                          setEditingIndex(index);
-                          setEditingItem({ ...item });
+                          setEditingIndex(null);
+                          setEditingItem({});
                         }}
                       >
-                        <Text style={styles.buttonText}>Editar</Text>
+                        <Text style={styles.buttonText}>Cancelar</Text>
                       </TouchableOpacity>
-                      </View>
-                      <View style={{ flex: 1 }}>
-
-                        <TouchableOpacity
-                          style={styles.buttonFourth}
-                          onPress={() => excluirSeguro(item.id)}
-                        >
-                          <Text style={styles.buttonText}>Excluir</Text>
-                        </TouchableOpacity>
-                        </View>
-                      </View>
-                    </>
-                )}
+                    </View>
                   </View>
-                );
-          }}
-                ListEmptyComponent={<Text style={styles.noitens}>Nenhum seguro cadastrado.</Text>}
-        />
-      )}
+                </View>
+              );
+            }
 
-                <TouchableOpacity
-                  style={styles.buttonPrimary}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/modal/insurance/createInsurance',
-                      params: { id },
-                    })
-                  }
-                >
-                  <Text style={styles.buttonText}>Cadastrar Seguro</Text>
-                </TouchableOpacity>
+            return (
+              <View style={styles.card}>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Seguradora:</Text> {item.seguradora}
+                </Text>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Apólice:</Text> {item.numeroApolice}
+                </Text>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Início:</Text> {item.dataInicio}
+                </Text>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Fim:</Text> {item.dataFim}
+                </Text>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Tel Emergência:</Text> {item.telefoneEmergencia}
+                </Text>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Valor:</Text> {item.valor}
+                </Text>
+                {item.observacoes && (
+                  <Text style={styles.cardInfo}>
+                    <Text style={styles.bold}>Observações:</Text> {item.observacoes}
+                  </Text>
+                )}
+                <View style={styles.flexRow}>
+                  <View style={{ flex: 1 }}>
+                    <TouchableOpacity
+                      style={styles.buttonSecondary}
+                      onPress={() => {
+                        setEditingIndex(index);
+                        setEditingItem({ ...item });
+                      }}
+                    >
+                      <Text style={styles.buttonText}>Editar</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <TouchableOpacity style={styles.buttonFourth} onPress={() => excluirSeguro(item.id)}>
+                      <Text style={styles.buttonText}>Excluir</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
             );
+          }}
+          ListEmptyComponent={<Text style={styles.noitens}>Nenhum seguro cadastrado.</Text>}
+        />
+      )}
+      {!loading && editingIndex === null && (
+        <TouchableOpacity
+          style={styles.buttonPrimary}
+          onPress={() =>
+            router.push({
+              pathname: '/modal/insurance/createInsurance',
+              params: { id },
+            })
           }
+        >
+          <Text style={styles.buttonText}>Cadastrar Seguro</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}

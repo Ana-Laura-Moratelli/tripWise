@@ -79,13 +79,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     console.log("🔍 Usuário encontrado:", userData);
 
     if (!userData.password) {
-      console.log("⚠️ Senha ausente no Firestore!");
       res.status(500).json({ error: "Senha não cadastrada corretamente" });
       return;
     }
 
     const senhaCorreta = await bcrypt.compare(password, userData.password);
-    console.log("🔐 Resultado da comparação:", senhaCorreta);
 
     if (!senhaCorreta) {
       console.log("❌ Senha incorreta");
@@ -94,7 +92,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     if (!process.env.JWT_SECRET) {
-      console.log("🚨 JWT_SECRET não está definido!");
       res.status(500).json({ error: "Erro interno no servidor" });
       return;
     }

@@ -18,11 +18,31 @@ export default function HotelSearch() {
   const router = useRouter();
   const API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey;
 
-  function formatarParaISO(dataBR: string) {
-    const [dia, mes, ano] = dataBR.split('/');
-    return `${ano}-${mes}-${dia}`;
+  function formatarParaISO(data: string) {
+    const partes = data.split('/');
+    if (partes.length === 3) {
+      const [diaStr, mesStr, anoStr] = partes;
+      const dia = parseInt(diaStr, 10);
+      const mes = parseInt(mesStr, 10);
+      const ano = parseInt(anoStr, 10);
+  
+      if (isNaN(mes) || mes < 1 || mes > 12) {
+        throw new Error("Mês inválido. Use valores de 01 a 12.");
+      }
+  
+      const maxDiasPorMes = [31, (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) ? 29 : 28,
+                             31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      if (isNaN(dia) || dia < 1 || dia > maxDiasPorMes[mes - 1]) {
+        throw new Error("Dia inválido para o mês informado.");
+      }
+  
+      const mm = mesStr.padStart(2, '0');
+      const dd = diaStr.padStart(2, '0');
+      return `${anoStr}-${mm}-${dd}`;
+    }
+    return data;
   }
-
+  
   function validarCampos(checkin: string, checkout: string) {
     if (!cidade) throw new Error("Informe a cidade para busca.");
     if (!/\d{4}-\d{2}-\d{2}/.test(checkin)) throw new Error("Data de entrada inválida.");
@@ -54,15 +74,15 @@ export default function HotelSearch() {
 
       validarCampos(checkin, checkout);
 
-      const hoje = new Date();
-      const dataCheckin = parseISO(checkin);
+      const now = new Date();
+      const hojeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()); const dataCheckin = parseISO(checkin);
       const dataCheckout = parseISO(checkout);
 
-      if (isBefore(dataCheckin, hoje)) {
-        throw new Error("A data de check-in não pode ser anterior ao dia de hoje.");
+      if (isBefore(dataCheckin, hojeStart)) {
+        throw new Error("A data de ida não pode ser anterior ao dia de hoje.");
       }
 
-      if (isBefore(dataCheckout, hoje)) {
+      if (isBefore(dataCheckout, hojeStart)) {
         throw new Error("A data de check-out não pode ser anterior ao dia de hoje.");
       }
 

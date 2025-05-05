@@ -1,16 +1,17 @@
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, Alert, ActionSheetIOS } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { TextInputMask } from 'react-native-masked-text';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../../src/services/api';
 import styles from '@/src/styles/global';
-import { colors } from '@/src/styles/global'; 
+import { colors } from '@/src/styles/global';
 
 export default function CreateTransport() {
   const router = useRouter();
-  const { id } = useLocalSearchParams(); 
+  const { id } = useLocalSearchParams();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const [tipoTransporte, setTipoTransporte] = useState('aluguel');
   const [empresa, setEmpresa] = useState('');
@@ -46,10 +47,10 @@ export default function CreateTransport() {
   }
 
   useEffect(() => {
-      navigation.setOptions({
-        title: 'Cadastrar Transporte',
-        headerBackTitle: 'Voltar',
-      });
+    navigation.setOptions({
+      title: 'Cadastrar Transporte',
+      headerBackTitle: 'Voltar',
+    });
   }, []);
 
   async function adicionarTransporte() {
@@ -121,30 +122,37 @@ export default function CreateTransport() {
         </View>
       )}
 
-      <TextInput
+      <TextInputMask
+        type={'datetime'}
+        options={{ format: 'DD/MM/YYYY HH:mm' }}
         style={styles.input}
         placeholder="Data e Hora de Partida"
         value={dataHoraPartida}
         onChangeText={setDataHoraPartida}
         placeholderTextColor={colors.mediumGray}
+        keyboardType="numeric"
       />
 
-      <TextInput
+      <TextInputMask
+        type={'datetime'}
+        options={{ format: 'DD/MM/YYYY HH:mm' }}
         style={styles.input}
         placeholder="Data e Hora de Chegada"
         value={dataHoraChegada}
         onChangeText={setDataHoraChegada}
         placeholderTextColor={colors.mediumGray}
+        keyboardType="numeric"
       />
 
-      <TextInput
+
+      <TextInputMask
+        type={'money'}
+        options={{ precision: 2, separator: ',', delimiter: '.', unit: 'R$', suffixUnit: '' }}
         style={styles.input}
-        placeholder="Valor"
         value={valor}
         onChangeText={setValor}
-        keyboardType="numeric"
-        placeholderTextColor={colors.mediumGray}
-      />
+        placeholder="Valor"
+        placeholderTextColor={colors.mediumGray} />
 
       {tipoTransporte === 'aluguel' && (
         <>
@@ -180,7 +188,7 @@ export default function CreateTransport() {
         style={styles.textarea}
         placeholder="Observação"
         value={observacoes}
-        multiline numberOfLines={4} 
+        multiline numberOfLines={4}
         onChangeText={setObservacoes}
         placeholderTextColor={colors.mediumGray}
       />

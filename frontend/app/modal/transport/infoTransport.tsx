@@ -15,7 +15,7 @@ export default function InfoTransport() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const navigation = useNavigation();
-  
+
   const tipos = [
     { label: 'Aluguel de Carro', value: 'aluguel' },
     { label: 'Transferência', value: 'transferencia' },
@@ -77,136 +77,186 @@ export default function InfoTransport() {
   return (
     <View style={styles.container}>
       {loading ? (
-        <View style={styles.container}><Text style={styles.loading}>Carregando...</Text></View>
+        <View style={styles.container}>
+          <Text style={styles.loading}>Carregando...</Text>
+        </View>
       ) : (
         <FlatList
           data={transportes}
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => {
             const isEditing = editingIndex === index;
-            return (
-              <View style={styles.card}>
-                {isEditing ? (
-                  <>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Empresa"
-                      value={editingItem.empresa ?? item.empresa}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, empresa: text })}
-                    />
-                    <TextInputMask
-                      type={'datetime'}
-                      options={{ format: 'DD/MM/YYYY HH:mm' }}
-                      value={editingItem.dataHoraPartida ?? item.dataHoraPartida}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, dataHoraPartida: text })}
-                      style={styles.input}
-                      placeholder="Data/Hora Partida"
-                      keyboardType="numeric"
-                    />
-                    <TextInputMask
-                      type={'datetime'}
-                      options={{ format: 'DD/MM/YYYY HH:mm' }}
-                      value={editingItem.dataHoraChegada ?? item.dataHoraChegada}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, dataHoraChegada: text })}
-                      style={styles.input}
-                      placeholder="Data/Hora Chegada"
-                      keyboardType="numeric"
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Valor"
-                      value={editingItem.valor ?? item.valor}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, valor: text })}
-                      keyboardType="numeric"
-                    />
 
-                    {editingItem.tipoTransporte === 'aluguel' && (
-                      <>
-                        <TextInput
-                          style={styles.input}
-                          placeholder="Modelo do Veículo"
-                          value={editingItem.modeloVeiculo ?? item.modeloVeiculo}
-                          onChangeText={(text) => setEditingItem({ ...editingItem, modeloVeiculo: text })}
-                        />
-                        <TextInput
-                          style={styles.input}
-                          placeholder="Placa do Veículo"
-                          value={editingItem.placaVeiculo ?? item.placaVeiculo}
-                          onChangeText={(text) => setEditingItem({ ...editingItem, placaVeiculo: text })}
-                        />
-                      </>
-                    )}
+            if (isEditing) {
+              return (
+                <View style={styles.cardEditing}>
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Empresa</Text></Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Empresa"
+                    value={editingItem.empresa ?? item.empresa}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, empresa: text })}
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Data/Hora Partida</Text></Text>
+                  <TextInputMask
+                    type={'datetime'}
+                    options={{ format: 'DD/MM/YYYY HH:mm' }}
+                    style={styles.input}
+                    placeholder="Data/Hora Partida"
+                    value={editingItem.dataHoraPartida ?? item.dataHoraPartida}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, dataHoraPartida: text })}
+                    keyboardType="numeric"
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Data/Hora Chegada</Text></Text>
+                  <TextInputMask
+                    type={'datetime'}
+                    options={{ format: 'DD/MM/YYYY HH:mm' }}
+                    style={styles.input}
+                    placeholder="Data/Hora Chegada"
+                    value={editingItem.dataHoraChegada ?? item.dataHoraChegada}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, dataHoraChegada: text })}
+                    keyboardType="numeric"
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Valor</Text></Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Valor"
+                    value={editingItem.valor ?? item.valor}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, valor: text })}
+                    keyboardType="numeric"
+                  />
 
-                    {editingItem.tipoTransporte === 'publico' && (
+                  {editingItem.tipoTransporte === 'aluguel' && (
+                    <>
+                      <Text style={styles.cardLabel}><Text style={styles.bold}>Modelo do Veículo</Text></Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Modelo do Veículo"
+                        value={editingItem.modeloVeiculo ?? item.modeloVeiculo}
+                        onChangeText={(text) => setEditingItem({ ...editingItem, modeloVeiculo: text })}
+                      />
+                      <Text style={styles.cardLabel}><Text style={styles.bold}>Placa do Veículo</Text></Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Placa do Veículo"
+                        value={editingItem.placaVeiculo ?? item.placaVeiculo}
+                        onChangeText={(text) => setEditingItem({ ...editingItem, placaVeiculo: text })}
+                      />
+                    </>
+                  )}
+
+                  {editingItem.tipoTransporte === 'publico' && (
+                    <>
+                      <Text style={styles.cardLabel}><Text style={styles.bold}>Número da Linha</Text></Text>
                       <TextInput
                         style={styles.input}
                         placeholder="Número da Linha"
                         value={editingItem.numeroLinha ?? item.numeroLinha}
                         onChangeText={(text) => setEditingItem({ ...editingItem, numeroLinha: text })}
                       />
-                    )}
+                    </>
+                  )}
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Observações</Text></Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Observações"
+                    value={editingItem.observacoes ?? item.observacoes}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, observacoes: text })}
+                  />
 
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Observações (opcional)"
-                      value={editingItem.observacoes ?? item.observacoes}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, observacoes: text })}
-                    />
-
-
-                    <View style={styles.flexRow}>
-                      <View style={{ flex: 1 }}>
-                        <TouchableOpacity style={styles.buttonThird} onPress={() => atualizarTransporte(item.id)}>
-                          <Text style={styles.buttonText}>Salvar</Text>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <TouchableOpacity style={styles.buttonFourth} onPress={() => { setEditingIndex(null); setEditingItem({}); }}>
-                          <Text style={styles.buttonText}>Cancelar</Text>
-                        </TouchableOpacity>
-                      </View>
+                  <View style={styles.flexRow}>
+                    <View style={{ flex: 1 }}>
+                      <TouchableOpacity style={styles.buttonThird} onPress={() => atualizarTransporte(item.id)}>
+                        <Text style={styles.buttonText}>Salvar</Text>
+                      </TouchableOpacity>
                     </View>
-                  </>
-                ) : (
-                  <>
-                    <Text style={styles.cardTitle}>{tipos.find((t) => t.value === item.tipoTransporte)?.label}</Text>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Empresa:</Text> {item.empresa}</Text>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Partida:</Text> {item.dataHoraPartida}</Text>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Chegada:</Text> {item.dataHoraChegada}</Text>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Valor: R$</Text> {item.valor}</Text>
-                    {item.modeloVeiculo && <Text style={styles.cardInfo}><Text style={styles.bold}>Modelo: </Text>{item.modeloVeiculo}</Text>}
-                    {item.placaVeiculo && <Text style={styles.cardInfo}><Text style={styles.bold}>Placa: </Text>{item.placaVeiculo}</Text>}
-                    {item.numeroLinha && <Text style={styles.cardInfo}><Text style={styles.bold}>Linha: </Text>{item.numeroLinha}</Text>}
-                    {item.observacoes && <Text style={styles.cardInfo}><Text style={styles.bold}>Obs: </Text>{item.observacoes}</Text>}
-
-                    <View style={styles.flexRow}>
-                      <View style={{ flex: 1 }}>
-                        <TouchableOpacity style={styles.buttonSecondary} onPress={() => { setEditingIndex(index); setEditingItem({ ...item }); }}>
-                          <Text style={styles.buttonText}>Editar</Text>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <TouchableOpacity style={styles.buttonFourth} onPress={() => excluirTransporte(item.id)}>
-                          <Text style={styles.buttonText}>Excluir</Text>
-                        </TouchableOpacity>
-                      </View>
+                    <View style={{ flex: 1 }}>
+                      <TouchableOpacity
+                        style={styles.buttonFourth}
+                        onPress={() => {
+                          setEditingIndex(null);
+                          setEditingItem({});
+                        }}
+                      >
+                        <Text style={styles.buttonText}>Cancelar</Text>
+                      </TouchableOpacity>
                     </View>
-                  </>
+                  </View>
+                </View>
+              );
+            }
+
+            return (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>
+                  {tipos.find((t) => t.value === item.tipoTransporte)?.label}
+                </Text>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Empresa:</Text> {item.empresa}
+                </Text>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Partida:</Text> {item.dataHoraPartida}
+                </Text>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Chegada:</Text> {item.dataHoraChegada}
+                </Text>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Valor:</Text> R$ {item.valor}
+                </Text>
+                {item.modeloVeiculo && (
+                  <Text style={styles.cardInfo}>
+                    <Text style={styles.bold}>Modelo:</Text> {item.modeloVeiculo}
+                  </Text>
                 )}
+                {item.placaVeiculo && (
+                  <Text style={styles.cardInfo}>
+                    <Text style={styles.bold}>Placa:</Text> {item.placaVeiculo}
+                  </Text>
+                )}
+                {item.numeroLinha && (
+                  <Text style={styles.cardInfo}>
+                    <Text style={styles.bold}>Linha:</Text> {item.numeroLinha}
+                  </Text>
+                )}
+                {item.observacoes && (
+                  <Text style={styles.cardInfo}>
+                    <Text style={styles.bold}>Obs:</Text> {item.observacoes}
+                  </Text>
+                )}
+                <View style={styles.flexRow}>
+                  <View style={{ flex: 1 }}>
+                    <TouchableOpacity
+                      style={styles.buttonSecondary}
+                      onPress={() => {
+                        setEditingIndex(index);
+                        setEditingItem({ ...item });
+                      }}
+                    >
+                      <Text style={styles.buttonText}>Editar</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <TouchableOpacity style={styles.buttonFourth} onPress={() => excluirTransporte(item.id)}>
+                      <Text style={styles.buttonText}>Excluir</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
             );
           }}
           ListEmptyComponent={<Text style={styles.noitens}>Nenhum transporte cadastrado.</Text>}
         />
       )}
-
-      <TouchableOpacity
-        style={styles.buttonPrimary}
-        onPress={() => router.push({ pathname: '/modal/transport/createTransport', params: { id } })}
-      >
-        <Text style={styles.buttonText}>Cadastrar Transporte</Text>
-      </TouchableOpacity>
+      {!loading && editingIndex === null && (
+        <TouchableOpacity
+          style={styles.buttonPrimary}
+          onPress={() => router.push({ pathname: '/modal/transport/createTransport', params: { id } })}
+        >
+          <Text style={styles.buttonText}>Cadastrar Transporte</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
+
 }
 

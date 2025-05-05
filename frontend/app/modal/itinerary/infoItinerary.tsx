@@ -34,28 +34,71 @@ export default function infoItinerary() {
   const [loading, setLoading] = useState(true);
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editingItem, setEditingItem] = useState<Partial<Itinerario>>({});
+  const [editingItem, setEditingItem] = useState<Partial<Itinerario> & {
+    endereco?: {
+      cep?: string;
+      rua?: string;
+      numero?: string;
+      bairro?: string;
+      cidade?: string;
+      estado?: string;
+    }
+  }>({});
 
-  function validarDataAtividade(dataStr: string): string | null {
-    if (!dataStr || dataStr.length < 10) return null;
-
-    const partes = dataStr.trim().split(' ');
-    const [dia, mes, ano] = partes[0].split('/');
-    if (!dia || !mes || !ano) return null;
-
-    const hora = partes[1] || '00:00';
-    const [h, m] = hora.split(':');
-    if (isNaN(Number(h)) || isNaN(Number(m))) return null;
-
-    const dataISO = `${ano}-${mes}-${dia}T${hora}:00`;
-    const dataSelecionada = new Date(dataISO);
-
-    if (isNaN(dataSelecionada.getTime())) return null;
-    if (dataSelecionada < new Date()) return null;
-
-    return `${dia}/${mes}/${ano}` + (partes[1] ? ` ${partes[1]}` : '');
+  async function buscarEnderecoPorCEP(cepDigitado: string) {
+    const cepNum = cepDigitado.replace(/\D/g, '');
+    // atualiza só o campo CEP
+    setEditingItem(prev => ({
+      ...prev,
+      endereco: { ...prev.endereco, cep: cepDigitado }
+    }));
+    if (cepNum.length !== 8) return;
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cepNum}/json/`);
+      const data = await res.json();
+      if (!data.erro) {
+        setEditingItem(prev => ({
+          ...prev,
+          endereco: {
+            ...prev.endereco,
+            rua: data.logradouro,
+            bairro: data.bairro,
+            cidade: data.localidade,
+            estado: data.uf
+          }
+        }));
+      }
+    } catch {
+      console.warn('Via CEP falhou');
+    }
   }
 
+  function validarDataAtividade(dataHoraBR: string): string | null {
+    if (!dataHoraBR || dataHoraBR.length < 10) return null;
+
+    const [datePart, timePart] = dataHoraBR.trim().split(' ');
+    const [d, m, y] = datePart.split('/');
+    const day = parseInt(d, 10);
+    const month = parseInt(m, 10);
+    const year = parseInt(y, 10);
+
+    if ([day, month, year].some(isNaN)) return null;
+    if (month < 1 || month > 12) return null;
+    const daysInMonth = [
+      31,
+      new Date(year, 2, 0).getDate(),
+      31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    ];
+    if (day < 1 || day > daysInMonth[month - 1]) return null;
+
+    if (timePart && timePart.trim() !== '') {
+      const horaValida = /^([01]?\d|2[0-3]):[0-5]\d$/.test(timePart.trim());
+      if (!horaValida) return null;
+      return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y} ${timePart.trim()}`;
+    }
+
+    return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+  }
   async function fetchItinerarios() {
     try {
       const response = await api.get('/api/trip');
@@ -104,6 +147,8 @@ export default function infoItinerary() {
     }
   }
 
+
+
   async function updateItinerary(itemIndex: number, originalIndex?: number) {
     const indexToUse = originalIndex !== undefined ? originalIndex : itemIndex;
     try {
@@ -121,6 +166,18 @@ export default function infoItinerary() {
       }
 
       dadosParaAtualizar.dia = dataValidada;
+
+      const endObj = editingItem.endereco || {};
+      const fullAddress = `${endObj.rua}, ${endObj.numero}, ${endObj.bairro}, ${endObj.cidade}, ${endObj.estado}`;
+      const coordsRes = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=AIzaSyBpmchWTIClePxMh-US0DCEe4ZzoVmA5Ms`
+      );
+      const coordsJson = await coordsRes.json();
+      if (coordsJson.status === 'OK') {
+        endObj.latitude = coordsJson.results[0].geometry.location.lat.toString();
+        endObj.longitude = coordsJson.results[0].geometry.location.lng.toString();
+      }
+      dadosParaAtualizar.endereco = endObj;
 
       await api.put(`/api/trip/${id}/itinerary/${indexToUse}`, dadosParaAtualizar, {
         headers: { 'Content-Type': 'application/json' },
@@ -145,7 +202,8 @@ export default function infoItinerary() {
     const origIndex = item.originalIndex;
     if (editingIndex === index) {
       return (
-        <View style={styles.card}>
+        <View style={styles.cardEditing}>
+          <Text style={styles.cardLabel}><Text style={styles.bold}>Nome do local</Text></Text>
           <TextInput
             style={styles.input}
             value={editingItem.nomeLocal ?? item.nomeLocal}
@@ -153,6 +211,7 @@ export default function infoItinerary() {
             placeholder="Nome do local"
             placeholderTextColor={colors.mediumGray}
           />
+          <Text style={styles.cardLabel}><Text style={styles.bold}>Tipo de atividade</Text></Text>
           <TextInput
             style={styles.input}
             value={editingItem.tipo ?? item.tipo}
@@ -160,6 +219,7 @@ export default function infoItinerary() {
             placeholder="Tipo de atividade"
             placeholderTextColor={colors.mediumGray}
           />
+          <Text style={styles.cardLabel}><Text style={styles.bold}>Valor</Text></Text>
           <TextInputMask
             type={'money'}
             options={{ precision: 2, separator: ',', delimiter: '.', unit: 'R$', suffixUnit: '' }}
@@ -169,6 +229,7 @@ export default function infoItinerary() {
             placeholder="Valor"
             placeholderTextColor={colors.mediumGray}
           />
+          <Text style={styles.cardLabel}><Text style={styles.bold}>Dia</Text></Text>
           <TextInputMask
             type={'datetime'}
             options={{ format: 'DD/MM/YYYY HH:mm' }}
@@ -178,27 +239,91 @@ export default function infoItinerary() {
             placeholder="Dia (dd/mm/aaaa hh:mm)"
             placeholderTextColor={colors.mediumGray}
           />
+          <Text style={styles.cardLabel}><Text style={styles.bold}>CEP</Text></Text>
+          <TextInputMask
+            type="custom"
+            options={{ mask: '99999-999' }}
+            style={styles.input}
+            placeholder="CEP"
+            value={editingItem.endereco?.cep}
+            onChangeText={buscarEnderecoPorCEP}
+            keyboardType="numeric"
+            placeholderTextColor={colors.mediumGray}
+          />
+          <Text style={styles.cardLabel}><Text style={styles.bold}>Rua</Text></Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Rua"
+            value={editingItem.endereco?.rua}
+            onChangeText={text => setEditingItem(prev => ({
+              ...prev,
+              endereco: { ...prev.endereco, rua: text }
+            }))}
+            placeholderTextColor={colors.mediumGray}
+          />
+          <Text style={styles.cardLabel}><Text style={styles.bold}>Número</Text></Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Número"
+            value={editingItem.endereco?.numero}
+            onChangeText={text => setEditingItem(prev => ({
+              ...prev,
+              endereco: { ...prev.endereco, numero: text }
+            }))}
+            placeholderTextColor={colors.mediumGray}
+          />
+          <Text style={styles.cardLabel}><Text style={styles.bold}>Bairro</Text></Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Bairro"
+            value={editingItem.endereco?.bairro}
+            onChangeText={text => setEditingItem(prev => ({
+              ...prev,
+              endereco: { ...prev.endereco, bairro: text }
+            }))}
+            placeholderTextColor={colors.mediumGray}
+          />
+          <Text style={styles.cardLabel}><Text style={styles.bold}>Cidade</Text></Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Cidade"
+            value={editingItem.endereco?.cidade}
+            onChangeText={text => setEditingItem(prev => ({
+              ...prev,
+              endereco: { ...prev.endereco, cidade: text }
+            }))}
+            placeholderTextColor={colors.mediumGray}
+          />
+          <Text style={styles.cardLabel}><Text style={styles.bold}>Estado</Text></Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Estado"
+            value={editingItem.endereco?.estado}
+            onChangeText={text => setEditingItem(prev => ({
+              ...prev,
+              endereco: { ...prev.endereco, estado: text }
+            }))}
+            placeholderTextColor={colors.mediumGray}
+          />
+          <Text style={styles.cardLabel}><Text style={styles.bold}>Descrição</Text></Text>
           <TextInput
             style={styles.input}
             value={editingItem.descricao ?? item.descricao}
             onChangeText={(text) => setEditingItem({ ...editingItem, descricao: text })}
-            placeholder="Descrição (opcional)"
+            placeholder="Descrição"
             placeholderTextColor={colors.mediumGray}
           />
           <View style={styles.flexRow}>
-          <View style={{ flex: 1 }}>
-
-            <TouchableOpacity style={styles.buttonThird} onPress={() => updateItinerary(index, origIndex)}>
-              <Text style={styles.buttonText}>Salvar</Text>
-            </TouchableOpacity>
+            <View style={{ flex: 1 }}>
+              <TouchableOpacity style={styles.buttonThird} onPress={() => updateItinerary(index, origIndex)}>
+                <Text style={styles.buttonText}>Salvar</Text>
+              </TouchableOpacity>
             </View>
             <View style={{ flex: 1 }}>
-
-            <TouchableOpacity style={styles.buttonFourth} onPress={() => { setEditingIndex(null); setEditingItem({}); }}>
-              <Text style={styles.buttonText}>Cancelar</Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.buttonFourth} onPress={() => { setEditingIndex(null); setEditingItem({}); }}>
+                <Text style={styles.buttonText}>Cancelar</Text>
+              </TouchableOpacity>
             </View>
-
           </View>
         </View>
       );
@@ -247,12 +372,14 @@ export default function infoItinerary() {
           ListEmptyComponent={<Text style={styles.noitens}>Nenhum item encontrado.</Text>}
         />
       )}
-      <TouchableOpacity
-        style={styles.buttonPrimary}
-        onPress={() => router.push({ pathname: "/modal/itinerary/createItinerary", params: { id } })}
-      >
-        <Text style={styles.buttonText}>Criar Cronograma</Text>
-      </TouchableOpacity>
+      {!loading && editingIndex === null && (
+        <TouchableOpacity
+          style={styles.buttonPrimary}
+          onPress={() => router.push({ pathname: "/modal/itinerary/createItinerary", params: { id } })}
+        >
+          <Text style={styles.buttonText}>Criar Cronograma</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

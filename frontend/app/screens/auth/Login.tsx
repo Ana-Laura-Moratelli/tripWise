@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, Alert, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, Alert, ScrollView } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -63,8 +63,8 @@ export default function AuthScreen() {
 
 
     async function handleRegister() {
-        const numeroLimpo = phoneNumber.replace(/\D/g, '');
-        const telefoneFormatado = `+55${numeroLimpo}`;
+        
+        const telefoneFormatado = phoneNumber;
         const cpfFormatado = cpf; 
     
         if (!name || !phoneNumber || !cpf || !regEmail || !regPassword) {
@@ -130,11 +130,7 @@ export default function AuthScreen() {
     
 
     return (
-        <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-
-        >
+       
             <ScrollView
                 contentContainerStyle={{ flexGrow: 1, backgroundColor: 'white' }}
                 keyboardShouldPersistTaps="handled"
@@ -265,6 +261,5 @@ export default function AuthScreen() {
                     </View>
                 </View>
             </ScrollView>
-        </KeyboardAvoidingView>
     );
 }

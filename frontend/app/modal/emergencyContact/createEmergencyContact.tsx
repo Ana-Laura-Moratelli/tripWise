@@ -89,7 +89,7 @@ export default function CreateEmergencyContact() {
       />
 
       <TouchableOpacity style={styles.buttonPrimary} onPress={adicionarContato}>
-        <Text style={styles.buttonText}>Salvar Contato</Text>
+        <Text style={styles.buttonText}>Cadastrar Contato</Text>
       </TouchableOpacity>
     </ScrollView>
   );

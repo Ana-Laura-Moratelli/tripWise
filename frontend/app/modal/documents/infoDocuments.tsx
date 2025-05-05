@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TextInput, Alert, TouchableOpacity, Platform, ActionSheetIOS } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { api } from '../../../src/services/api';
@@ -8,6 +8,7 @@ import { Documento } from '../../../src/types/document';
 import { TextInputMask } from 'react-native-masked-text';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
+import { Picker } from '@react-native-picker/picker';
 
 export default function InfoDocuments() {
   const { id } = useLocalSearchParams();
@@ -17,6 +18,25 @@ export default function InfoDocuments() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingItem, setEditingItem] = useState<Partial<Documento>>({});
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  const tiposDoc = [
+    { label: 'CPF', value: 'CPF' },
+    { label: 'RG', value: 'RG' },
+    { label: 'Passaporte', value: 'Passaporte' },
+  ];
+
+  function abrirSelecaoTipoDocumento() {
+    const options = tiposDoc.map(o => o.label);
+    options.push('Cancelar');
+    ActionSheetIOS.showActionSheetWithOptions(
+      { options, cancelButtonIndex: options.length - 1 },
+      (buttonIndex: number) => {
+        if (buttonIndex < tiposDoc.length) {
+          setEditingItem(prev => ({ ...prev, tipo: tiposDoc[buttonIndex].value }));
+        }
+      }
+    );
+  }
 
   async function atualizarDocumento(docId: string) {
     try {
@@ -77,9 +97,10 @@ export default function InfoDocuments() {
 
   return (
     <View style={styles.container}>
-
       {loading ? (
-        <View style={styles.container}><Text style={styles.loading}>Carregando...</Text></View>
+        <View style={styles.container}>
+          <Text style={styles.loading}>Carregando...</Text>
+        </View>
       ) : (
         <FlatList
           data={documentos}
@@ -87,105 +108,133 @@ export default function InfoDocuments() {
           renderItem={({ item, index }) => {
             const isEditing = editingIndex === index;
 
-            return (
-              <View style={styles.card}>
-                {isEditing ? (
-                  <>
-                    <TextInput
-                      style={styles.input}
-                      value={editingItem.tipo ?? item.tipo}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, tipo: text })}
-                      placeholder="Tipo de documento"
-                      placeholderTextColor={colors.mediumGray}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      value={editingItem.numero ?? item.numero}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, numero: text })}
-                      placeholder="Número"
-                      placeholderTextColor={colors.mediumGray}
-                    />
+            if (isEditing) {
+              return (
+                <View style={styles.cardEditing}>
+                  {/* Tipo de documento */}
+                  {Platform.OS === 'ios' ? (
+                    <TouchableOpacity style={styles.input} onPress={abrirSelecaoTipoDocumento}>
+                      <Text style={{ color: editingItem.tipo ? 'black' : colors.mediumGray }}>
+                        {editingItem.tipo
+                          ? tiposDoc.find(o => o.value === editingItem.tipo)?.label
+                          : 'Escolha um tipo'}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={editingItem.tipo}
+                        style={styles.picker}
+                        onValueChange={(value) => setEditingItem(prev => ({ ...prev, tipo: value }))}
+                      >
+                        <Picker.Item label="Selecione um tipo" value="" />
+                        {tiposDoc.map(o => (
+                          <Picker.Item key={o.value} label={o.label} value={o.value} />
+                        ))}
+                      </Picker>
+                    </View>
+                  )}
+
+                  {/* Número do documento com máscara conforme tipo */}
+                  {editingItem.tipo === 'CPF' && (
                     <TextInputMask
-                      type={'datetime'}
-                      options={{ format: 'DD/MM/YYYY' }}
-                      value={editingItem.validade ?? item.validade}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, validade: text })}
-                      placeholder="Validade (dd/mm/aaaa)"
-                      placeholderTextColor={colors.mediumGray}
+                      type="cpf"
                       style={styles.input}
+                      value={editingItem.numero}
+                      onChangeText={(text) => setEditingItem(prev => ({ ...prev, numero: text }))}
+                      placeholder="Número do CPF"
+                      placeholderTextColor={colors.mediumGray}
                       keyboardType="numeric"
                     />
-                    <TextInput
+                  )}
+                  {editingItem.tipo === 'RG' && (
+                    <TextInputMask
+                      type="custom"
+                      options={{ mask: '99.999.999-9' }}
                       style={styles.input}
-                      value={editingItem.observacoes ?? item.observacoes}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, observacoes: text })}
-                      placeholder="Observações"
+                      value={editingItem.numero}
+                      onChangeText={(text) => setEditingItem(prev => ({ ...prev, numero: text }))}
+                      placeholder="Número do RG"
                       placeholderTextColor={colors.mediumGray}
+                      keyboardType="numeric"
                     />
+                  )}
+                  {editingItem.tipo === 'Passaporte' && (
+                    <TextInputMask
+                      type="custom"
+                      options={{ mask: 'AA 999999' }}
+                      style={styles.input}
+                      value={editingItem.numero}
+                      onChangeText={(text) => setEditingItem(prev => ({ ...prev, numero: text }))}
+                      placeholder="Passaporte (AA 000001)"
+                      placeholderTextColor={colors.mediumGray}
+                      autoCapitalize="characters"
+                    />
+                  )}
 
-                    <View style={styles.flexRow}>
-                      <View style={{ flex: 1 }}>
-                        <TouchableOpacity
-                          style={styles.buttonThird}
-                          onPress={() => atualizarDocumento(item.id)}
-                        >
-                          <Text style={styles.buttonText}>Salvar</Text>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <TouchableOpacity
-                          style={styles.buttonFourth}
-                          onPress={() => {
-                            setEditingIndex(null);
-                            setEditingItem({});
-                          }}
-                        >
-                          <Text style={styles.buttonText}>Cancelar</Text>
-                        </TouchableOpacity>
-                      </View>
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Validade</Text></Text>
+                  <TextInputMask
+                    type={'datetime'}
+                    options={{ format: 'DD/MM/YYYY' }}
+                    value={editingItem.validade ?? item.validade}
+                    onChangeText={(text) => setEditingItem({ ...editingItem, validade: text })}
+                    placeholder="Validade (dd/mm/aaaa)"
+                    placeholderTextColor={colors.mediumGray}
+                    style={styles.input}
+                    keyboardType="numeric"
+                  />
+
+                  <View style={styles.flexRow}>
+                    <View style={{ flex: 1 }}>
+                      <TouchableOpacity
+                        style={styles.buttonThird}
+                        onPress={() => atualizarDocumento(item.id)}
+                      >
+                        <Text style={styles.buttonText}>Salvar</Text>
+                      </TouchableOpacity>
                     </View>
-                  </>
-                ) : (
-                  <>
-                    <Text style={styles.cardInfo}>
-                      <Text style={styles.bold}>Tipo:</Text> {item.tipo}
-                    </Text>
-                    <Text style={styles.cardInfo}>
-                      <Text style={styles.bold}>Número:</Text> {item.numero}
-                    </Text>
-                    <Text style={styles.cardInfo}>
-                      <Text style={styles.bold}>Validade:</Text> {item.validade}
-                    </Text>
-                    {item.observacoes && (
-                      <Text style={styles.cardInfo}>
-                        <Text style={styles.bold}>Observações:</Text> {item.observacoes}
-                      </Text>
-                    )}
-
-                    <View style={styles.flexRow}>
-                      <View style={{ flex: 1 }}>
-                        <TouchableOpacity
-                          style={styles.buttonSecondary}
-                          onPress={() => {
-                            setEditingIndex(index);
-                            setEditingItem({ ...item });
-                          }}
-                        >
-
-                          <Text style={styles.buttonText}>Editar</Text>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={{ flex: 1 }}>
-
-                        <TouchableOpacity
-                          style={styles.buttonFourth}
-                          onPress={() => excluirDocumento(item.id)}>
-                          <Text style={styles.buttonText}>Excluir</Text>
-                        </TouchableOpacity>
-                      </View>
+                    <View style={{ flex: 1 }}>
+                      <TouchableOpacity
+                        style={styles.buttonFourth}
+                        onPress={() => {
+                          setEditingIndex(null);
+                          setEditingItem({});
+                        }}
+                      >
+                        <Text style={styles.buttonText}>Cancelar</Text>
+                      </TouchableOpacity>
                     </View>
-                  </>
-                )}
+                  </View>
+                </View>
+              );
+            }
+
+            return (
+              <View style={styles.card}>
+                <Text style={styles.cardInfo}><Text style={styles.bold}>Tipo:</Text> {item.tipo}</Text>
+                <Text style={styles.cardInfo}><Text style={styles.bold}>Número:</Text> {item.numero}</Text>
+                <Text style={styles.cardInfo}><Text style={styles.bold}>Validade:</Text> {item.validade}</Text>
+                <View style={styles.flexRow}>
+                  <View style={{ flex: 1 }}>
+                    <TouchableOpacity
+                      style={styles.buttonSecondary}
+                      onPress={() => {
+                        setEditingIndex(index);
+                        setEditingItem({ ...item });
+                      }}
+                    >
+                      <Text style={styles.buttonText}>Editar</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <TouchableOpacity
+                      style={styles.buttonFourth}
+                      onPress={() => excluirDocumento(item.id)}
+                    >
+                      <Text style={styles.buttonText}>Excluir</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
             );
           }}
@@ -195,19 +244,20 @@ export default function InfoDocuments() {
         />
       )}
 
-      <TouchableOpacity
-        style={styles.buttonPrimary}
-        onPress={() =>
-          router.push({
-            pathname: '/modal/documents/createDocuments',
-            params: { id },
-          })
-        }
-      >
-        <Text style={styles.buttonText}>Cadastrar Documento</Text>
-      </TouchableOpacity>
+      {!loading && editingIndex === null && (
+        <TouchableOpacity
+          style={styles.buttonPrimary}
+          onPress={() =>
+            router.push({
+              pathname: '/modal/documents/createDocuments',
+              params: { id },
+            })
+          }
+        >
+          <Text style={styles.buttonText}>Cadastrar Documento</Text>
+        </TouchableOpacity>
+      )}
     </View>
-
-
   );
 }
+

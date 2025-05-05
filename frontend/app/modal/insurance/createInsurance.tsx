@@ -11,16 +11,16 @@ export default function CreateInsurance() {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const navigation = useNavigation();
-
     const [seguradora, setSeguradora] = useState('');
     const [numeroApolice, setNumeroApolice] = useState('');
     const [dataInicio, setDataInicio] = useState('');
     const [dataFim, setDataFim] = useState('');
     const [telefoneEmergencia, setTelefoneEmergencia] = useState('');
+    const [valor, setValor] = useState('');
     const [observacoes, setObservacoes] = useState('');
 
     async function adicionarSeguro() {
-        if (!seguradora || !numeroApolice || !dataInicio || !dataFim || !telefoneEmergencia) {
+        if (!seguradora || !numeroApolice || !dataInicio || !dataFim || !telefoneEmergencia || !valor)  {
             Alert.alert('Atenção', 'Preencha todos os campos obrigatórios.');
             return;
         }
@@ -32,6 +32,7 @@ export default function CreateInsurance() {
                 dataInicio,
                 dataFim,
                 telefoneEmergencia,
+                valor,
                 observacoes,
             });
 
@@ -65,6 +66,7 @@ export default function CreateInsurance() {
                 value={numeroApolice}
                 onChangeText={setNumeroApolice}
                 placeholderTextColor={colors.mediumGray}
+                keyboardType="numeric"
             />
 
             <TextInputMask
@@ -100,6 +102,17 @@ export default function CreateInsurance() {
                 keyboardType="phone-pad"
             />
 
+
+            <TextInputMask
+                type={'money'}
+                options={{ precision: 2, separator: ',', delimiter: '.', unit: 'R$', suffixUnit: '' }}
+                style={styles.input}
+                value={valor}
+                onChangeText={setValor}
+                placeholder="Valor"
+                placeholderTextColor={colors.mediumGray} />
+
+
             <TextInput
                 style={styles.textarea}
                 placeholder="Observações"
@@ -110,7 +123,7 @@ export default function CreateInsurance() {
             />
 
             <TouchableOpacity style={styles.buttonPrimary} onPress={adicionarSeguro}>
-                <Text style={styles.buttonText}>Salvar Seguro</Text>
+                <Text style={styles.buttonText}>Cadastrar Seguro</Text>
             </TouchableOpacity>
         </ScrollView>
     );

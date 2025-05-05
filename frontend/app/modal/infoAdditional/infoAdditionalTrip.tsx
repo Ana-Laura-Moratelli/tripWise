@@ -30,7 +30,7 @@ export default function InfoAdditionalTrip() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.subtitle}>Selecione uma opção para gerenciar:</Text>
+      <Text style={styles.subtitle}>Selecione uma opção para gerenciar</Text>
       <View style={styles.flexColumn}>
       {botoes.map((botao, index) => (
         <TouchableOpacity

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, ActionSheetIOS } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { api } from '../../../src/services/api';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +7,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { TextInputMask } from 'react-native-masked-text';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
+import { Platform } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
 export default function CreateDocuments() {
   const router = useRouter();
@@ -16,6 +18,28 @@ export default function CreateDocuments() {
   const [validade, setValidade] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const tiposDoc = [
+    { label: 'CPF', value: 'CPF' },
+    { label: 'RG', value: 'RG' },
+    { label: 'Passaporte', value: 'Passaporte' },
+  ];
+
+  function abrirSelecaoTipoDocumento() {
+    const options = tiposDoc.map(o => o.label);
+    options.push('Cancelar');
+
+    ActionSheetIOS.showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex: options.length - 1,
+      },
+      (buttonIndex: number) => {
+        if (buttonIndex < tiposDoc.length) {
+          setTipo(tiposDoc[buttonIndex].value);
+        }
+      }
+    );
+  }
 
   async function adicionarDocumento() {
     if (!tipo || !numero || !validade) {
@@ -50,21 +74,67 @@ export default function CreateDocuments() {
   return (
     <ScrollView style={styles.container}>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Tipo do Documento"
-        value={tipo}
-        onChangeText={setTipo}
-        placeholderTextColor={colors.mediumGray}
-      />
+      {Platform.OS === 'ios' ? (
+        <TouchableOpacity style={styles.input} onPress={abrirSelecaoTipoDocumento}>
+          <Text>
+            {tipo
+              ? tiposDoc.find(o => o.value === tipo)?.label
+              : 'Escolha um tipo'}
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={tipo}
+            style={styles.picker}
+            onValueChange={(itemValue) => setTipo(itemValue)}
+          >
+            <Picker.Item label="Selecione um tipo" value="" />
+            {tiposDoc.map(o => (
+              <Picker.Item key={o.value} label={o.label} value={o.value} />
+            ))}
+          </Picker>
+        </View>
+      )}
 
-      <TextInput
-        style={styles.input}
-        placeholder="Número do Documento"
-        value={numero}
-        onChangeText={setNumero}
-        placeholderTextColor={colors.mediumGray}
-      />
+
+
+      {/* Número do Documento */}
+      {tipo === 'CPF' && (
+        <TextInputMask
+          type="cpf"
+          style={styles.input}
+          value={numero}
+          onChangeText={setNumero}
+          placeholder="Número do CPF"
+          placeholderTextColor={colors.mediumGray}
+          keyboardType="numeric"
+        />
+      )}
+      {tipo === 'RG' && (
+        <TextInputMask
+          type="custom"
+          options={{ mask: '99.999.999-9' }}
+          style={styles.input}
+          value={numero}
+          onChangeText={setNumero}
+          placeholder="Número do RG"
+          placeholderTextColor={colors.mediumGray}
+          keyboardType="numeric"
+        />
+      )}
+      {tipo === 'Passaporte' && (
+        <TextInputMask
+          type="custom"
+          options={{ mask: 'AA 999999' }}
+          style={styles.input}
+          value={numero}
+          onChangeText={setNumero}
+          placeholder="Passaporte (AA 000001)"
+          placeholderTextColor={colors.mediumGray}
+          autoCapitalize="characters"
+        />
+      )}
 
       <TextInputMask
         type={'datetime'}
@@ -77,17 +147,10 @@ export default function CreateDocuments() {
         keyboardType="numeric"
       />
 
-      <TextInput
-        style={styles.textarea}
-        placeholder="Observações"
-        value={observacoes}
-        onChangeText={setObservacoes}
-        placeholderTextColor={colors.mediumGray}
-        multiline
-      />
+     
 
       <TouchableOpacity style={styles.buttonPrimary} onPress={adicionarDocumento}>
-        <Text style={styles.buttonText}>Salvar Documento</Text>
+        <Text style={styles.buttonText}>Cadastrar Documento</Text>
       </TouchableOpacity>
     </ScrollView>
   );

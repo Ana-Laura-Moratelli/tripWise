@@ -41,6 +41,7 @@ export default StyleSheet.create({
     title: {
         fontSize: fontSize.large,
         fontWeight: 'bold',
+        color: colors.black,
         marginBottom: spacing.medium,
         textAlign: 'center',
     },
@@ -84,14 +85,12 @@ export default StyleSheet.create({
         borderWidth: border.width,
         borderColor: colors.gray,
         borderRadius: border.large,
-        marginBottom: spacing.large,
         overflow: 'hidden',
     },
     picker: {
         borderWidth: border.width,
         borderColor: colors.gray,
         borderRadius: spacing.medium,
-        marginBottom: spacing.large,
         color: colors.black,
     },
     label: {
@@ -232,11 +231,35 @@ export default StyleSheet.create({
         shadowRadius: 2,
         elevation: 2,
     },
+    cardEditing: {
+        backgroundColor: colors.lightGray,
+        padding: spacing.large,
+        borderRadius: border.medium,
+        marginBottom: spacing.small,
+        display: "flex",
+        flexDirection: "column",
+        shadowColor: colors.black,
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
     /* Titulo do card */
     cardTitle: {
         fontSize: fontSize.large,
         fontWeight: "bold",
         marginBottom: spacing.xsmall,
+    },
+    cardLabel: {
+        fontSize: fontSize.large,
+        fontWeight: "bold",
+        marginBottom: spacing.small,
+    },
+    width70: {
+        width: "70%",
     },
     /* Informações do card */
     cardInfo: {

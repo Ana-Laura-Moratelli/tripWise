@@ -17,8 +17,13 @@ export default {
         },
         ios: {
             supportsTablet: true,
+            infoPlist: {
+                NSCalendarsUsageDescription: "Precisamos acessar seu calendário para adicionar eventos das viagens.",
+                NSRemindersUsageDescription: "Precisamos acessar seus lembretes para agendar as atividades da viagem."
+              }
         },
         android: {
+            "softInputMode": "adjustResize",
             adaptiveIcon: {
                 foregroundImage: "./assets/images/adaptive-icon.png",
                 backgroundColor: "#ffffff",
@@ -38,9 +43,24 @@ export default {
         extra: {
             googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
         },
-        plugins: ["expo-router"],
-        experiments: {
+        plugins: [
+            'expo-router',
+            [
+              'expo-build-properties',
+              {
+                android: {
+                  manifest: {
+                    application: {
+                      // injeta no AndroidManifest.xml
+                      'android:windowSoftInputMode': 'adjustResize'
+                    }
+                  }
+                }
+              }
+            ]
+          ],
+          experiments: {
             typedRoutes: true
-        }
+          },
     }
 };

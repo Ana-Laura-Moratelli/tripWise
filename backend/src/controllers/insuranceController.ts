@@ -4,9 +4,9 @@ import { db } from "../services/firebase";
 export const createInsurance: RequestHandler = async (req, res) => {
   try {
     const { tripId } = req.params;
-    const { seguradora, numeroApolice, dataInicio, dataFim, telefoneEmergencia, observacoes } = req.body;
+    const { seguradora, numeroApolice, dataInicio, dataFim, telefoneEmergencia, valor, observacoes } = req.body;
 
-    if (!seguradora || !numeroApolice || !dataInicio || !dataFim || !telefoneEmergencia) {
+    if (!seguradora || !numeroApolice || !dataInicio || !dataFim || !telefoneEmergencia || !valor) {
       res.status(400).json({ error: "Campos obrigatórios não preenchidos." });
       return;
     }
@@ -26,6 +26,7 @@ export const createInsurance: RequestHandler = async (req, res) => {
       dataInicio,
       dataFim,
       telefoneEmergencia,
+      valor,
       observacoes,
       criadoEm: new Date(),
     });
@@ -61,9 +62,9 @@ export const readInsurance: RequestHandler = async (req, res) => {
 export const updateInsurance: RequestHandler = async (req, res) => {
   try {
     const { insuranceId } = req.params;
-    const { seguradora, numeroApolice, dataInicio, dataFim, telefoneEmergencia, observacoes } = req.body;
+    const { seguradora, numeroApolice, dataInicio, dataFim, telefoneEmergencia, valor, observacoes } = req.body;
 
-    if (!seguradora || !numeroApolice || !dataInicio || !dataFim || !telefoneEmergencia) {
+    if (!seguradora || !numeroApolice || !dataInicio || !dataFim || !telefoneEmergencia || !valor) {
       res.status(400).json({ error: "Campos obrigatórios não preenchidos." });
       return;
     }
@@ -82,6 +83,7 @@ export const updateInsurance: RequestHandler = async (req, res) => {
       dataInicio,
       dataFim,
       telefoneEmergencia,
+      valor,
       observacoes: observacoes || "",
       atualizadoEm: new Date(),
     });

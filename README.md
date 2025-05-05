@@ -29,28 +29,30 @@ O App tripWise tem como objetivo facilitar a organização de viagens, permitind
       <th>Sprint</th>
     </tr>
   </thead>
-  <tbody>
-    <tr align="center"><td>1</td><td>ALTA</td><td>Como usuário, desejo criar uma conta com login e senha utilizando e-mail e senha.</td><td>5</td><td>1</td></tr>
-    <tr align="center"><td>2</td><td>ALTA</td><td>Como usuário, desejo adicionar e gerenciar várias viagens no aplicativo.</td><td>5</td><td>1</td></tr>
-    <tr align="center"><td>3</td><td>ALTA</td><td>Como usuário, desejo planejar viagens com origem, destino e datas.</td><td>3</td><td>1</td></tr>
-    <tr align="center"><td>4</td><td>ALTA</td><td>Como usuário, desejo pesquisar voos e comparar preços.</td><td>8</td><td>1</td></tr>
-    <tr align="center"><td>5</td><td>ALTA</td><td>Como usuário, desejo reservar acomodações diretamente no aplicativo.</td><td>8</td><td>1</td></tr>
-    <tr align="center"><td>6</td><td>ALTA</td><td>Como usuário, desejo criar itinerários com locais e atividades.</td><td>5</td><td>1</td></tr>
-    <tr align="center"><td>7</td><td>ALTA</td><td>Como usuário, desejo ver um cronograma com meus compromissos.</td><td>5</td><td>1</td></tr>
-    <tr align="center"><td>8</td><td>ALTA</td><td>Como usuário, desejo compartilhar meu itinerário com outras pessoas.</td><td>5</td><td>1</td></tr>
-    <tr align="center"><td>9</td><td>MÉDIA</td><td>Como usuário, desejo receber alertas e notificações sobre eventos importantes da viagem.</td><td>5</td><td>2</td></tr>
-    <tr align="center"><td>10</td><td>MÉDIA</td><td>Como usuário, desejo armazenar informações importantes sobre minha viagem.</td><td>3</td><td>2</td></tr>
-    <tr align="center"><td>11</td><td>MÉDIA</td><td>Como usuário, desejo visualizar no mapa os pontos turísticos e acomodações da minha viagem.</td><td>8</td><td>2</td></tr>
-    <tr align="center"><td>12</td><td>MÉDIA</td><td>Como usuário, desejo gerenciar dados de transporte como aluguel de carros e transfers.</td><td>5</td><td>2</td></tr>
-    <tr align="center"><td>13</td><td>MÉDIA</td><td>Como usuário, desejo acessar dicas sobre o destino da minha viagem.</td><td>3</td><td>2</td></tr>
-    <tr align="center"><td>14</td><td>MÉDIA</td><td>Como usuário, desejo monitorar meu orçamento de viagem.</td><td>8</td><td>2</td></tr>
-    <tr align="center"><td>15</td><td>BAIXA</td><td>Como usuário, desejo que o app use o GPS para calcular rotas até meus destinos.</td><td>5</td><td>3</td></tr>
-    <tr align="center"><td>16</td><td>BAIXA</td><td>Como usuário, desejo importar dados de passagens e reservas a partir dos meus e-mails.</td><td>8</td><td>3</td></tr>
-    <tr align="center"><td>17</td><td>BAIXA</td><td>Como usuário, desejo adicionar notas e fotos durante minha viagem.</td><td>5</td><td>3</td></tr>
-    <tr align="center"><td>18</td><td>BAIXA</td><td>Como usuário, desejo sincronizar meus eventos com o calendário do celular.</td><td>5</td><td>3</td></tr>
-    <tr align="center"><td>19</td><td>BAIXA</td><td>Como usuário, desejo visualizar fusos horários dos destinos da viagem.</td><td>3</td><td>3</td></tr>
-    <tr align="center"><td>20</td><td>BAIXA</td><td>Como usuário, desejo que meus dados estejam protegidos com segurança e criptografia.</td><td>5</td><td>3</td></tr>
-  </tbody>
+ <tbody>
+  <tr align="center"><td>1</td><td>ALTA</td><td>Como usuário, desejo criar uma conta com login e senha utilizando e-mail e senha.</td><td>5</td><td>1</td></tr>
+  <tr align="center"><td>2</td><td>ALTA</td><td>Como usuário, desejo adicionar e gerenciar várias viagens no aplicativo.</td><td>5</td><td>1</td></tr>
+  <tr align="center"><td>3</td><td>ALTA</td><td>Como usuário, desejo planejar viagens com origem, destino e datas.</td><td>3</td><td>1</td></tr>
+  <tr align="center"><td>4</td><td>ALTA</td><td>Como usuário, desejo pesquisar voos e comparar preços.</td><td>8</td><td>1</td></tr>
+  <tr align="center"><td>5</td><td>ALTA</td><td>Como usuário, desejo reservar acomodações diretamente no aplicativo.</td><td>8</td><td>1</td></tr>
+  <tr align="center"><td>6</td><td>ALTA</td><td>Como usuário, desejo criar itinerários com locais e atividades.</td><td>5</td><td>1</td></tr>
+  <tr align="center"><td>7</td><td>ALTA</td><td>Como usuário, desejo ver um cronograma com meus compromissos.</td><td>5</td><td>1</td></tr>
+  <tr align="center"><td>8</td><td>ALTA</td><td>Como usuário, desejo compartilhar meu itinerário com outras pessoas.</td><td>5</td><td>1</td></tr>
+  <tr align="center"><td>10</td><td>MÉDIA</td><td>Como usuário, desejo armazenar informações importantes sobre minha viagem.</td><td>3</td><td>2</td></tr>
+  <tr align="center"><td>11</td><td>MÉDIA</td><td>Como usuário, desejo visualizar no mapa os pontos turísticos e acomodações da minha viagem.</td><td>8</td><td>2</td></tr>
+  <tr align="center"><td>12</td><td>MÉDIA</td><td>Como usuário, desejo gerenciar dados de transporte como aluguel de carros e transfers.</td><td>5</td><td>2</td></tr>
+  <tr align="center"><td>13</td><td>MÉDIA</td><td>Como usuário, desejo acessar dicas sobre o destino da minha viagem.</td><td>3</td><td>2</td></tr>
+  <tr align="center"><td>14</td><td>MÉDIA</td><td>Como usuário, desejo monitorar meu orçamento de viagem.</td><td>8</td><td>2</td></tr>
+  <tr align="center"><td>15</td><td>MÉDIA</td><td>Como usuário, desejo que o app use o GPS para calcular rotas até meus destinos.</td><td>5</td><td>2</td></tr>
+  <tr align="center"><td>18</td><td>MÉDIA</td><td>Como usuário, desejo sincronizar meus eventos com o calendário do celular.</td><td>5</td><td>2</td></tr>
+  <tr align="center"><td>19</td><td>MÉDIA</td><td>Como usuário, desejo visualizar fusos horários dos destinos da viagem.</td><td>3</td><td>2</td></tr>
+  <tr align="center"><td>9</td><td>BAIXA</td><td>Como usuário, desejo receber alertas e notificações sobre eventos importantes da viagem.</td><td>5</td><td>3</td></tr>
+  <tr align="center"><td>16</td><td>BAIXA</td><td>Como usuário, desejo importar dados de passagens e reservas a partir dos meus e-mails.</td><td>8</td><td>3</td></tr>
+  <tr align="center"><td>17</td><td>BAIXA</td><td>Como usuário, desejo adicionar notas e fotos durante minha viagem.</td><td>5</td><td>3</td></tr>
+  <tr align="center"><td>20</td><td>BAIXA</td><td>Como usuário, desejo que meus dados estejam protegidos com segurança e criptografia.</td><td>5</td><td>3</td></tr>
+</tbody>
+
+
 </table>
 
 
@@ -117,15 +119,15 @@ O App tripWise tem como objetivo facilitar a organização de viagens, permitind
   </tr>
   <tr align="center">
     <td>02</td>
-    <td>07/04/2025</td>
-    <td>27/04/2025</td>
-    <td></td> 
-    <td>🔄</td>
+    <td>30/03/2025</td>
+    <td>05/05/2025</td>
+    <td><a href="https://github.com/Ana-Laura-Moratelli/tripWise/blob/main/sprints/sprint02/sprint02.md">Relatório</a></td> 
+    <td>✅</td>
   </tr>
   <tr align="center">
     <td>03</td>
     <td>05/05/2025</td>
-    <td>25/05/2025</td>
+    <td>02/06/2025</td>
     <td></td> 
     <td>🔄</td>
   </tr>

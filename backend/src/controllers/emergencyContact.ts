@@ -39,16 +39,12 @@ export const createEmergencyContact: RequestHandler = async (req, res) => {
 export const readEmergencyContact: RequestHandler = async (req, res) => {
     try {
       const { tripId } = req.params;
-  
-      console.log("Buscando contatos de emergência para tripId:", tripId);
-  
+    
       const snapshot = await db
         .collection("emergencyContact")
         .where("tripId", "==", tripId)
         .get();
-  
-      console.log("Quantidade de contatos encontrados:", snapshot.size);
-  
+    
       const emergencyContacts = snapshot.docs.map(emergencyContact => ({
         id: emergencyContact.id,
         ...emergencyContact.data(),

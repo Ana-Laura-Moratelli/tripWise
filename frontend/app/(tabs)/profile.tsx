@@ -9,24 +9,11 @@ import stylesProfile from '@/src/styles/profile';
 import { colors } from '@/src/styles/global';
 
 function formatPhoneForDisplay(phone: string): string {
-  if (phone.startsWith('+55')) phone = phone.substring(3);
-  else if (phone.startsWith('55') && phone.length > 11) phone = phone.substring(2);
-
   if (phone.length === 11)
     return `(${phone.substring(0, 2)}) ${phone.substring(2, 7)}-${phone.substring(7)}`;
   if (phone.length === 10)
     return `(${phone.substring(0, 2)}) ${phone.substring(2, 6)}-${phone.substring(6)}`;
   return phone;
-}
-
-function transformPhoneNumber(maskedPhone: string): string {
-  const digits = maskedPhone.replace(/\D/g, '');
-  return `+55${digits}`;
-}
-
-function formatPhoneForEditing(phone: string): string {
-  const digits = phone.replace(/\D/g, '');
-  return digits.startsWith('55') ? digits.substring(2) : digits;
 }
 
 function getInitial(name: string): string {
@@ -76,7 +63,7 @@ export default function Profile() {
       return;
     }
 
-    const phoneTransformed = transformPhoneNumber(user.phoneNumber);
+    const phoneTransformed = formatPhoneForDisplay(user.phoneNumber);
     const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
 
     if (!cpfRegex.test(user.cpf)) {
@@ -160,7 +147,7 @@ export default function Profile() {
           <TextInputMask
             type={'cel-phone'}
             options={{ maskType: 'BRL', withDDD: true, dddMask: '(99) ' }}
-            value={formatPhoneForEditing(user.phoneNumber)}
+            value={formatPhoneForDisplay(user.phoneNumber)}
             onChangeText={(text) => setUser({ ...user, phoneNumber: text })}
             style={styles.input}
             placeholder="Telefone"

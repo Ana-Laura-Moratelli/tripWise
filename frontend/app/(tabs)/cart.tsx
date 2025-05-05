@@ -57,28 +57,34 @@ export default function Cart() {
 
 
   async function criarEventoCalendario(titulo: string, startDate: Date, endDate?: Date) {
-    const { status } = await Calendar.requestCalendarPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permissão necessária', 'Autorize o acesso ao calendário para criar lembretes.');
-      return;
+    try {
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+  
+      if (status !== 'granted') {
+        Alert.alert('Permissão necessária', 'Autorize o acesso ao calendário para criar lembretes.');
+        return;
+      }
+  
+      const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+      const calendarioPadrao = calendars.find(cal => cal.allowsModifications);
+  
+      if (!calendarioPadrao) {
+        Alert.alert('Erro', 'Não foi encontrado um calendário modificável no dispositivo.');
+        return;
+      }
+  
+      await Calendar.createEventAsync(calendarioPadrao.id, {
+        title: titulo,
+        startDate,
+        endDate: endDate ?? startDate,
+        timeZone: 'America/Sao_Paulo',
+        allDay: !endDate || startDate.toDateString() === endDate.toDateString()
+      });
+    } catch (error: any) {
+      Alert.alert('Erro ao adicionar ao calendário', error?.message || 'Erro desconhecido');
     }
-
-    const calendars = await Calendar.getCalendarsAsync();
-    const calendarioPadrao = calendars.find(cal => cal.allowsModifications);
-
-    if (!calendarioPadrao) {
-      Alert.alert('Erro', 'Não foi encontrado um calendário modificável no dispositivo.');
-      return;
-    }
-
-    await Calendar.createEventAsync(calendarioPadrao.id, {
-      title: titulo,
-      startDate,
-      endDate: endDate ?? startDate,
-      timeZone: 'America/Sao_Paulo',
-      allDay: !endDate || startDate.toDateString() === endDate.toDateString()
-    });
   }
+  
 
   const realizarViagem = async () => {
     try {
@@ -143,7 +149,7 @@ export default function Cart() {
             renderItem={({ item, index }) => (
               <View style={styles.card}>
                 <View style={styles.flexRow}>
-                  <View>
+                  <View style={styles.width70}>
                     <Text style={styles.cardTitle}>
                       {item.tipo} - {item.origin} → {item.destination}
                     </Text>
@@ -172,18 +178,19 @@ export default function Cart() {
             renderItem={({ item, index }) => (
               <View style={styles.card}>
                 <View style={styles.flexRow}>
-                  <View>
+                  <View style={styles.width70}>
                     <Text style={styles.cardTitle}>{item.name}</Text>
+                    <Text>{item.address}</Text>
+                    <Text>Avaliação: {item.rating} ({item.reviews})</Text>
+                    <Text>Check-in: {item.checkin}</Text>
+                    <Text>Check-out: {item.checkout}</Text>
+                    <Text style={styles.cardInfoPrimary}>{item.total}</Text>
                   </View>
-                  <Text>{item.address}</Text>
-                  <Text>Avaliação: {item.rating} ({item.reviews})</Text>
-                  <Text>Check-in: {item.checkin}</Text>
-                  <Text>Check-out: {item.checkout}</Text>
-                  <Text style={styles.cardInfoPrimary}>{item.total}</Text>
-                </View>
+               
                 <TouchableOpacity onPress={() => removerHotel(index)}>
                   <Text style={styles.removeText}>Remover</Text>
                 </TouchableOpacity>
+              </View> 
               </View>
             )}
           />

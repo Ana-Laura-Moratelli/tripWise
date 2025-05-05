@@ -26,5 +26,5 @@ app.use("/api/insurance", insuranceRoutes);
 app.use("/api/transport", transportRoutes);
 
 const PORT = parseInt(process.env.PORT || "5000", 10);
-const HOST = "172.20.10.6"; 
+const HOST = "192.168.15.9"; 
 app.listen(PORT, HOST, () => console.log(`🚀 Backend rodando em http://${HOST}:${PORT}`));

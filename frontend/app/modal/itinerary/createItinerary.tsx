@@ -76,24 +76,56 @@ export default function CreateItinerary() {
 
   function formatarDataAtividade(dataHoraBR: string): string | null {
     if (!dataHoraBR || dataHoraBR.length < 10) return null;
-    const partes = dataHoraBR.trim().split(' ');
-    const [dia, mes, ano] = partes[0].split('/');
-    if (!dia || !mes || !ano) return null;
-    if (partes.length > 1 && partes[1].trim() !== '') {
-      const horaValida = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(partes[1].trim());
+  
+    const [datePart, timePart] = dataHoraBR.trim().split(' ');
+    const [d, m, y] = datePart.split('/');
+    const day = parseInt(d, 10);
+    const month = parseInt(m, 10);
+    const year = parseInt(y, 10);
+  
+    if ([day, month, year].some(isNaN)) return null;
+    if (month < 1 || month > 12) return null;
+    const daysInMonth = [
+      31,
+      new Date(year, 2, 0).getDate(),
+      31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    ];
+    if (day < 1 || day > daysInMonth[month - 1]) return null;
+  
+    if (timePart && timePart.trim() !== '') {
+      const horaValida = /^([01]?\d|2[0-3]):[0-5]\d$/.test(timePart.trim());
       if (!horaValida) return null;
-      return `${dia}/${mes}/${ano} ${partes[1]}`;
+      return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y} ${timePart.trim()}`;
     }
-    return `${dia}/${mes}/${ano}`;
+  
+    return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
   }
-
+  
   function converterParaISO(dataHoraBR: string): string | null {
-    const partes = dataHoraBR.trim().split(' ');
-    const [dia, mes, ano] = partes[0].split('/');
-    if (!dia || !mes || !ano) return null;
-    const hora = partes[1] || '00:00';
-    return `${ano}-${mes}-${dia}T${hora}:00`;
+    if (!dataHoraBR || dataHoraBR.length < 10) return null;
+  
+    const [datePart, timePart] = dataHoraBR.trim().split(' ');
+    const [d, m, y] = datePart.split('/');
+    const day = parseInt(d, 10);
+    const month = parseInt(m, 10);
+    const year = parseInt(y, 10);
+  
+    if ([day, month, year].some(isNaN)) return null;
+    if (month < 1 || month > 12) return null;
+    const daysInMonth = [
+      31,
+      new Date(year, 2, 0).getDate(),
+      31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    ];
+    if (day < 1 || day > daysInMonth[month - 1]) return null;
+  
+    const hora = timePart && /^([01]?\d|2[0-3]):[0-5]\d$/.test(timePart.trim())
+      ? timePart.trim()
+      : '00:00';
+  
+    return `${year}-${m.padStart(2,'0')}-${d.padStart(2,'0')}T${hora}:00`;
   }
+  
 
   async function salvarCronograma() {
     try {
@@ -113,6 +145,7 @@ export default function CreateItinerary() {
       if (dataSelecionada < new Date()) {
         Alert.alert("Data inválida", "A data não pode ser anterior ao momento atual.");
         return;
+        
       }
 
       let enderecoCompleto = `${rua}, ${numero}, ${bairro}, ${cidade}, ${estado}`.trim();
@@ -243,7 +276,7 @@ export default function CreateItinerary() {
       placeholderTextColor={colors.mediumGray} />
 
       <TouchableOpacity style={styles.buttonPrimary} onPress={salvarCronograma}>
-        <Text style={styles.buttonText}>Salvar</Text>
+        <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
 
     </ScrollView>

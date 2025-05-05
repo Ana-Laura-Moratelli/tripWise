@@ -24,12 +24,28 @@ export default function FlightSearch() {
   function formatarParaISO(data: string) {
     const partes = data.split('/');
     if (partes.length === 3) {
-      const [dia, mes, ano] = partes;
-      return `${ano}-${mes}-${dia}`;
+      const [diaStr, mesStr, anoStr] = partes;
+      const dia = parseInt(diaStr, 10);
+      const mes = parseInt(mesStr, 10);
+      const ano = parseInt(anoStr, 10);
+  
+      if (isNaN(mes) || mes < 1 || mes > 12) {
+        throw new Error("Mês inválido. Use valores de 01 a 12.");
+      }
+  
+      const maxDiasPorMes = [31, (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) ? 29 : 28,
+                             31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      if (isNaN(dia) || dia < 1 || dia > maxDiasPorMes[mes - 1]) {
+        throw new Error("Dia inválido para o mês informado.");
+      }
+  
+      const mm = mesStr.padStart(2, '0');
+      const dd = diaStr.padStart(2, '0');
+      return `${anoStr}-${mm}-${dd}`;
     }
     return data;
   }
-
+  
   function validarParametros() {
     const isoPartida = formatarParaISO(dataPartida);
     const isoVolta = formatarParaISO(dataVolta);
@@ -86,20 +102,22 @@ export default function FlightSearch() {
     setLoading(true);
     try {
       validarParametros();
-      const hoje = new Date();
+      const now = new Date();
+      const hojeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
       const isoPartida = formatarParaISO(dataPartida);
       const isoVolta = formatarParaISO(dataVolta);
 
       const dataPartidaISO = parseISO(isoPartida);
       const dataVoltaISO = parseISO(isoVolta);
 
-      if (isBefore(dataPartidaISO, hoje)) {
-        throw new Error("A data de ida não pode ser anterior à data de hoje.");
+      if (isBefore(dataPartidaISO, hojeStart)) {
+        throw new Error("A data de ida não pode ser anterior ao dia de hoje.");
       }
 
       if (idaEVolta) {
-        if (isBefore(dataVoltaISO, hoje)) {
-          throw new Error("A data de volta não pode ser anterior à data de hoje.");
+        if (isBefore(dataVoltaISO, hojeStart)) {
+          throw new Error("A data de volta não pode ser anterior ao dia de hoje.");
         }
         if (isBefore(dataVoltaISO, dataPartidaISO)) {
           throw new Error("A data de volta não pode ser anterior à data de ida.");
@@ -294,13 +312,13 @@ export default function FlightSearch() {
                   })
                 }
               >
-                  <View style={styles.card}>
-                    <Text style={styles.cardTitle}>{item.tipo} - {item.origin} → {item.destination}</Text>
-                    <Text style={styles.cardInfo}>Companhia: {item.airline}</Text>
-                    <Text style={styles.cardInfo}>Partida: {item.departureTime}</Text>
-                    <Text style={styles.cardInfo}>Chegada: {item.arrivalTime}</Text>
-                    <Text style={styles.cardInfoPrimary}>Preço: {item.price}</Text>
-                  </View>
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>{item.tipo} - {item.origin} → {item.destination}</Text>
+                  <Text style={styles.cardInfo}>Companhia: {item.airline}</Text>
+                  <Text style={styles.cardInfo}>Partida: {item.departureTime}</Text>
+                  <Text style={styles.cardInfo}>Chegada: {item.arrivalTime}</Text>
+                  <Text style={styles.cardInfoPrimary}>Preço: {item.price}</Text>
+                </View>
               </TouchableOpacity>
 
 

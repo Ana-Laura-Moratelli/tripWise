@@ -75,119 +75,139 @@ export default function InfoEmergencyContacts() {
   return (
     <View style={styles.container}>
       {loading ? (
-        <View style={styles.container}><Text style={styles.loading}>Carregando...</Text></View>
+        <View style={styles.container}>
+          <Text style={styles.loading}>Carregando...</Text>
+        </View>
       ) : (
         <FlatList
           data={contatos}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           renderItem={({ item, index }) => {
             const isEditing = editingIndex === index;
-            return (
-              <View style={styles.card}>
-                {isEditing ? (
-                  <>
-                    <TextInput
-                      style={styles.input}
-                      value={editingItem.name ?? item.name}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, name: text })}
-                      placeholder="Nome"
-                      placeholderTextColor={colors.mediumGray}
-                    />
-                    <TextInputMask
-                      type={'custom'}
-                      options={{ mask: '(99) 99999-9999' }}
-                      value={editingItem.phone ?? item.phone}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, phone: text })}
-                      placeholder="Telefone"
-                      style={styles.input}
-                      placeholderTextColor={colors.mediumGray}
-                      keyboardType="numeric"
-                    />
-                    <TextInput
-                      style={styles.input}
-                      value={editingItem.relation ?? item.relation}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, relation: text })}
-                      placeholder="Relação"
-                      placeholderTextColor={colors.mediumGray}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      value={editingItem.observacoes ?? item.observacoes}
-                      onChangeText={(text) => setEditingItem({ ...editingItem, observacoes: text })}
-                      placeholder="Observações"
-                      placeholderTextColor={colors.mediumGray}
-                    />
 
-                    <View style={styles.flexRow}>
-                      <View style={{ flex: 1 }}>
-                        <TouchableOpacity style={styles.buttonThird} onPress={() => atualizarContato(item.id)}>
-                          <Text style={styles.buttonText}>Salvar</Text>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <TouchableOpacity style={styles.buttonFourth} onPress={() => {
+            if (isEditing) {
+              return (
+                <View style={styles.cardEditing}>
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Nome</Text></Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editingItem.name ?? item.name}
+                    onChangeText={text => setEditingItem({ ...editingItem, name: text })}
+                    placeholder="Nome"
+                    placeholderTextColor={colors.mediumGray}
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Telefone</Text></Text>
+                  <TextInputMask
+                    type="custom"
+                    options={{ mask: '(99) 99999-9999' }}
+                    value={editingItem.phone ?? item.phone}
+                    onChangeText={text => setEditingItem({ ...editingItem, phone: text })}
+                    placeholder="Telefone"
+                    style={styles.input}
+                    placeholderTextColor={colors.mediumGray}
+                    keyboardType="numeric"
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Relação</Text></Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editingItem.relation ?? item.relation}
+                    onChangeText={text => setEditingItem({ ...editingItem, relation: text })}
+                    placeholder="Relação"
+                    placeholderTextColor={colors.mediumGray}
+                  />
+                  <Text style={styles.cardLabel}><Text style={styles.bold}>Observações</Text></Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editingItem.observacoes ?? item.observacoes}
+                    onChangeText={text => setEditingItem({ ...editingItem, observacoes: text })}
+                    placeholder="Observações"
+                    placeholderTextColor={colors.mediumGray}
+                  />
+
+                  <View style={styles.flexRow}>
+                    <View style={{ flex: 1 }}>
+                      <TouchableOpacity
+                        style={styles.buttonThird}
+                        onPress={() => atualizarContato(item.id)}
+                      >
+                        <Text style={styles.buttonText}>Salvar</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <TouchableOpacity
+                        style={styles.buttonFourth}
+                        onPress={() => {
                           setEditingIndex(null);
                           setEditingItem({});
-                        }}>
-                          <Text style={styles.buttonText}>Cancelar</Text>
-                        </TouchableOpacity>
-                      </View>
+                        }}
+                      >
+                        <Text style={styles.buttonText}>Cancelar</Text>
+                      </TouchableOpacity>
                     </View>
-                  </>
-                ) : (
-                  <>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Nome:</Text> {item.name}</Text>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Telefone:</Text> {item.phone}</Text>
-                    <Text style={styles.cardInfo}><Text style={styles.bold}>Relação:</Text> {item.relation}</Text>
-                    {item.observacoes && (
-                      <Text style={styles.cardInfo}><Text style={styles.bold}>Observações:</Text> {item.observacoes}</Text>
-                    )}
+                  </View>
+                </View>
+              );
+            }
 
-                    <View style={styles.flexRow}>
-                      <View style={{ flex: 1 }}>
-
-                        <TouchableOpacity
-                          style={styles.buttonSecondary}
-                          onPress={() => {
-                            setEditingIndex(index);
-                            setEditingItem({ ...item });
-                          }}
-                        >
-                          <Text style={styles.buttonText}>Editar</Text>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={{ flex: 1 }}>
-
-                        <TouchableOpacity
-                          style={styles.buttonFourth}
-                          onPress={() => excluirContato(item.id)}
-                        >
-                          <Text style={styles.buttonText}>Excluir</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </>
+            // Modo leitura
+            return (
+              <View style={styles.card}>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Nome:</Text> {item.name}
+                </Text>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Telefone:</Text> {item.phone}
+                </Text>
+                <Text style={styles.cardInfo}>
+                  <Text style={styles.bold}>Relação:</Text> {item.relation}
+                </Text>
+                {item.observacoes && (
+                  <Text style={styles.cardInfo}>
+                    <Text style={styles.bold}>Observações:</Text> {item.observacoes}
+                  </Text>
                 )}
+                <View style={styles.flexRow}>
+                  <View style={{ flex: 1 }}>
+                    <TouchableOpacity
+                      style={styles.buttonSecondary}
+                      onPress={() => {
+                        setEditingIndex(index);
+                        setEditingItem({ ...item });
+                      }}
+                    >
+                      <Text style={styles.buttonText}>Editar</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <TouchableOpacity
+                      style={styles.buttonFourth}
+                      onPress={() => excluirContato(item.id)}
+                    >
+                      <Text style={styles.buttonText}>Excluir</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
             );
           }}
           ListEmptyComponent={<Text style={styles.noitens}>Nenhum contato cadastrado.</Text>}
         />
       )}
-<View style={styles.buttonFooter} />
-      <TouchableOpacity
-        style={styles.buttonPrimary}
-        onPress={() =>
-          router.push({
-            pathname: '/modal/emergencyContact/createEmergencyContact',
-            params: { id },
-          })
-        }
-      >
-        <Text style={styles.buttonText}>Cadastrar Contato</Text>
-      </TouchableOpacity>
+
+      {!loading && editingIndex === null && (
+        <TouchableOpacity
+          style={styles.buttonPrimary}
+          onPress={() =>
+            router.push({
+              pathname: '/modal/emergencyContact/createEmergencyContact',
+              params: { id },
+            })
+          }
+        >
+          <Text style={styles.buttonText}>Cadastrar Contato</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
-
 

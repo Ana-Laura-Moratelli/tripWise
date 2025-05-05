@@ -43,15 +43,12 @@ export const createTransport: RequestHandler = async (req, res) => {
 export const readTransport: RequestHandler = async (req, res) => {
   try {
     const { tripId } = req.params;
-
-    console.log("Buscando transportes para tripId:", tripId);
-
+    
     const snapshot = await db
       .collection("transport")
       .where("tripId", "==", tripId)
       .get();
 
-    console.log("Quantidade de transportes encontrados:", snapshot.size);
 
     const transports = snapshot.docs.map(doc => ({
       id: doc.id,

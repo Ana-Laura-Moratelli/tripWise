@@ -5,5 +5,6 @@ export interface Insurance {
     dataInicio: string;
     dataFim: string;
     telefoneEmergencia: string;
+    valor: string;
     observacoes?: string;
   }
