@@ -24,13 +24,25 @@ export const registrarViagem = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const listarViagens = async (_req: Request, res: Response) => {
+export const listarViagens = async (req: Request, res: Response) => {
   try {
-    const snapshot = await db.collection("trip").orderBy("createdAt", "desc").get();
+    const { userId } = req.query;
+
+    if (!userId || typeof userId !== 'string') {
+      res.status(400).json({ error: 'Parâmetro userId é obrigatório.' });
+      return;
+    }
+
+    const snapshot = await db
+      .collection("trip")
+      .where("userId", "==", userId)
+      .get();
+
     const viagens = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     res.status(200).json(viagens);
-  } catch (error) {
-    res.status(500).json({ error: "Erro ao listar viagens." });
+  } catch (error: any) {
+    console.error("Erro ao listar viagens:", error.message);
+    res.status(500).json({ error: error.message || "Erro ao listar viagens." });
   }
 };
 

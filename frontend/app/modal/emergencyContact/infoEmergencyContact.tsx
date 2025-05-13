@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { api } from '../../../src/services/api';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import { EmergencyContact } from '../../../src/types/emergencyContact';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
@@ -97,15 +97,20 @@ export default function InfoEmergencyContacts() {
                     placeholderTextColor={colors.mediumGray}
                   />
                   <Text style={styles.cardLabel}><Text style={styles.bold}>Telefone</Text></Text>
-                  <TextInputMask
-                    type="custom"
-                    options={{ mask: '(99) 99999-9999' }}
+                  <MaskInput
                     value={editingItem.phone ?? item.phone}
-                    onChangeText={text => setEditingItem({ ...editingItem, phone: text })}
+                    onChangeText={(text) =>
+                      setEditingItem({ ...editingItem, phone: text })
+                    }
                     placeholder="Telefone"
                     style={styles.input}
                     placeholderTextColor={colors.mediumGray}
                     keyboardType="numeric"
+                    mask={[
+                      '(', /\d/, /\d/, ')', ' ',
+                      /\d/, /\d/, /\d/, /\d/, /\d/, '-',
+                      /\d/, /\d/, /\d/, /\d/
+                    ]}
                   />
                   <Text style={styles.cardLabel}><Text style={styles.bold}>Relação</Text></Text>
                   <TextInput

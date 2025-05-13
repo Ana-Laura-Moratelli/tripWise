@@ -3,10 +3,10 @@ import { View, Text, TouchableOpacity, Platform, FlatList } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect, useRouter } from 'expo-router';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { api } from '@/src/services/api';	
+import { api } from '@/src/services/api';
 import { Viagem } from '@/src/types/travel';
-import { Voo } from '@/src/types/flight' 
-import { Hotel } from '@/src/types/hotel'; 
+import { Voo } from '@/src/types/flight'
+import { Hotel } from '@/src/types/hotel';
 import styles from '@/src/styles/global';
 
 export default function Trip() {
@@ -19,22 +19,23 @@ export default function Trip() {
         try {
           const userId = await AsyncStorage.getItem("@user_id");
           if (!userId) return;
-  
+
           const response = await api.get("/api/trip", {
             params: { userId }
           });
-          const json = response.data;
-  
-          const viagensFiltradas = json.filter((viagem: Viagem) => viagem.userId === userId);
-          setViagens(viagensFiltradas);
+
+
+          setViagens(response.data);
         } catch (error) {
           console.error("Erro ao carregar viagens:", error);
         }
       }
+
       carregarViagens();
     }, [])
   );
-  
+
+
   const renderVoo = (voos: Voo[]) => {
     const origem = voos[0]?.origin;
     const destino = voos[0]?.destination;
@@ -57,36 +58,36 @@ export default function Trip() {
       </View>
     ));
   };
-  
+
 
   return (
     <View style={styles.container}>
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
-        <Text style={styles.title}>Histórico de Viagens</Text>
+      <Text style={styles.title}>Histórico de Viagens</Text>
 
-        {viagens.length === 0 ? (
-          <Text style={styles.noitens}>Nenhuma viagem realizada ainda.</Text>
-        ) : (
-          <FlatList
-            data={viagens}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() =>
-                  router.push({
-                    pathname: "/modal/trip/infoTrip",
-                    params: { id: item.id },
-                  })
-                }
-              >
-                <View style={styles.card}>
-                  {item.voos && item.voos.length > 0 && renderVoo(item.voos)}
-                  {item.hoteis && item.hoteis.length > 0 && renderHotel(item.hoteis)}
-                </View>
-              </TouchableOpacity>
-            )}
-          />
-        )}
+      {viagens.length === 0 ? (
+        <Text style={styles.noitens}>Nenhuma viagem realizada ainda.</Text>
+      ) : (
+        <FlatList
+          data={viagens}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: "/modal/trip/infoTrip",
+                  params: { id: item.id },
+                })
+              }
+            >
+              <View style={styles.card}>
+                {item.voos && item.voos.length > 0 && renderVoo(item.voos)}
+                {item.hoteis && item.hoteis.length > 0 && renderHotel(item.hoteis)}
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </View>
   );
 }

@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, Alert, ActionSheetIOS } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../../src/services/api';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
+import maskCurrency from 'react-native-mask-input';
 
 export default function CreateTransport() {
   const router = useRouter();
@@ -122,37 +123,55 @@ export default function CreateTransport() {
         </View>
       )}
 
-      <TextInputMask
-        type={'datetime'}
-        options={{ format: 'DD/MM/YYYY HH:mm' }}
-        style={styles.input}
-        placeholder="Data e Hora de Partida"
-        value={dataHoraPartida}
-        onChangeText={setDataHoraPartida}
-        placeholderTextColor={colors.mediumGray}
-        keyboardType="numeric"
-      />
-
-      <TextInputMask
-        type={'datetime'}
-        options={{ format: 'DD/MM/YYYY HH:mm' }}
-        style={styles.input}
-        placeholder="Data e Hora de Chegada"
-        value={dataHoraChegada}
-        onChangeText={setDataHoraChegada}
-        placeholderTextColor={colors.mediumGray}
-        keyboardType="numeric"
-      />
+   <MaskInput
+  style={styles.input}
+  placeholder="Data e Hora de Partida"
+  value={dataHoraPartida}
+  onChangeText={setDataHoraPartida}
+  placeholderTextColor={colors.mediumGray}
+  keyboardType="numeric"
+  mask={[
+    /\d/, /\d/, '/', 
+    /\d/, /\d/, '/', 
+    /\d/, /\d/, /\d/, /\d/, ' ', 
+    /\d/, /\d/, ':', 
+    /\d/, /\d/
+  ]}
+/>
 
 
-      <TextInputMask
-        type={'money'}
-        options={{ precision: 2, separator: ',', delimiter: '.', unit: 'R$', suffixUnit: '' }}
-        style={styles.input}
-        value={valor}
-        onChangeText={setValor}
-        placeholder="Valor"
-        placeholderTextColor={colors.mediumGray} />
+   <MaskInput
+  style={styles.input}
+  placeholder="Data e Hora de Chegada"
+  value={dataHoraChegada}
+  onChangeText={setDataHoraChegada}
+  placeholderTextColor={colors.mediumGray}
+  keyboardType="numeric"
+  mask={[
+    /\d/, /\d/, '/', 
+    /\d/, /\d/, '/', 
+    /\d/, /\d/, /\d/, /\d/, ' ', 
+    /\d/, /\d/, ':', 
+    /\d/, /\d/
+  ]}
+/>
+
+
+<MaskInput
+  value={valor}
+  onChangeText={(masked, unmasked) => setValor(masked)}
+  style={styles.input}
+  placeholder="Valor"
+  placeholderTextColor={colors.mediumGray}
+  keyboardType="numeric"
+  mask={[
+    'R', '$', ' ',
+    /\d/, /\d/, '.', 
+    /\d/, /\d/, /\d/, ',', 
+    /\d/, /\d/
+  ]}
+/>
+
 
       {tipoTransporte === 'aluguel' && (
         <>

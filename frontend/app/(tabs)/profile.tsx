@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import { api } from '../../src/services/api';
-import styles  from '@/src/styles/global';
+import styles from '@/src/styles/global';
 import stylesProfile from '@/src/styles/profile';
 import { colors } from '@/src/styles/global';
 
@@ -136,23 +136,23 @@ export default function Profile() {
             onChangeText={(text) => setUser({ ...user, email: text })}
             placeholderTextColor={colors.mediumGray}
           />
-          <TextInputMask
-            type={'cpf'}
+          <MaskInput
             value={user.cpf}
             onChangeText={(text) => setUser({ ...user, cpf: text })}
             style={styles.input}
             placeholder="CPF"
             placeholderTextColor={colors.mediumGray}
+            mask={[/\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '-', /\d/, /\d/]}
           />
-          <TextInputMask
-            type={'cel-phone'}
-            options={{ maskType: 'BRL', withDDD: true, dddMask: '(99) ' }}
-            value={formatPhoneForDisplay(user.phoneNumber)}
+          <MaskInput
+            value={user.phoneNumber}
             onChangeText={(text) => setUser({ ...user, phoneNumber: text })}
             style={styles.input}
             placeholder="Telefone"
             placeholderTextColor={colors.mediumGray}
+            mask={['(', /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}
           />
+
           <View style={styles.flexColumn}>
             <TouchableOpacity style={styles.buttonThird} onPress={handleSave}>
               <Text style={styles.buttonText}>Salvar</Text>

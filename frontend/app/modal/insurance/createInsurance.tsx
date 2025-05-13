@@ -3,7 +3,7 @@ import { TextInput, TouchableOpacity, Alert, ScrollView, Text } from 'react-nati
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { api } from '../../../src/services/api';
 import { useNavigation } from '@react-navigation/native';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
 
@@ -20,7 +20,7 @@ export default function CreateInsurance() {
     const [observacoes, setObservacoes] = useState('');
 
     async function adicionarSeguro() {
-        if (!seguradora || !numeroApolice || !dataInicio || !dataFim || !telefoneEmergencia || !valor)  {
+        if (!seguradora || !numeroApolice || !dataInicio || !dataFim || !telefoneEmergencia || !valor) {
             Alert.alert('Atenção', 'Preencha todos os campos obrigatórios.');
             return;
         }
@@ -69,48 +69,62 @@ export default function CreateInsurance() {
                 keyboardType="numeric"
             />
 
-            <TextInputMask
-                type={'datetime'}
-                options={{ format: 'DD/MM/YYYY' }}
+            <MaskInput
                 value={dataInicio}
                 onChangeText={setDataInicio}
                 placeholder="Data de Início"
                 placeholderTextColor={colors.mediumGray}
                 style={styles.input}
                 keyboardType="numeric"
+                mask={[
+                    /\d/, /\d/, '/',
+                    /\d/, /\d/, '/',
+                    /\d/, /\d/, /\d/, /\d/
+                ]}
             />
 
-            <TextInputMask
-                type={'datetime'}
-                options={{ format: 'DD/MM/YYYY' }}
+            <MaskInput
                 value={dataFim}
                 onChangeText={setDataFim}
                 placeholder="Data de Fim"
                 placeholderTextColor={colors.mediumGray}
                 style={styles.input}
                 keyboardType="numeric"
+                mask={[
+                    /\d/, /\d/, '/',
+                    /\d/, /\d/, '/',
+                    /\d/, /\d/, /\d/, /\d/
+                ]}
             />
 
-            <TextInputMask
-                type={'custom'}
-                options={{ mask: '(99) 99999-9999' }}
+            <MaskInput
                 value={telefoneEmergencia}
                 onChangeText={setTelefoneEmergencia}
                 placeholder="Telefone de Emergência"
-                style={styles.input}
                 placeholderTextColor={colors.mediumGray}
+                style={styles.input}
                 keyboardType="phone-pad"
+                mask={[
+                    '(', /\d/, /\d/, ')', ' ',
+                    /\d/, /\d/, /\d/, /\d/, /\d/, '-',
+                    /\d/, /\d/, /\d/, /\d/
+                ]}
             />
 
-
-            <TextInputMask
-                type={'money'}
-                options={{ precision: 2, separator: ',', delimiter: '.', unit: 'R$', suffixUnit: '' }}
-                style={styles.input}
+            <MaskInput
                 value={valor}
                 onChangeText={setValor}
                 placeholder="Valor"
-                placeholderTextColor={colors.mediumGray} />
+                placeholderTextColor={colors.mediumGray}
+                style={styles.input}
+                keyboardType="numeric"
+                mask={[
+                    'R', '$', ' ',
+                    /\d/, /\d/, '.',
+                    /\d/, /\d/, /\d/, ',',
+                    /\d/, /\d/
+                ]}
+            />
 
 
             <TextInput

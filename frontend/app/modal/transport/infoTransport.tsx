@@ -3,7 +3,7 @@ import { View, Text, FlatList, TextInput, TouchableOpacity, Alert } from 'react-
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../../../src/services/api';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import { Transport } from '../../../src/types/transport';
 import styles from '@/src/styles/global';
 
@@ -98,25 +98,41 @@ export default function InfoTransport() {
                     onChangeText={(text) => setEditingItem({ ...editingItem, empresa: text })}
                   />
                   <Text style={styles.cardLabel}><Text style={styles.bold}>Data/Hora Partida</Text></Text>
-                  <TextInputMask
-                    type={'datetime'}
-                    options={{ format: 'DD/MM/YYYY HH:mm' }}
+                  <MaskInput
                     style={styles.input}
                     placeholder="Data/Hora Partida"
                     value={editingItem.dataHoraPartida ?? item.dataHoraPartida}
-                    onChangeText={(text) => setEditingItem({ ...editingItem, dataHoraPartida: text })}
+                    onChangeText={(text) =>
+                      setEditingItem({ ...editingItem, dataHoraPartida: text })
+                    }
                     keyboardType="numeric"
+                    mask={[
+                      /\d/, /\d/, '/',
+                      /\d/, /\d/, '/',
+                      /\d/, /\d/, /\d/, /\d/, ' ',
+                      /\d/, /\d/, ':',
+                      /\d/, /\d/
+                    ]}
                   />
+
                   <Text style={styles.cardLabel}><Text style={styles.bold}>Data/Hora Chegada</Text></Text>
-                  <TextInputMask
-                    type={'datetime'}
-                    options={{ format: 'DD/MM/YYYY HH:mm' }}
+                  <MaskInput
                     style={styles.input}
                     placeholder="Data/Hora Chegada"
                     value={editingItem.dataHoraChegada ?? item.dataHoraChegada}
-                    onChangeText={(text) => setEditingItem({ ...editingItem, dataHoraChegada: text })}
+                    onChangeText={(text) =>
+                      setEditingItem({ ...editingItem, dataHoraChegada: text })
+                    }
                     keyboardType="numeric"
+                    mask={[
+                      /\d/, /\d/, '/',
+                      /\d/, /\d/, '/',
+                      /\d/, /\d/, /\d/, /\d/, ' ',
+                      /\d/, /\d/, ':',
+                      /\d/, /\d/
+                    ]}
                   />
+
                   <Text style={styles.cardLabel}><Text style={styles.bold}>Valor</Text></Text>
                   <TextInput
                     style={styles.input}

@@ -1,17 +1,15 @@
-// app/_layout.tsx
-import React, { useEffect } from 'react';
-import { KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, View, ActivityIndicator } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, useSegments } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 
-export {
-  ErrorBoundary,
-} from 'expo-router';
+export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
@@ -25,58 +23,66 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  useEffect(() => { if (error) throw error; }, [error]);
-  useEffect(() => { if (loaded) SplashScreen.hideAsync(); }, [loaded]);
+  useEffect(() => {
+    if (error) throw error;
+  }, [error]);
+
+  useEffect(() => {
+    if (loaded) SplashScreen.hideAsync();
+  }, [loaded]);
 
   if (!loaded) return null;
+
   return <RootLayoutNav />;
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const segments = useSegments();
-  // se o primeiro segmento for "(tabs)", estamos dentro do BottomTabs
-  const insideTabs = segments[0] === '(tabs)';
+  const [loading, setLoading] = useState(true);
+  const [logado, setLogado] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem('token').then((token) => {
+      setLogado(!!token);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   const content = (
     <ThemeProvider value={DefaultTheme}>
-      <Stack>
-        {/* Tabs principais */}
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-
-        {/* Modais externos aos tabs */}
-        <Stack.Screen
-          name="modal/travelTips/travelTips"
-          options={{ presentation: 'modal', title: 'Dicas de Viagem' }}
-        />
-        <Stack.Screen
-          name="modal/hotel/infoHotel"
-          options={{ presentation: 'modal', title: 'Informações do Hotel' }}
-        />
-        <Stack.Screen
-          name="modal/flight/infoFlight"
-          options={{ presentation: 'modal', title: 'Informações do Voo' }}
-        />
-
-        {/* Login / Register ficam fora do tabs */}
-        <Stack.Screen name="index" options={{ title: 'Login' }} />
-        <Stack.Screen name="screens/auth/Login" options={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        {logado ? (
+          <>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="modal/travelTips/travelTips" options={{ presentation: 'modal', title: 'Dicas de Viagem' }} />
+            <Stack.Screen name="modal/hotel/infoHotel" options={{ presentation: 'modal', title: 'Informações do Hotel' }} />
+            <Stack.Screen name="modal/flight/infoFlight" options={{ presentation: 'modal', title: 'Informações do Voo' }} />
+          </>
+        ) : (
+          <Stack.Screen name="screens/auth/Login" />
+        )}
       </Stack>
     </ThemeProvider>
   );
 
-  // só envolver em KeyboardAvoidingView se NÃO estivermos dentro dos tabs
-  if (!insideTabs) {
-    return (
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}
-      >
-        {content}
-      </KeyboardAvoidingView>
-    );
-  }
-
-  return content;
+  return !logado ? (
+    
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}
+    >
+      {content}
+    </KeyboardAvoidingView>
+  ) : (
+    content
+  );
 }

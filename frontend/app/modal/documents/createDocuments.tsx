@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { api } from '../../../src/services/api';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
 import { Platform } from 'react-native';
@@ -100,53 +100,68 @@ export default function CreateDocuments() {
 
 
       {/* Número do Documento */}
-      {tipo === 'CPF' && (
-        <TextInputMask
-          type="cpf"
-          style={styles.input}
-          value={numero}
-          onChangeText={setNumero}
-          placeholder="Número do CPF"
-          placeholderTextColor={colors.mediumGray}
-          keyboardType="numeric"
-        />
-      )}
-      {tipo === 'RG' && (
-        <TextInputMask
-          type="custom"
-          options={{ mask: '99.999.999-9' }}
-          style={styles.input}
-          value={numero}
-          onChangeText={setNumero}
-          placeholder="Número do RG"
-          placeholderTextColor={colors.mediumGray}
-          keyboardType="numeric"
-        />
-      )}
-      {tipo === 'Passaporte' && (
-        <TextInputMask
-          type="custom"
-          options={{ mask: 'AA 999999' }}
-          style={styles.input}
-          value={numero}
-          onChangeText={setNumero}
-          placeholder="Passaporte (AA 000001)"
-          placeholderTextColor={colors.mediumGray}
-          autoCapitalize="characters"
-        />
-      )}
+     {tipo === 'CPF' && (
+  <MaskInput
+    style={styles.input}
+    value={numero}
+    onChangeText={setNumero}
+    placeholder="Número do CPF"
+    placeholderTextColor={colors.mediumGray}
+    keyboardType="numeric"
+    mask={[
+      /\d/, /\d/, /\d/, '.', 
+      /\d/, /\d/, /\d/, '.', 
+      /\d/, /\d/, /\d/, '-', 
+      /\d/, /\d/
+    ]}
+  />
+)}
 
-      <TextInputMask
-        type={'datetime'}
-        options={{ format: 'DD/MM/YYYY' }}
-        value={validade}
-        onChangeText={setValidade}
-        placeholder="Validade"
-        placeholderTextColor={colors.mediumGray}
-        style={styles.input}
-        keyboardType="numeric"
-      />
+{tipo === 'RG' && (
+  <MaskInput
+    style={styles.input}
+    value={numero}
+    onChangeText={setNumero}
+    placeholder="Número do RG"
+    placeholderTextColor={colors.mediumGray}
+    keyboardType="numeric"
+    mask={[
+      /\d/, /\d/, '.', 
+      /\d/, /\d/, /\d/, '.', 
+      /\d/, /\d/, /\d/, '-', 
+      /\d/
+    ]}
+  />
+)}
 
+{tipo === 'Passaporte' && (
+  <MaskInput
+    style={styles.input}
+    value={numero}
+    onChangeText={setNumero}
+    placeholder="Passaporte (AA 000001)"
+    placeholderTextColor={colors.mediumGray}
+    autoCapitalize="characters"
+    mask={[
+      /[A-Z]/, /[A-Z]/, ' ', 
+      /\d/, /\d/, /\d/, /\d/, /\d/, /\d/
+    ]}
+  />
+)}
+
+<MaskInput
+  style={styles.input}
+  value={validade}
+  onChangeText={setValidade}
+  placeholder="Validade"
+  placeholderTextColor={colors.mediumGray}
+  keyboardType="numeric"
+  mask={[
+    /\d/, /\d/, '/', 
+    /\d/, /\d/, '/', 
+    /\d/, /\d/, /\d/, /\d/
+  ]}
+/>
      
 
       <TouchableOpacity style={styles.buttonPrimary} onPress={adicionarDocumento}>

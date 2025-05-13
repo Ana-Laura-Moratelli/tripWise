@@ -9,6 +9,8 @@ import documentRoutes from "./routes/documentsRoutes";
 import emergencyContactRoutes from "./routes/emergencyContactRoutes";
 import insuranceRoutes from "./routes/insuranceRoutes";
 import transportRoutes from "./routes/transportRoutes";
+import photoNotesRoutes from "./routes/photoNotesRoutes"; 
+import './services/importTripEmail'; // ✅ roda o cron que importa os emails
 
 const app = express();
 app.use(cors());
@@ -24,6 +26,7 @@ app.use("/api/documents", documentRoutes);
 app.use("/api/emergencyContact", emergencyContactRoutes); 
 app.use("/api/insurance", insuranceRoutes);
 app.use("/api/transport", transportRoutes);
+app.use("/api/photoNotes", photoNotesRoutes); 
 
 const PORT = parseInt(process.env.PORT || "5000", 10);
 const HOST = "172.20.10.6"; 

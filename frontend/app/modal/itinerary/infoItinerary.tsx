@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../../src/services/api';
@@ -220,36 +220,62 @@ export default function infoItinerary() {
             placeholderTextColor={colors.mediumGray}
           />
           <Text style={styles.cardLabel}><Text style={styles.bold}>Valor</Text></Text>
-          <TextInputMask
-            type={'money'}
-            options={{ precision: 2, separator: ',', delimiter: '.', unit: 'R$', suffixUnit: '' }}
+          <MaskInput
             style={styles.input}
             value={editingItem.valor ?? item.valor}
-            onChangeText={(text) => setEditingItem({ ...editingItem, valor: text })}
+            onChangeText={(text) =>
+              setEditingItem({ ...editingItem, valor: text })
+            }
             placeholder="Valor"
             placeholderTextColor={colors.mediumGray}
+            keyboardType="numeric"
+            mask={[
+              'R', '$', ' ',
+              /\d/, /\d/, '.',
+              /\d/, /\d/, /\d/, ',',
+              /\d/, /\d/
+            ]}
           />
-          <Text style={styles.cardLabel}><Text style={styles.bold}>Dia</Text></Text>
-          <TextInputMask
-            type={'datetime'}
-            options={{ format: 'DD/MM/YYYY HH:mm' }}
+
+          <Text style={styles.cardLabel}>
+            <Text style={styles.bold}>Dia</Text>
+          </Text>
+
+          <MaskInput
             style={styles.input}
             value={editingItem.dia ?? item.dia}
-            onChangeText={(text) => setEditingItem({ ...editingItem, dia: text })}
+            onChangeText={(text) =>
+              setEditingItem({ ...editingItem, dia: text })
+            }
             placeholder="Dia (dd/mm/aaaa hh:mm)"
             placeholderTextColor={colors.mediumGray}
+            keyboardType="numeric"
+            mask={[
+              /\d/, /\d/, '/',
+              /\d/, /\d/, '/',
+              /\d/, /\d/, /\d/, /\d/, ' ',
+              /\d/, /\d/, ':',
+              /\d/, /\d/
+            ]}
           />
-          <Text style={styles.cardLabel}><Text style={styles.bold}>CEP</Text></Text>
-          <TextInputMask
-            type="custom"
-            options={{ mask: '99999-999' }}
+
+          <Text style={styles.cardLabel}>
+            <Text style={styles.bold}>CEP</Text>
+          </Text>
+
+          <MaskInput
             style={styles.input}
             placeholder="CEP"
             value={editingItem.endereco?.cep}
             onChangeText={buscarEnderecoPorCEP}
             keyboardType="numeric"
             placeholderTextColor={colors.mediumGray}
+            mask={[
+              /\d/, /\d/, /\d/, /\d/, /\d/, '-',
+              /\d/, /\d/, /\d/
+            ]}
           />
+
           <Text style={styles.cardLabel}><Text style={styles.bold}>Rua</Text></Text>
           <TextInput
             style={styles.input}

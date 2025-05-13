@@ -23,8 +23,7 @@ export default function InfoAdditionalTrip() {
     { titulo: 'Contatos de Emergência', rota: 'emergencyContact/infoEmergencyContact' },
     { titulo: 'Informações de Seguro', rota: 'insurance/infoInsurance' },
     { titulo: 'Dados de Transporte', rota: 'transport/infoTransport' },
-    { titulo: 'Fotos', rota: '/photo/infoPhoto' },
-    { titulo: 'Notas', rota: 'notes/infoNotes' },
+    { titulo: 'Fotos', rota: '/photoNote/infoPhotoNote' },
   ];
 
 

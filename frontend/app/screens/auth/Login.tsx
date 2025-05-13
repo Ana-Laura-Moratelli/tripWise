@@ -4,7 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginUser, registerUser } from "@/src/services/auth";
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import styles from "../../../src/styles/auth";
 import { colors } from "../../../src/styles/global";
 
@@ -207,13 +207,8 @@ export default function AuthScreen() {
                                     onChangeText={setName}
                                     placeholderTextColor={colors.mediumGray}
                                 />
-                                <TextInputMask
-                                    type={'cel-phone'}
-                                    options={{
-                                        maskType: 'BRL',
-                                        withDDD: true,
-                                        dddMask: '(99) '
-                                    }}
+                                <MaskInput
+                                    mask={['(', /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}
                                     placeholder="Telefone"
                                     style={styles.input}
                                     value={phoneNumber}
@@ -222,8 +217,8 @@ export default function AuthScreen() {
                                     placeholderTextColor={colors.mediumGray}
                                 />
 
-                                <TextInputMask
-                                    type={'cpf'}
+                                <MaskInput
+                                   mask={[/\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '-', /\d/, /\d/]}
                                     value={cpf}
                                     onChangeText={setCpf}
                                     style={styles.input}

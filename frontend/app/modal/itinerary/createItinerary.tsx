@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../../src/services/api';
@@ -76,13 +76,13 @@ export default function CreateItinerary() {
 
   function formatarDataAtividade(dataHoraBR: string): string | null {
     if (!dataHoraBR || dataHoraBR.length < 10) return null;
-  
+
     const [datePart, timePart] = dataHoraBR.trim().split(' ');
     const [d, m, y] = datePart.split('/');
     const day = parseInt(d, 10);
     const month = parseInt(m, 10);
     const year = parseInt(y, 10);
-  
+
     if ([day, month, year].some(isNaN)) return null;
     if (month < 1 || month > 12) return null;
     const daysInMonth = [
@@ -91,25 +91,25 @@ export default function CreateItinerary() {
       31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     ];
     if (day < 1 || day > daysInMonth[month - 1]) return null;
-  
+
     if (timePart && timePart.trim() !== '') {
       const horaValida = /^([01]?\d|2[0-3]):[0-5]\d$/.test(timePart.trim());
       if (!horaValida) return null;
-      return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y} ${timePart.trim()}`;
+      return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y} ${timePart.trim()}`;
     }
-  
-    return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
+
+    return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
   }
-  
+
   function converterParaISO(dataHoraBR: string): string | null {
     if (!dataHoraBR || dataHoraBR.length < 10) return null;
-  
+
     const [datePart, timePart] = dataHoraBR.trim().split(' ');
     const [d, m, y] = datePart.split('/');
     const day = parseInt(d, 10);
     const month = parseInt(m, 10);
     const year = parseInt(y, 10);
-  
+
     if ([day, month, year].some(isNaN)) return null;
     if (month < 1 || month > 12) return null;
     const daysInMonth = [
@@ -118,14 +118,14 @@ export default function CreateItinerary() {
       31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     ];
     if (day < 1 || day > daysInMonth[month - 1]) return null;
-  
+
     const hora = timePart && /^([01]?\d|2[0-3]):[0-5]\d$/.test(timePart.trim())
       ? timePart.trim()
       : '00:00';
-  
-    return `${year}-${m.padStart(2,'0')}-${d.padStart(2,'0')}T${hora}:00`;
+
+    return `${year}-${m.padStart(2, '0')}-${d.padStart(2, '0')}T${hora}:00`;
   }
-  
+
 
   async function salvarCronograma() {
     try {
@@ -145,7 +145,7 @@ export default function CreateItinerary() {
       if (dataSelecionada < new Date()) {
         Alert.alert("Data inválida", "A data não pode ser anterior ao momento atual.");
         return;
-        
+
       }
 
       let enderecoCompleto = `${rua}, ${numero}, ${bairro}, ${cidade}, ${estado}`.trim();
@@ -202,78 +202,96 @@ export default function CreateItinerary() {
         value={tipoAtividade}
         onChangeText={setTipoAtividade}
         placeholderTextColor={colors.mediumGray} />
-
-      <TextInputMask
-        type={'datetime'}
-        options={{ format: 'DD/MM/YYYY HH:mm' }}
+      <MaskInput
         style={styles.input}
         value={dia}
         onChangeText={setDia}
         placeholder="Data"
-        placeholderTextColor={colors.mediumGray} />
+        placeholderTextColor={colors.mediumGray}
+        mask={[
+          /\d/, /\d/, '/',
+          /\d/, /\d/, '/',
+          /\d/, /\d/, /\d/, /\d/, ' ',
+          /\d/, /\d/, ':',
+          /\d/, /\d/
+        ]}
+      />
 
-      <TextInputMask
-        type={'money'}
-        options={{ precision: 2, separator: ',', delimiter: '.', unit: 'R$', suffixUnit: '' }}
+      <MaskInput
         style={styles.input}
         value={valor}
         onChangeText={setValor}
         placeholder="Valor"
+        placeholderTextColor={colors.mediumGray}
+        keyboardType="numeric"
+        mask={[
+          'R', '$', ' ',
+          /\d/, /\d/, '.',
+          /\d/, /\d/, /\d/, ',',
+          /\d/, /\d/
+        ]}
+      />
+
+
+      <MaskInput
+        style={styles.input}
+        value={cep}
+        onChangeText={(text) => {
+          setCep(text);
+          buscarEnderecoPorCEP(text);
+        }}
+        placeholder="CEP"
+        placeholderTextColor={colors.mediumGray}
+        keyboardType="numeric"
+        mask={[
+          /\d/, /\d/, /\d/, /\d/, /\d/, '-',
+          /\d/, /\d/, /\d/
+        ]}
+      />
+
+
+      <TextInput
+        style={styles.input}
+        placeholder="Rua"
+        value={rua}
+        onChangeText={setRua}
         placeholderTextColor={colors.mediumGray} />
 
-      <Text style={styles.title}>Endereço</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Número"
+        value={numero}
+        onChangeText={setNumero}
+        placeholderTextColor={colors.mediumGray} />
 
-      <TextInputMask 
-      type={'custom'}
-      options={{ mask: '99999-999' }} 
-      style={styles.input} 
-      value={cep} 
-      onChangeText={(text) => { setCep(text); buscarEnderecoPorCEP(text); }} 
-      placeholder="CEP" 
-      placeholderTextColor={colors.mediumGray} />
+      <TextInput
+        style={styles.input}
+        placeholder="Bairro"
+        value={bairro}
+        onChangeText={setBairro}
+        placeholderTextColor={colors.mediumGray} />
 
-      <TextInput 
-      style={styles.input} 
-      placeholder="Rua" 
-      value={rua} 
-      onChangeText={setRua} 
-      placeholderTextColor={colors.mediumGray} />
+      <TextInput
+        style={styles.input}
+        placeholder="Cidade"
+        value={cidade}
+        onChangeText={setCidade}
+        placeholderTextColor={colors.mediumGray} />
 
-      <TextInput 
-      style={styles.input} 
-      placeholder="Número" 
-      value={numero} 
-      onChangeText={setNumero} 
-      placeholderTextColor={colors.mediumGray} />
+      <TextInput
+        style={styles.input}
+        placeholder="Estado"
+        value={estado}
+        onChangeText={setEstado}
+        placeholderTextColor={colors.mediumGray} />
 
-      <TextInput 
-      style={styles.input} 
-      placeholder="Bairro"
-      value={bairro} 
-      onChangeText={setBairro} 
-      placeholderTextColor={colors.mediumGray} />
-
-      <TextInput 
-      style={styles.input} 
-      placeholder="Cidade" 
-      value={cidade} 
-      onChangeText={setCidade} 
-      placeholderTextColor={colors.mediumGray} />
-
-      <TextInput 
-      style={styles.input}
-      placeholder="Estado" 
-      value={estado} 
-      onChangeText={setEstado} 
-      placeholderTextColor={colors.mediumGray} />
-
-      <TextInput 
-      style={styles.textarea} 
-      placeholder="Descrição" 
-      multiline numberOfLines={4} 
-      value={descricao} 
-      onChangeText={setDescricao} 
-      placeholderTextColor={colors.mediumGray} />
+      <TextInput
+        style={styles.textarea}
+        placeholder="Descrição"
+        multiline numberOfLines={4}
+        value={descricao}
+        onChangeText={setDescricao}
+        placeholderTextColor={colors.mediumGray} />
 
       <TouchableOpacity style={styles.buttonPrimary} onPress={salvarCronograma}>
         <Text style={styles.buttonText}>Cadastrar</Text>

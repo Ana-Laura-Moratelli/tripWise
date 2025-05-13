@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { api } from '../../../src/services/api';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Documento } from '../../../src/types/document';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
 import { Picker } from '@react-native-picker/picker';
@@ -137,51 +137,78 @@ export default function InfoDocuments() {
 
                   {/* Número do documento com máscara conforme tipo */}
                   {editingItem.tipo === 'CPF' && (
-                    <TextInputMask
-                      type="cpf"
+                    <MaskInput
                       style={styles.input}
                       value={editingItem.numero}
-                      onChangeText={(text) => setEditingItem(prev => ({ ...prev, numero: text }))}
+                      onChangeText={(text) =>
+                        setEditingItem((prev) => ({ ...prev, numero: text }))
+                      }
                       placeholder="Número do CPF"
                       placeholderTextColor={colors.mediumGray}
                       keyboardType="numeric"
-                    />
-                  )}
-                  {editingItem.tipo === 'RG' && (
-                    <TextInputMask
-                      type="custom"
-                      options={{ mask: '99.999.999-9' }}
-                      style={styles.input}
-                      value={editingItem.numero}
-                      onChangeText={(text) => setEditingItem(prev => ({ ...prev, numero: text }))}
-                      placeholder="Número do RG"
-                      placeholderTextColor={colors.mediumGray}
-                      keyboardType="numeric"
-                    />
-                  )}
-                  {editingItem.tipo === 'Passaporte' && (
-                    <TextInputMask
-                      type="custom"
-                      options={{ mask: 'AA 999999' }}
-                      style={styles.input}
-                      value={editingItem.numero}
-                      onChangeText={(text) => setEditingItem(prev => ({ ...prev, numero: text }))}
-                      placeholder="Passaporte (AA 000001)"
-                      placeholderTextColor={colors.mediumGray}
-                      autoCapitalize="characters"
+                      mask={[
+                        /\d/, /\d/, /\d/, '.',
+                        /\d/, /\d/, /\d/, '.',
+                        /\d/, /\d/, /\d/, '-',
+                        /\d/, /\d/
+                      ]}
                     />
                   )}
 
-                  <Text style={styles.cardLabel}><Text style={styles.bold}>Validade</Text></Text>
-                  <TextInputMask
-                    type={'datetime'}
-                    options={{ format: 'DD/MM/YYYY' }}
+                  {editingItem.tipo === 'RG' && (
+                    <MaskInput
+                      style={styles.input}
+                      value={editingItem.numero}
+                      onChangeText={(text) =>
+                        setEditingItem((prev) => ({ ...prev, numero: text }))
+                      }
+                      placeholder="Número do RG"
+                      placeholderTextColor={colors.mediumGray}
+                      keyboardType="numeric"
+                      mask={[
+                        /\d/, /\d/, '.',
+                        /\d/, /\d/, /\d/, '.',
+                        /\d/, /\d/, /\d/, '-',
+                        /\d/
+                      ]}
+                    />
+                  )}
+
+                  {editingItem.tipo === 'Passaporte' && (
+                    <MaskInput
+                      style={styles.input}
+                      value={editingItem.numero}
+                      onChangeText={(text) =>
+                        setEditingItem((prev) => ({ ...prev, numero: text }))
+                      }
+                      placeholder="Passaporte (AA 000001)"
+                      placeholderTextColor={colors.mediumGray}
+                      autoCapitalize="characters"
+                      mask={[
+                        /[A-Z]/, /[A-Z]/, ' ',
+                        /\d/, /\d/, /\d/, /\d/, /\d/, /\d/
+                      ]}
+                    />
+                  )}
+
+                  <Text style={styles.cardLabel}>
+                    <Text style={styles.bold}>Validade</Text>
+                  </Text>
+
+                  <MaskInput
+                    style={styles.input}
                     value={editingItem.validade ?? item.validade}
-                    onChangeText={(text) => setEditingItem({ ...editingItem, validade: text })}
+                    onChangeText={(text) =>
+                      setEditingItem({ ...editingItem, validade: text })
+                    }
                     placeholder="Validade (dd/mm/aaaa)"
                     placeholderTextColor={colors.mediumGray}
-                    style={styles.input}
                     keyboardType="numeric"
+                    mask={[
+                      /\d/, /\d/, '/',
+                      /\d/, /\d/, '/',
+                      /\d/, /\d/, /\d/, /\d/
+                    ]}
                   />
 
                   <View style={styles.flexRow}>

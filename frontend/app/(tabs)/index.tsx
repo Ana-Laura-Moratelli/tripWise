@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { differenceInDays, parseISO, isBefore } from 'date-fns';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import { api } from '../../src/services/api';
 import { Hotel } from '../../src/types/hotel';
 import Constants from 'expo-constants';
@@ -25,24 +25,24 @@ export default function HotelSearch() {
       const dia = parseInt(diaStr, 10);
       const mes = parseInt(mesStr, 10);
       const ano = parseInt(anoStr, 10);
-  
+
       if (isNaN(mes) || mes < 1 || mes > 12) {
         throw new Error("Mês inválido. Use valores de 01 a 12.");
       }
-  
+
       const maxDiasPorMes = [31, (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) ? 29 : 28,
-                             31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
       if (isNaN(dia) || dia < 1 || dia > maxDiasPorMes[mes - 1]) {
         throw new Error("Dia inválido para o mês informado.");
       }
-  
+
       const mm = mesStr.padStart(2, '0');
       const dd = diaStr.padStart(2, '0');
       return `${anoStr}-${mm}-${dd}`;
     }
     return data;
   }
-  
+
   function validarCampos(checkin: string, checkout: string) {
     if (!cidade) throw new Error("Informe a cidade para busca.");
     if (!/\d{4}-\d{2}-\d{2}/.test(checkin)) throw new Error("Data de entrada inválida.");
@@ -162,9 +162,8 @@ export default function HotelSearch() {
         placeholderTextColor={colors.mediumGray}
       />
 
-      <TextInputMask
-        type={'datetime'}
-        options={{ format: 'DD/MM/YYYY' }}
+      <MaskInput
+        mask={Masks.DATE_DDMMYYYY}
         style={styles.input}
         placeholder="Check-in"
         value={checkinMask}
@@ -172,9 +171,8 @@ export default function HotelSearch() {
         placeholderTextColor={colors.mediumGray}
       />
 
-      <TextInputMask
-        type={'datetime'}
-        options={{ format: 'DD/MM/YYYY' }}
+      <MaskInput
+        mask={Masks.DATE_DDMMYYYY}
         style={styles.input}
         placeholder="Check-out"
         value={checkoutMask}

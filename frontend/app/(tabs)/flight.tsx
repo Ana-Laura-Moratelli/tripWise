@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, ActivityIndicator, Switch } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import { parseISO, isBefore } from 'date-fns';
 import { api } from '../../src/services/api';
 import { Voo } from '../../src/types/flight';
@@ -28,24 +28,24 @@ export default function FlightSearch() {
       const dia = parseInt(diaStr, 10);
       const mes = parseInt(mesStr, 10);
       const ano = parseInt(anoStr, 10);
-  
+
       if (isNaN(mes) || mes < 1 || mes > 12) {
         throw new Error("Mês inválido. Use valores de 01 a 12.");
       }
-  
+
       const maxDiasPorMes = [31, (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) ? 29 : 28,
-                             31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
       if (isNaN(dia) || dia < 1 || dia > maxDiasPorMes[mes - 1]) {
         throw new Error("Dia inválido para o mês informado.");
       }
-  
+
       const mm = mesStr.padStart(2, '0');
       const dd = diaStr.padStart(2, '0');
       return `${anoStr}-${mm}-${dd}`;
     }
     return data;
   }
-  
+
   function validarParametros() {
     const isoPartida = formatarParaISO(dataPartida);
     const isoVolta = formatarParaISO(dataVolta);
@@ -254,15 +254,13 @@ export default function FlightSearch() {
 
       />
 
-      <TextInputMask
-        type={'datetime'}
-        options={{ format: 'DD/MM/YYYY' }}
+      <MaskInput
         style={styles.input}
         placeholder="Data de Ida"
         value={dataPartida}
         onChangeText={setDataPartida}
         placeholderTextColor={colors.mediumGray}
-
+        mask={Masks.DATE_DDMMYYYY}
       />
 
       <View style={styles.switchContainer}>
@@ -271,9 +269,8 @@ export default function FlightSearch() {
       </View>
 
       {idaEVolta && (
-        <TextInputMask
-          type={'datetime'}
-          options={{ format: 'DD/MM/YYYY' }}
+        <MaskInput
+          mask={Masks.DATE_DDMMYYYY}
           style={styles.input}
           placeholder="Data de Volta"
           value={dataVolta}

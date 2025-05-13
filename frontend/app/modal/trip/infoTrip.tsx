@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Alert, ScrollView, Share } from "react-na
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from "../../../src/services/api";
 import styles from '@/src/styles/global';
 
@@ -47,28 +48,34 @@ export default function InfoTrip() {
     );
 
     async function fetchViagem() {
-        try {
-            const response = await api.get("/api/trip");
-            const data = response.data;
-            const item = data.find((v: any) => v.id === id);
+  try {
+    const userId = await AsyncStorage.getItem("@user_id");
+    if (!userId) return;
 
-            if (item) {
-                if (item.itinerarios && item.itinerarios.length > 0) {
-                    item.itinerarios.sort((a: any, b: any) => {
-                        const dateA = parseDate(a.dia);
-                        const dateB = parseDate(b.dia);
-                        return dateA.getTime() - dateB.getTime();
-                    });
-                }
+    const response = await api.get("/api/trip", {
+      params: { userId }
+    });
 
-                setViagem(item);
-            } else {
-                setViagem(null);
-            }
-        } catch (error) {
-            Alert.alert("Erro", "Não foi possível carregar os dados da viagem.");
-        }
+    const data = response.data;
+    const item = data.find((v: any) => v.id === id);
+
+    if (item) {
+      if (item.itinerarios && item.itinerarios.length > 0) {
+        item.itinerarios.sort((a: any, b: any) => {
+          const dateA = parseDate(a.dia);
+          const dateB = parseDate(b.dia);
+          return dateA.getTime() - dateB.getTime();
+        });
+      }
+
+      setViagem(item);
+    } else {
+      setViagem(null);
     }
+  } catch (error) {
+    Alert.alert("Erro", "Não foi possível carregar os dados da viagem.");
+  }
+}
 
     async function fetchTransportes() {
         try {

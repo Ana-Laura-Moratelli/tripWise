@@ -3,7 +3,7 @@ import { View, Text, FlatList, TextInput, Alert, TouchableOpacity } from 'react-
 import { useNavigation } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { api } from '../../../src/services/api';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import { Insurance } from '../../../src/types/insurance';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
@@ -104,38 +104,62 @@ export default function InfoInsurance() {
                     keyboardType="numeric"
                   />
                   <Text style={styles.cardLabel}><Text style={styles.bold}>Data Início</Text></Text>
-                  <TextInputMask
-                    type={'datetime'}
-                    options={{ format: 'DD/MM/YYYY' }}
+                  <MaskInput
                     value={editingItem.dataInicio ?? item.dataInicio}
-                    onChangeText={(text) => setEditingItem({ ...editingItem, dataInicio: text })}
+                    onChangeText={(text) =>
+                      setEditingItem({ ...editingItem, dataInicio: text })
+                    }
                     placeholder="Data Início"
                     placeholderTextColor={colors.mediumGray}
                     style={styles.input}
                     keyboardType="numeric"
+                    mask={[
+                      /\d/, /\d/, '/',
+                      /\d/, /\d/, '/',
+                      /\d/, /\d/, /\d/, /\d/
+                    ]}
                   />
-                  <Text style={styles.cardLabel}><Text style={styles.bold}>Data Fim</Text></Text>
-                  <TextInputMask
-                    type={'datetime'}
-                    options={{ format: 'DD/MM/YYYY' }}
+
+                  <Text style={styles.cardLabel}>
+                    <Text style={styles.bold}>Data Fim</Text>
+                  </Text>
+
+                  <MaskInput
                     value={editingItem.dataFim ?? item.dataFim}
-                    onChangeText={(text) => setEditingItem({ ...editingItem, dataFim: text })}
+                    onChangeText={(text) =>
+                      setEditingItem({ ...editingItem, dataFim: text })
+                    }
                     placeholder="Data Fim"
                     placeholderTextColor={colors.mediumGray}
                     style={styles.input}
                     keyboardType="numeric"
+                    mask={[
+                      /\d/, /\d/, '/',
+                      /\d/, /\d/, '/',
+                      /\d/, /\d/, /\d/, /\d/
+                    ]}
                   />
-                  <Text style={styles.cardLabel}><Text style={styles.bold}>Telefone de Emergência</Text></Text>
-                  <TextInputMask
-                    type={'custom'}
-                    options={{ mask: '(99) 99999-9999' }}
+
+                  <Text style={styles.cardLabel}>
+                    <Text style={styles.bold}>Telefone de Emergência</Text>
+                  </Text>
+
+                  <MaskInput
                     value={editingItem.telefoneEmergencia ?? item.telefoneEmergencia}
-                    onChangeText={(text) => setEditingItem({ ...editingItem, telefoneEmergencia: text })}
+                    onChangeText={(text) =>
+                      setEditingItem({ ...editingItem, telefoneEmergencia: text })
+                    }
                     placeholder="Telefone de Emergência"
                     placeholderTextColor={colors.mediumGray}
                     style={styles.input}
                     keyboardType="phone-pad"
+                    mask={[
+                      '(', /\d/, /\d/, ')', ' ',
+                      /\d/, /\d/, /\d/, /\d/, /\d/, '-',
+                      /\d/, /\d/, /\d/, /\d/
+                    ]}
                   />
+
                   <Text style={styles.cardLabel}><Text style={styles.bold}>Valor</Text></Text>
                   <TextInput
                     style={styles.input}

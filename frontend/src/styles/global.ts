@@ -53,6 +53,7 @@ export default StyleSheet.create({
     container: {
         flex: 1,
         padding: spacing.large,
+        marginTop: 50,
         backgroundColor: colors.white,
     },
     content: {

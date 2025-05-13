@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { api } from '../../../src/services/api';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { TextInputMask } from 'react-native-masked-text';
+import MaskInput, { Masks } from 'react-native-mask-input';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
 
@@ -56,20 +56,19 @@ export default function CreateEmergencyContact() {
         placeholderTextColor={colors.mediumGray}
       />
 
-      <TextInputMask
-        type={'cel-phone'}
-        options={{
-          maskType: 'BRL',
-          withDDD: true,
-          dddMask: '(99) '
-        }}
-        value={phone}
-        onChangeText={setPhone}
-        placeholder="Telefone"
-        placeholderTextColor={colors.mediumGray}
-        style={styles.input}
-        keyboardType="phone-pad"
-      />
+     <MaskInput
+  value={phone}
+  onChangeText={setPhone}
+  placeholder="Telefone"
+  placeholderTextColor={colors.mediumGray}
+  style={styles.input}
+  keyboardType="phone-pad"
+  mask={[
+    '(', /\d/, /\d/, ')', ' ',
+    /\d/, /\d/, /\d/, /\d/, /\d/, '-', 
+    /\d/, /\d/, /\d/, /\d/
+  ]}
+/>
 
       <TextInput
         style={styles.input}
