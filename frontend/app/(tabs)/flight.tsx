@@ -8,6 +8,7 @@ import { api } from '../../src/services/api';
 import { Voo } from '../../src/types/flight';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
+import { Stack } from "expo-router";
 
 const EXCHANGE_RATE_URL = "https://api.exchangerate.host/latest?base=USD&symbols=BRL";
 
@@ -234,6 +235,13 @@ export default function FlightSearch() {
 
   return (
     <View style={styles.container}>
+
+      
+        <Stack.Screen
+        options={{
+          title: "Voos",
+        }}
+      />
       <TextInput
         style={styles.input}
         placeholder="Código IATA Origem (Ex: GRU)"

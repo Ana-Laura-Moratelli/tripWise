@@ -21,14 +21,16 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: '#5B2FD4',
         tabBarInactiveTintColor: '#aaa',
-        headerShown: useClientOnlyValue(false, true),
+        headerShown: true,
         tabBarHideOnKeyboard: true,
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Hotéis',
-          tabBarIcon: ({ color }) => <TabBarIcon name="hotel" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => (
+            <TabBarIcon name="hotel" color={color} />
+          ),
           tabBarLabelStyle: { marginTop: 4 },
           headerRight: () => (
             <Link href="/modal/travelTips/travelTips" asChild>
@@ -51,7 +53,9 @@ export default function TabLayout() {
         name="flight"
         options={{
           title: 'Voos',
-          tabBarIcon: ({ color }) => <TabBarIcon name="plane" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => (
+            <TabBarIcon name="plane" color={color} />
+          ),
           tabBarLabelStyle: { marginTop: 4 },
         }}
       />
@@ -59,8 +63,9 @@ export default function TabLayout() {
         name="cart"
         options={{
           title: 'Carrinho',
-          tabBarIcon: ({ color }) => <TabBarIcon name="shopping-cart" color={color} />,
-          tabBarLabelStyle: { marginTop: 4 },
+          tabBarIcon: ({ color }: { color: string }) => (
+            <TabBarIcon name="shopping-cart" color={color} />
+          ), tabBarLabelStyle: { marginTop: 4 },
         }}
       />
 
@@ -68,7 +73,9 @@ export default function TabLayout() {
         name="trip"
         options={{
           title: 'Viagens',
-          tabBarIcon: ({ color }) => <TabBarIcon name="globe" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => (
+            <TabBarIcon name="globe" color={color} />
+          ),
           tabBarLabelStyle: { marginTop: 4 },
         }}
       />
@@ -76,7 +83,9 @@ export default function TabLayout() {
         name="map"
         options={{
           title: 'Mapa',
-          tabBarIcon: ({ color }) => <TabBarIcon name="map" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => (
+            <TabBarIcon name="map" color={color} />
+          ),
           tabBarLabelStyle: { marginTop: 4 },
         }}
       />
@@ -84,15 +93,18 @@ export default function TabLayout() {
         name="notification"
         options={{
           title: 'Alertas',
-          tabBarIcon: ({ color }) => <TabBarIcon name="bell" color={color} />,
-          tabBarLabelStyle: { marginTop: 4 },
+          tabBarIcon: ({ color }: { color: string }) => (
+            <TabBarIcon name="bell" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => (
+            <TabBarIcon name="user" color={color} />
+          ),
           tabBarLabelStyle: { marginTop: 4 },
         }}
       />

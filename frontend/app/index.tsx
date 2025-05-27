@@ -1,5 +1,34 @@
-import { Redirect } from 'expo-router';
+// app/index.tsx
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 
 export default function Index() {
-  return <Redirect href="/(tabs)" />;
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    AsyncStorage.getItem('token')
+      .then(token => {
+        if (token) {
+          // já logado → vai pras tabs
+          router.push('/');
+        } else {
+          // não logado → vai pra tela de Login
+          router.replace('/screens/auth/Login');
+        }
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex:1, justifyContent:'center', alignItems:'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return null;
 }

@@ -7,6 +7,7 @@ import { api } from '../../src/services/api';
 import styles from '@/src/styles/global';
 import stylesProfile from '@/src/styles/profile';
 import { colors } from '@/src/styles/global';
+import { Stack } from "expo-router";
 
 function formatPhoneForDisplay(phone: string): string {
   if (phone.length === 11)
@@ -114,6 +115,13 @@ export default function Profile() {
 
   return (
     <View style={styles.container}>
+
+      
+        <Stack.Screen
+        options={{
+          title: "Perfil",
+        }}
+      />
       <View style={stylesProfile.avatarContainer}>
         <View style={stylesProfile.avatarCircle}>
           <Text style={stylesProfile.avatarText}>{getInitial(user.name)}</Text>

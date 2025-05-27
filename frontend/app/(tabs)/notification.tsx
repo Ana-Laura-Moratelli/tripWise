@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { api } from '../../src/services/api';
 import styles from '@/src/styles/global';
+import { Stack } from "expo-router";
 
 export default function Notification() {
   const [alertas, setAlertas] = useState<any[]>([]);
@@ -87,6 +88,13 @@ export default function Notification() {
 
   return (
     <View style={styles.container}>
+
+      
+        <Stack.Screen
+        options={{
+          title: "Notificações",
+        }}
+      />
       {alertas.length === 0 ? (
         <Text style={styles.noitens}>Nenhum alerta para as próximas 24 horas.</Text>
       ) : (

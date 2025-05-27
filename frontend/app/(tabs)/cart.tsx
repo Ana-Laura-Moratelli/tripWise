@@ -8,6 +8,7 @@ import { api } from '../../src/services/api';
 import { Voo } from '../../src/types/flight';
 import { Hotel } from '../../src/types/hotel';
 import styles from '@/src/styles/global';
+import { Stack } from "expo-router";
 
 export default function Cart() {
   const [voosCarrinho, setVoosCarrinho] = useState<Voo[]>([]);
@@ -137,6 +138,12 @@ export default function Cart() {
 
   return (
     <View style={styles.container}>
+      
+        <Stack.Screen
+        options={{
+          title: "Carrinho",
+        }}
+      />
       <ScrollView contentContainerStyle={[{ paddingBottom: 80 }]}>
         <Text style={styles.title}>Voos no Carrinho</Text>
         {voosCarrinho.length === 0 ? (

@@ -9,14 +9,13 @@ export default {
     icon: "./assets/images/icon.png",
     scheme: "myapp",
     userInterfaceStyle: "automatic",
-    newArchEnabled: false,
     splash: {
       image: "./assets/images/splash-icon.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
     ios: {
-      bundleIdentifier: "com.analaura.tripwise", // ← obrigatório para builds iOS
+      bundleIdentifier: "com.analaura.tripwise", 
       supportsTablet: true,
       infoPlist: {
         NSCalendarsUsageDescription: "Precisamos acessar seu calendário para adicionar eventos das viagens.",
@@ -24,7 +23,7 @@ export default {
       },
     },
     android: {
-      package: "com.analaura.tripwise", // ← obrigatório para APK/AAB
+      package: "com.analaura.tripwise", 
       softInputMode: "adjustResize",
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",

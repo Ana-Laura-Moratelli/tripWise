@@ -50,8 +50,53 @@ interface DadosImportados {
   hoteis?: Hotel[];
 }
 
+function extrairDadosDeTexto(corpo: string): DadosImportados {
+  const dados: DadosImportados = {};
+
+  // 🔥 Limpa quebras de linha e espaços extras
+  const textoLimpo = corpo.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+
+  // 🔍 Regex para Voo
+  const vooRegex = /Voo de (.+?) para (.+?), saída às (.+?) e chegada às (.+?), pela (.+?), valor R\$?(\d+[\d.,]*)/i;
+  const vooMatch = textoLimpo.match(vooRegex);
+  if (vooMatch) {
+    dados.voos = [{
+      origin: vooMatch[1].trim(),
+      destination: vooMatch[2].trim(),
+      departureTime: vooMatch[3].trim(),
+      arrivalTime: vooMatch[4].trim(),
+      airline: vooMatch[5].trim(),
+      price: vooMatch[6].trim(),
+      tipo: 'ida',
+    }];
+  }
+
+  // 🔍 Regex para Hotel
+  const hotelRegex = /Hotel[:\s]*(.+?), check-in (.+?), check-out (.+?), endereço[:\s]*(.+?), nota (\d[\d.,]*), valor R\$?(\d+[\d.,]*)/i;
+  const hotelMatch = textoLimpo.match(hotelRegex);
+  if (hotelMatch) {
+    dados.hoteis = [{
+      name: hotelMatch[1].trim(),
+      checkin: hotelMatch[2].trim(),
+      checkout: hotelMatch[3].trim(),
+      address: hotelMatch[4].trim(),
+      latitude: '',
+      longitude: '',
+      rating: hotelMatch[5].trim(),
+      price: hotelMatch[6].trim(),
+      reviews: '',
+      total: hotelMatch[6].trim(),
+    }];
+  }
+
+  return dados;
+}
+
+
+
 async function listarEmails(): Promise<void> {
   console.log('🕒 Verificando e-mails...');
+
   const res = await gmail.users.messages.list({
     userId: 'me',
     q: 'is:unread',
@@ -71,7 +116,7 @@ async function listarEmails(): Promise<void> {
     const remetenteRaw = headers.find(h => h.name === 'From')?.value ?? '';
     const remetente = extrairEmail(remetenteRaw);
     const corpo = getBody(email.data);
-
+    console.log('📝 Corpo do e-mail:', corpo);
     try {
       // Tenta localizar blocos JSON de voos e hoteis separadamente
       const voosMatch = corpo.match(/voos\s*[:=]\s*(\[[\s\S]*?\])/);
@@ -96,10 +141,15 @@ async function listarEmails(): Promise<void> {
       }
 
       if (!dados.voos && !dados.hoteis) {
+        const dadosTexto = extrairDadosDeTexto(corpo);
+        dados.voos = dadosTexto.voos;
+        dados.hoteis = dadosTexto.hoteis;
+      }
+
+      if (!dados.voos && !dados.hoteis) {
         console.warn("⚠️ Nenhum dado válido encontrado no e-mail de:", remetente);
         continue;
       }
-
       const user = await buscarUsuarioPorEmail(remetente);
 
       if (user) {
@@ -114,6 +164,7 @@ async function listarEmails(): Promise<void> {
       console.error('❌ Erro ao processar e-mail:', e);
     }
   }
+
 }
 
 function extrairEmail(remetente: string): string {
@@ -122,15 +173,33 @@ function extrairEmail(remetente: string): string {
 }
 
 function getBody(message: gmail_v1.Schema$Message): string {
-  const parts = message.payload?.parts || [];
-  const part = parts.find(p => p.mimeType === 'text/plain') || message.payload;
+  const parts = message.payload?.parts;
+
+  if (!parts) {
+    const bodyData = message.payload?.body?.data;
+    if (!bodyData) return '';
+    const buffer = Buffer.from(bodyData, 'base64');
+    return buffer.toString('utf-8');
+  }
+
+  const part = parts.find(
+    p => p.mimeType === 'text/plain'
+  ) || parts.find(p => p.mimeType === 'text/html');
+
   const bodyData = part?.body?.data;
 
   if (!bodyData) return '';
 
   const buffer = Buffer.from(bodyData, 'base64');
-  return buffer.toString('utf-8');
+  const decoded = buffer.toString('utf-8');
+
+  if (part?.mimeType === 'text/html') {
+    return decoded.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  return decoded.trim();
 }
+
 
 async function buscarUsuarioPorEmail(email: string) {
   const snapshot = await db.collection('users').where('email', '==', email).get();

@@ -6,7 +6,6 @@ const router = express.Router();
 router.post("/trip", registrarViagem);
 router.get("/trip", listarViagens);
 router.delete("/trip/:id", deletarViagem); 
-
 router.post("/trip/:id/itinerary", adicionarItinerario); 
 router.put("/:id/itinerary/:itemIndex", atualizarItinerario);
 router.delete("/trip/:id/itinerary/:itemIndex", deletarItinerario);

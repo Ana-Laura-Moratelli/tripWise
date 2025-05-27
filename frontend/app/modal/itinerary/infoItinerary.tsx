@@ -8,6 +8,7 @@ import { api } from '../../../src/services/api';
 import { Itinerario } from '../../../src/types/itinerary';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function parseDate(dateStr: string): Date {
   const [dataPart, timePart] = dateStr.split(' ');
@@ -100,31 +101,41 @@ export default function infoItinerary() {
     return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
   }
   async function fetchItinerarios() {
-    try {
-      const response = await api.get('/api/trip');
-      const data = response.data;
-      const viagem = data.find((item: any) => item.id === id);
-      if (viagem) {
-        if (!viagem.itinerarios || viagem.itinerarios.length === 0) {
-          setItinerarios([]);
-        } else {
-          const itinerariosComIndex: Itinerario[] = viagem.itinerarios.map(
-            (item: Itinerario, idx: number) => ({ ...item, originalIndex: idx })
-          );
-          const sortedItinerarios = itinerariosComIndex.sort((a, b) => {
-            return parseDate(a.dia).getTime() - parseDate(b.dia).getTime();
-          });
-          setItinerarios(sortedItinerarios);
-        }
-      } else {
-        Alert.alert("Erro", "Viagem não encontrada.");
-      }
-    } catch (error) {
-      console.error("Erro ao buscar itinerários:", error);
-    } finally {
-      setLoading(false);
+  try {
+    const userId = await AsyncStorage.getItem("@user_id");
+    if (!userId) {
+      Alert.alert("Erro", "Usuário não encontrado.");
+      return;
     }
+
+    const response = await api.get('/api/trip', {
+      params: { userId }
+    });
+
+    const data = response.data;
+    const viagem = data.find((item: any) => item.id === id);
+    if (viagem) {
+      if (!viagem.itinerarios || viagem.itinerarios.length === 0) {
+        setItinerarios([]);
+      } else {
+        const itinerariosComIndex: Itinerario[] = viagem.itinerarios.map(
+          (item: Itinerario, idx: number) => ({ ...item, originalIndex: idx })
+        );
+        const sortedItinerarios = itinerariosComIndex.sort((a, b) => {
+          return parseDate(a.dia).getTime() - parseDate(b.dia).getTime();
+        });
+        setItinerarios(sortedItinerarios);
+      }
+    } else {
+      Alert.alert("Erro", "Viagem não encontrada.");
+    }
+  } catch (error) {
+    console.error("Erro ao buscar itinerários:", error);
+  } finally {
+    setLoading(false);
   }
+}
+
 
   useEffect(() => {
     fetchItinerarios();

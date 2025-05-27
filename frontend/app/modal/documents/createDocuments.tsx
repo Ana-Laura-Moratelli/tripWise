@@ -9,7 +9,9 @@ import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
 import { Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-
+export const screenOptions = {
+  title: 'Cadastrar Documento',
+};
 export default function CreateDocuments() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
@@ -18,6 +20,8 @@ export default function CreateDocuments() {
   const [validade, setValidade] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  
   const tiposDoc = [
     { label: 'CPF', value: 'CPF' },
     { label: 'RG', value: 'RG' },
@@ -62,12 +66,6 @@ export default function CreateDocuments() {
     }
   }
 
-  useEffect(() => {
-    navigation.setOptions({
-      title: 'Cadastrar Documento',
-      headerBackTitle: 'Voltar',
-    });
-  }, [navigation]);
 
 
 
@@ -100,69 +98,69 @@ export default function CreateDocuments() {
 
 
       {/* Número do Documento */}
-     {tipo === 'CPF' && (
-  <MaskInput
-    style={styles.input}
-    value={numero}
-    onChangeText={setNumero}
-    placeholder="Número do CPF"
-    placeholderTextColor={colors.mediumGray}
-    keyboardType="numeric"
-    mask={[
-      /\d/, /\d/, /\d/, '.', 
-      /\d/, /\d/, /\d/, '.', 
-      /\d/, /\d/, /\d/, '-', 
-      /\d/, /\d/
-    ]}
-  />
-)}
+      {tipo === 'CPF' && (
+        <MaskInput
+          style={styles.input}
+          value={numero}
+          onChangeText={setNumero}
+          placeholder="Número do CPF"
+          placeholderTextColor={colors.mediumGray}
+          keyboardType="numeric"
+          mask={[
+            /\d/, /\d/, /\d/, '.',
+            /\d/, /\d/, /\d/, '.',
+            /\d/, /\d/, /\d/, '-',
+            /\d/, /\d/
+          ]}
+        />
+      )}
 
-{tipo === 'RG' && (
-  <MaskInput
-    style={styles.input}
-    value={numero}
-    onChangeText={setNumero}
-    placeholder="Número do RG"
-    placeholderTextColor={colors.mediumGray}
-    keyboardType="numeric"
-    mask={[
-      /\d/, /\d/, '.', 
-      /\d/, /\d/, /\d/, '.', 
-      /\d/, /\d/, /\d/, '-', 
-      /\d/
-    ]}
-  />
-)}
+      {tipo === 'RG' && (
+        <MaskInput
+          style={styles.input}
+          value={numero}
+          onChangeText={setNumero}
+          placeholder="Número do RG"
+          placeholderTextColor={colors.mediumGray}
+          keyboardType="numeric"
+          mask={[
+            /\d/, /\d/, '.',
+            /\d/, /\d/, /\d/, '.',
+            /\d/, /\d/, /\d/, '-',
+            /\d/
+          ]}
+        />
+      )}
 
-{tipo === 'Passaporte' && (
-  <MaskInput
-    style={styles.input}
-    value={numero}
-    onChangeText={setNumero}
-    placeholder="Passaporte (AA 000001)"
-    placeholderTextColor={colors.mediumGray}
-    autoCapitalize="characters"
-    mask={[
-      /[A-Z]/, /[A-Z]/, ' ', 
-      /\d/, /\d/, /\d/, /\d/, /\d/, /\d/
-    ]}
-  />
-)}
+      {tipo === 'Passaporte' && (
+        <MaskInput
+          style={styles.input}
+          value={numero}
+          onChangeText={setNumero}
+          placeholder="Passaporte (AA 000001)"
+          placeholderTextColor={colors.mediumGray}
+          autoCapitalize="characters"
+          mask={[
+            /[A-Z]/, /[A-Z]/, ' ',
+            /\d/, /\d/, /\d/, /\d/, /\d/, /\d/
+          ]}
+        />
+      )}
 
-<MaskInput
-  style={styles.input}
-  value={validade}
-  onChangeText={setValidade}
-  placeholder="Validade"
-  placeholderTextColor={colors.mediumGray}
-  keyboardType="numeric"
-  mask={[
-    /\d/, /\d/, '/', 
-    /\d/, /\d/, '/', 
-    /\d/, /\d/, /\d/, /\d/
-  ]}
-/>
-     
+      <MaskInput
+        style={styles.input}
+        value={validade}
+        onChangeText={setValidade}
+        placeholder="Validade"
+        placeholderTextColor={colors.mediumGray}
+        keyboardType="numeric"
+        mask={[
+          /\d/, /\d/, '/',
+          /\d/, /\d/, '/',
+          /\d/, /\d/, /\d/, /\d/
+        ]}
+      />
+
 
       <TouchableOpacity style={styles.buttonPrimary} onPress={adicionarDocumento}>
         <Text style={styles.buttonText}>Cadastrar Documento</Text>

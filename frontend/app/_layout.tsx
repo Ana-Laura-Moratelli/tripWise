@@ -11,10 +11,6 @@ import { useColorScheme } from '@/components/useColorScheme';
 
 export { ErrorBoundary } from 'expo-router';
 
-export const unstable_settings = {
-  initialRouteName: '(tabs)',
-};
-
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -58,23 +54,43 @@ function RootLayoutNav() {
 
   const content = (
     <ThemeProvider value={DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        {logado ? (
-          <>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="modal/travelTips/travelTips" options={{ presentation: 'modal', title: 'Dicas de Viagem' }} />
-            <Stack.Screen name="modal/hotel/infoHotel" options={{ presentation: 'modal', title: 'Informações do Hotel' }} />
-            <Stack.Screen name="modal/flight/infoFlight" options={{ presentation: 'modal', title: 'Informações do Voo' }} />
-          </>
-        ) : (
-          <Stack.Screen name="screens/auth/Login" />
-        )}
+      <Stack screenOptions={{ headerShown: true }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> {/* Header controlado pelas tabs */}
+
+        <Stack.Screen
+          name="modal/travelTips/travelTips"
+          options={{
+            presentation: 'modal',
+            headerShown: true,
+            title: 'Dicas de Viagem',
+          }}
+        />
+        <Stack.Screen
+          name="modal/hotel/infoHotel"
+          options={{
+            presentation: 'modal',
+            headerShown: true,
+            title: 'Informações do Hotel',
+            headerBackTitle: 'Voltar',
+          }}
+        />
+
+        <Stack.Screen
+          name="modal/flight/infoFlight"
+          options={{
+            presentation: 'modal',
+            headerShown: true,
+            title: 'Informações do Voo',
+            headerBackTitle: 'Voltar',
+          }}
+        />
       </Stack>
+
     </ThemeProvider>
   );
 
   return !logado ? (
-    
+
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}

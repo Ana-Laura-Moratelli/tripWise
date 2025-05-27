@@ -8,6 +8,7 @@ import { Viagem } from '@/src/types/travel';
 import { Voo } from '@/src/types/flight'
 import { Hotel } from '@/src/types/hotel';
 import styles from '@/src/styles/global';
+import { Stack } from "expo-router";
 
 export default function Trip() {
   const [viagens, setViagens] = useState<Viagem[]>([]);
@@ -62,6 +63,12 @@ export default function Trip() {
 
   return (
     <View style={styles.container}>
+      
+        <Stack.Screen
+        options={{
+          title: "Viagens",
+        }}
+      />
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
       <Text style={styles.title}>Histórico de Viagens</Text>
 

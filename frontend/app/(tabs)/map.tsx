@@ -7,6 +7,9 @@ import * as Location from 'expo-location';
 import { api } from '../../src/services/api';
 import Constants from 'expo-constants';
 import styles from '@/src/styles/map';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 /*
 import { Itinerario } from '../../src/types/itinerary';
 import { Hotel } from '../../src/types/hotel';
@@ -51,45 +54,54 @@ export default function MapModal() {
     });
   }
 
-  async function carregarDados() {
-    try {
-      const response = await api.get('/api/trip');
-      const viagens = response.data;
-      const todosHoteis: Hotel[] = [];
-      const todosItinerarios: Itinerario[] = [];
+ async function carregarDados() {
+  try {
+    const userId = await AsyncStorage.getItem("@user_id");
+    if (!userId) {
+      Alert.alert("Erro", "Usuário não encontrado.");
+      return;
+    }
 
-      viagens.forEach((viagem: any) => {
-        viagem.hoteis?.forEach((hotel: any) => {
-          if (hotel.latitude && hotel.longitude) {
-            todosHoteis.push({
-              name: hotel.name,
-              latitude: hotel.latitude,
-              longitude: hotel.longitude,
-            });
-          }
-        });
+    const response = await api.get('/api/trip', {
+      params: { userId }
+    });
 
-        viagem.itinerarios?.forEach((item: any) => {
-          if (item.endereco?.latitude && item.endereco?.longitude) {
-            todosItinerarios.push({
-              nomeLocal: item.nomeLocal,
-              endereco: {
-                latitude: item.endereco.latitude,
-                longitude: item.endereco.longitude,
-              },
-            });
-          }
-        });
+    const viagens = response.data;
+    const todosHoteis: Hotel[] = [];
+    const todosItinerarios: Itinerario[] = [];
+
+    viagens.forEach((viagem: any) => {
+      viagem.hoteis?.forEach((hotel: any) => {
+        if (hotel.latitude && hotel.longitude) {
+          todosHoteis.push({
+            name: hotel.name,
+            latitude: hotel.latitude,
+            longitude: hotel.longitude,
+          });
+        }
       });
 
-      setHoteis(todosHoteis);
-      setItinerarios(todosItinerarios);
-    } catch (error) {
-      Alert.alert("Erro", "Erro ao carregar dados do mapa.");
-    } finally {
-      setLoading(false);
-    }
+      viagem.itinerarios?.forEach((item: any) => {
+        if (item.endereco?.latitude && item.endereco?.longitude) {
+          todosItinerarios.push({
+            nomeLocal: item.nomeLocal,
+            endereco: {
+              latitude: item.endereco.latitude,
+              longitude: item.endereco.longitude,
+            },
+          });
+        }
+      });
+    });
+
+    setHoteis(todosHoteis);
+    setItinerarios(todosItinerarios);
+  } catch (error) {
+    Alert.alert("Erro", "Erro ao carregar dados do mapa.");
+  } finally {
+    setLoading(false);
   }
+}
 
   useFocusEffect(
     useCallback(() => {

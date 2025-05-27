@@ -7,6 +7,7 @@ import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
 const API_KEY = 'e78a67473cfd4d2b8ed76424d4cdabbf';
 
+
 export default function SearchGeoapify() {
     const [query, setQuery] = useState('');
     const [categoria, setCategoria] = useState('catering.restaurant');

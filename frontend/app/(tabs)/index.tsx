@@ -8,6 +8,7 @@ import { Hotel } from '../../src/types/hotel';
 import Constants from 'expo-constants';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
+import { Stack } from "expo-router";
 
 export default function HotelSearch() {
   const [cidade, setCidade] = useState('');
@@ -154,6 +155,13 @@ export default function HotelSearch() {
 
   return (
     <View style={styles.container}>
+
+      <Stack.Screen
+        options={{
+          title: "Hotéis",
+        }}
+      />
+
       <TextInput
         style={styles.input}
         placeholder="Destino"
