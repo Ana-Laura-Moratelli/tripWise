@@ -77,7 +77,6 @@ export default function InfoDocuments() {
       setLoading(false);
     }
   }
-
   useEffect(() => {
 
     navigation.setOptions({

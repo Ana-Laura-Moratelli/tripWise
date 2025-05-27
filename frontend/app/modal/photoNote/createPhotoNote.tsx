@@ -20,7 +20,6 @@ export default function CreatePhotoNote() {
             headerBackTitle: 'Voltar',
         });
 
-        // Solicita permissão ao iniciar
         (async () => {
             const { status } = await ImagePicker.requestCameraPermissionsAsync();
             if (status !== 'granted') {
@@ -29,28 +28,29 @@ export default function CreatePhotoNote() {
         })();
     }, []);
 
-    async function escolherImagem() {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            quality: 0.7,
-            base64: false,
-        });
+ async function escolherImagem() {
+    const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'], 
+        quality: 0.7,
+        base64: false,
+    });
 
-        if (!result.canceled) {
-            setFotoUrl(result.assets[0].uri);
-        }
+    if (!result.canceled) {
+        setFotoUrl(result.assets[0].uri);
     }
+}
 
-    async function tirarFoto() {
-        const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            quality: 0.7,
-        });
+async function tirarFoto() {
+    const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'], 
+        quality: 0.7,
+    });
 
-        if (!result.canceled) {
-            setFotoUrl(result.assets[0].uri);
-        }
+    if (!result.canceled) {
+        setFotoUrl(result.assets[0].uri);
     }
+}
+
 
     async function adicionarFotoOuNota() {
         if (!fotoUrl && !anotacao) {

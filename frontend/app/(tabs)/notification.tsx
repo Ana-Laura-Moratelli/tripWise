@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList } from 'react-native';
-import { parse, subDays, format, isAfter, isBefore } from 'date-fns';
+import { parse, format, isAfter, isBefore, endOfTomorrow } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { api } from '../../src/services/api';
@@ -20,56 +20,45 @@ export default function Notification() {
           const response = await api.get("/api/trip", { params: { userId } });
           const viagens = response.data.filter((v: any) => v.userId === userId);
 
-          const hoje = new Date();
-          hoje.setHours(0, 0, 0, 0); // considera só a data
+          const agora = new Date();
+          const limite = endOfTomorrow(); // Até amanhã às 23:59
 
-          const daqui24h = new Date(hoje.getTime() + 24 * 60 * 60 * 1000);
           const listaAlertas: any[] = [];
 
           viagens.forEach((viagem: any) => {
+            // 🔔 Hoteis
             viagem.hoteis?.forEach((hotel: any) => {
               const checkinData = parse(hotel.checkin + ' 10:00', 'dd/MM/yyyy HH:mm', new Date());
-              const alertaCheckin = subDays(checkinData, 1);
-              alertaCheckin.setHours(0, 0, 0, 0);
-
-              if (isAfter(alertaCheckin, hoje) && isBefore(alertaCheckin, daqui24h)) {
+              if (isAfter(checkinData, agora) && isBefore(checkinData, limite)) {
                 listaAlertas.push({
                   tipo: 'Check-in no hotel',
-                  data: format(alertaCheckin, 'dd/MM/yyyy'),
-                  hora: null,
+                  data: format(checkinData, 'dd/MM/yyyy'),
                   local: hotel.name,
-                  timestamp: alertaCheckin.getTime()
+                  timestamp: checkinData.getTime(),
                 });
               }
 
-              if (hotel.checkout) {
-                const checkoutData = parse(hotel.checkout + ' 10:00', 'dd/MM/yyyy HH:mm', new Date());
-                const alertaCheckout = subDays(checkoutData, 1);
-                alertaCheckout.setHours(0, 0, 0, 0);
-
-                if (isAfter(alertaCheckout, hoje) && isBefore(alertaCheckout, daqui24h)) {
-                  listaAlertas.push({
-                    tipo: 'Check-out do hotel',
-                    data: format(alertaCheckout, 'dd/MM/yyyy'),
-                    hora: null,
-                    local: hotel.name,
-                    timestamp: alertaCheckout.getTime()
-                  });
-                }
+              const checkoutData = parse(hotel.checkout + ' 10:00', 'dd/MM/yyyy HH:mm', new Date());
+              if (isAfter(checkoutData, agora) && isBefore(checkoutData, limite)) {
+                listaAlertas.push({
+                  tipo: 'Check-out do hotel',
+                  data: format(checkoutData, 'dd/MM/yyyy'),
+                  local: hotel.name,
+                  timestamp: checkoutData.getTime(),
+                });
               }
             });
 
+            // 🔔 Voos
             viagem.voos?.forEach((voo: any) => {
               const partida = parse(voo.departureTime, 'dd/MM/yyyy, HH:mm', new Date());
-              const alertaVoo = subDays(partida, 1);
-
-              if (isAfter(alertaVoo, new Date()) && isBefore(alertaVoo, new Date(Date.now() + 24 * 60 * 60 * 1000))) {
+              if (isAfter(partida, agora) && isBefore(partida, limite)) {
                 listaAlertas.push({
                   tipo: `Voo (${voo.tipo})`,
-                  data: format(alertaVoo, 'dd/MM/yyyy'),
+                  data: format(partida, 'dd/MM/yyyy'),
                   hora: format(partida, 'HH:mm'),
                   local: `${voo.origin} → ${voo.destination}`,
-                  timestamp: alertaVoo.getTime()
+                  timestamp: partida.getTime(),
                 });
               }
             });
@@ -88,15 +77,13 @@ export default function Notification() {
 
   return (
     <View style={styles.container}>
-
-      
-        <Stack.Screen
+      <Stack.Screen
         options={{
           title: "Notificações",
         }}
       />
       {alertas.length === 0 ? (
-        <Text style={styles.noitens}>Nenhum alerta para as próximas 24 horas.</Text>
+        <Text style={styles.noitens}>Nenhuma viagem nas próximas 24 horas.</Text>
       ) : (
         <FlatList
           data={alertas}
@@ -113,4 +100,3 @@ export default function Notification() {
     </View>
   );
 }
-

@@ -170,6 +170,8 @@ export default function FlightSearch() {
             origin: iataOrigem.toUpperCase(),
             destination: iataDestino.toUpperCase(),
             airline: primeiraIda.airline,
+            travel_class: primeiraIda.travel_class,     // novo
+            flight_number: primeiraIda.flight_number,
             departureTime: formatarDataCompleta(primeiraIda?.departure_airport?.time),
             arrivalTime: calcularChegada(primeiraIda?.departure_airport?.time, duracaoIda),
             price: precoBRL ? formatarReal(precoBRL) : 'Preço não disponível',
@@ -188,6 +190,8 @@ export default function FlightSearch() {
                 origin: iataDestino.toUpperCase(),
                 destination: iataOrigem.toUpperCase(),
                 airline: primeiraVolta.airline,
+                travel_class: primeiraVolta.travel_class,     // novo
+                flight_number: primeiraVolta.flight_number,
                 departureTime: dataHoraPartidaVolta.toLocaleString('pt-BR', {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -236,8 +240,8 @@ export default function FlightSearch() {
   return (
     <View style={styles.container}>
 
-      
-        <Stack.Screen
+
+      <Stack.Screen
         options={{
           title: "Voos",
         }}
@@ -267,6 +271,7 @@ export default function FlightSearch() {
         placeholder="Data de Ida"
         value={dataPartida}
         onChangeText={setDataPartida}
+        keyboardType="numeric"
         placeholderTextColor={colors.mediumGray}
         mask={Masks.DATE_DDMMYYYY}
       />
@@ -283,6 +288,7 @@ export default function FlightSearch() {
           placeholder="Data de Volta"
           value={dataVolta}
           onChangeText={setDataVolta}
+          keyboardType="numeric"
           placeholderTextColor={colors.mediumGray}
 
         />
@@ -309,6 +315,8 @@ export default function FlightSearch() {
                       tipo: item.tipo,
                       origin: item.origin,
                       destination: item.destination,
+                      travel_class: item.travel_class,
+                      flight_number: item.flight_number,
                       airline: item.airline,
                       departureTime: item.departureTime,
                       arrivalTime: item.arrivalTime,
@@ -320,6 +328,8 @@ export default function FlightSearch() {
                 <View style={styles.card}>
                   <Text style={styles.cardTitle}>{item.tipo} - {item.origin} → {item.destination}</Text>
                   <Text style={styles.cardInfo}>Companhia: {item.airline}</Text>
+                  <Text style={styles.cardInfo}>Classe: {item.travel_class}</Text>
+                  <Text style={styles.cardInfo}>Voo nº: {item.flight_number}</Text>
                   <Text style={styles.cardInfo}>Partida: {item.departureTime}</Text>
                   <Text style={styles.cardInfo}>Chegada: {item.arrivalTime}</Text>
                   <Text style={styles.cardInfoPrimary}>Preço: {item.price}</Text>

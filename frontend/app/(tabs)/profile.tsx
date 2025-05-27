@@ -149,6 +149,7 @@ export default function Profile() {
             onChangeText={(text) => setUser({ ...user, cpf: text })}
             style={styles.input}
             placeholder="CPF"
+            keyboardType="numeric"
             placeholderTextColor={colors.mediumGray}
             mask={[/\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '-', /\d/, /\d/]}
           />
@@ -157,6 +158,7 @@ export default function Profile() {
             onChangeText={(text) => setUser({ ...user, phoneNumber: text })}
             style={styles.input}
             placeholder="Telefone"
+            keyboardType="numeric"
             placeholderTextColor={colors.mediumGray}
             mask={['(', /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}
           />

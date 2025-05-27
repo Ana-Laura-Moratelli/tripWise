@@ -6,4 +6,5 @@ export interface Viagem {
   userId: string; 
   voos?: Voo[];
   hoteis?: Hotel[];
+  origem: string;
 }

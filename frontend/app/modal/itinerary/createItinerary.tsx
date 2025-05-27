@@ -207,6 +207,7 @@ export default function CreateItinerary() {
         value={dia}
         onChangeText={setDia}
         placeholder="Data"
+        keyboardType="numeric"
         placeholderTextColor={colors.mediumGray}
         mask={[
           /\d/, /\d/, '/',
@@ -261,6 +262,7 @@ export default function CreateItinerary() {
         style={styles.input}
         placeholder="Número"
         value={numero}
+        keyboardType="numeric"
         onChangeText={setNumero}
         placeholderTextColor={colors.mediumGray} />
 

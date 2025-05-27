@@ -56,7 +56,7 @@ function RootLayoutNav() {
     <ThemeProvider value={DefaultTheme}>
       <Stack screenOptions={{ headerShown: true }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> {/* Header controlado pelas tabs */}
-
+        <Stack.Screen name="screens/auth/Login" options={{ headerShown: false }} />
         <Stack.Screen
           name="modal/travelTips/travelTips"
           options={{

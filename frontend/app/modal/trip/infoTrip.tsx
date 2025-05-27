@@ -48,34 +48,34 @@ export default function InfoTrip() {
     );
 
     async function fetchViagem() {
-  try {
-    const userId = await AsyncStorage.getItem("@user_id");
-    if (!userId) return;
+        try {
+            const userId = await AsyncStorage.getItem("@user_id");
+            if (!userId) return;
 
-    const response = await api.get("/api/trip", {
-      params: { userId }
-    });
+            const response = await api.get("/api/trip", {
+                params: { userId }
+            });
 
-    const data = response.data;
-    const item = data.find((v: any) => v.id === id);
+            const data = response.data;
+            const item = data.find((v: any) => v.id === id);
 
-    if (item) {
-      if (item.itinerarios && item.itinerarios.length > 0) {
-        item.itinerarios.sort((a: any, b: any) => {
-          const dateA = parseDate(a.dia);
-          const dateB = parseDate(b.dia);
-          return dateA.getTime() - dateB.getTime();
-        });
-      }
+            if (item) {
+                if (item.itinerarios && item.itinerarios.length > 0) {
+                    item.itinerarios.sort((a: any, b: any) => {
+                        const dateA = parseDate(a.dia);
+                        const dateB = parseDate(b.dia);
+                        return dateA.getTime() - dateB.getTime();
+                    });
+                }
 
-      setViagem(item);
-    } else {
-      setViagem(null);
+                setViagem(item);
+            } else {
+                setViagem(null);
+            }
+        } catch (error) {
+            Alert.alert("Erro", "Não foi possível carregar os dados da viagem.");
+        }
     }
-  } catch (error) {
-    Alert.alert("Erro", "Não foi possível carregar os dados da viagem.");
-  }
-}
 
     async function fetchTransportes() {
         try {
@@ -179,6 +179,8 @@ export default function InfoTrip() {
                 message += `Voo ${index + 1}:\n`;
                 message += `${voo.tipo} - ${voo.origin} → ${voo.destination}\n`;
                 message += `Companhia: ${voo.airline}\n`;
+                message += `Classe: ${voo.travel_class}\n`;
+                message += `Voo nº: ${voo.flight_number}\n`;
                 message += `Partida: ${voo.departureTime}\n`;
                 message += `Chegada: ${voo.arrivalTime}\n`;
                 message += `Preço: ${voo.price}\n\n`;
@@ -297,6 +299,8 @@ export default function InfoTrip() {
                                     {voo.tipo} - {voo.origin} → {voo.destination}
                                 </Text>
                                 <Text style={styles.cardInfo}><Text style={styles.bold}>Companhia:</Text> {voo.airline}</Text>
+                                <Text style={styles.cardInfo}><Text style={styles.bold}>Classe:</Text> {voo.travel_class}</Text>
+                                <Text style={styles.cardInfo}><Text style={styles.bold}>Voo nº:</Text> {voo.flight_number}</Text>
                                 <Text style={styles.cardInfo}><Text style={styles.bold}>Partida:</Text> {voo.departureTime}</Text>
                                 <Text style={styles.cardInfo}><Text style={styles.bold}>Chegada:</Text> {voo.arrivalTime}</Text>
                                 <Text style={styles.cardInfoPrimary}>{voo.price}</Text>

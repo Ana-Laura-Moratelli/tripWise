@@ -60,20 +60,20 @@ export default function Cart() {
   async function criarEventoCalendario(titulo: string, startDate: Date, endDate?: Date) {
     try {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
-  
+
       if (status !== 'granted') {
         Alert.alert('Permissão necessária', 'Autorize o acesso ao calendário para criar lembretes.');
         return;
       }
-  
+
       const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
       const calendarioPadrao = calendars.find(cal => cal.allowsModifications);
-  
+
       if (!calendarioPadrao) {
         Alert.alert('Erro', 'Não foi encontrado um calendário modificável no dispositivo.');
         return;
       }
-  
+
       await Calendar.createEventAsync(calendarioPadrao.id, {
         title: titulo,
         startDate,
@@ -85,7 +85,7 @@ export default function Cart() {
       Alert.alert('Erro ao adicionar ao calendário', error?.message || 'Erro desconhecido');
     }
   }
-  
+
 
   const realizarViagem = async () => {
     try {
@@ -138,8 +138,8 @@ export default function Cart() {
 
   return (
     <View style={styles.container}>
-      
-        <Stack.Screen
+
+      <Stack.Screen
         options={{
           title: "Carrinho",
         }}
@@ -160,9 +160,11 @@ export default function Cart() {
                     <Text style={styles.cardTitle}>
                       {item.tipo} - {item.origin} → {item.destination}
                     </Text>
-                    <Text  style={styles.cardInfo}>Companhia: {item.airline}</Text>
-                    <Text  style={styles.cardInfo}>Partida: {item.departureTime}</Text>
-                    <Text  style={styles.cardInfo}>Chegada: {item.arrivalTime}</Text>
+                    <Text style={styles.cardInfo}>Companhia: {item.airline}</Text>
+                    <Text style={styles.cardInfo}>Classe: {item.travel_class}</Text>
+                    <Text style={styles.cardInfo}>Voo nº: {item.flight_number}</Text>
+                    <Text style={styles.cardInfo}>Partida: {item.departureTime}</Text>
+                    <Text style={styles.cardInfo}>Chegada: {item.arrivalTime}</Text>
                     <Text style={styles.cardInfoPrimary}>{item.price}</Text>
                   </View>
                   <TouchableOpacity onPress={() => removerVoo(index)}>
@@ -193,11 +195,11 @@ export default function Cart() {
                     <Text style={styles.cardInfo}>Check-out: {item.checkout}</Text>
                     <Text style={styles.cardInfoPrimary}>{item.total}</Text>
                   </View>
-               
-                <TouchableOpacity onPress={() => removerHotel(index)}>
-                  <Text style={styles.removeText}>Remover</Text>
-                </TouchableOpacity>
-              </View> 
+
+                  <TouchableOpacity onPress={() => removerHotel(index)}>
+                    <Text style={styles.removeText}>Remover</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
           />

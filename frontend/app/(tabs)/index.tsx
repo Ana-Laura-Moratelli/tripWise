@@ -176,6 +176,7 @@ export default function HotelSearch() {
         placeholder="Check-in"
         value={checkinMask}
         onChangeText={setCheckinMask}
+        keyboardType="numeric"
         placeholderTextColor={colors.mediumGray}
       />
 
@@ -185,6 +186,7 @@ export default function HotelSearch() {
         placeholder="Check-out"
         value={checkoutMask}
         onChangeText={setCheckoutMask}
+        keyboardType="numeric"
         placeholderTextColor={colors.mediumGray}
       />
 

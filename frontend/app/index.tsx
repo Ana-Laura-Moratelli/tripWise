@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { registerForPushNotificationsAsync } from '@/src/services/notification';
 
 export default function Index() {
   const [loading, setLoading] = useState(true);
@@ -10,8 +11,9 @@ export default function Index() {
 
   useEffect(() => {
     AsyncStorage.getItem('token')
-      .then(token => {
+      .then(async (token) => {
         if (token) {
+          await registerForPushNotificationsAsync();
           // já logado → vai pras tabs
           router.push('/');
         } else {

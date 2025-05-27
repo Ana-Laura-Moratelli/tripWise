@@ -292,6 +292,21 @@ export default StyleSheet.create({
         marginBottom: spacing.xsmall,
     },
 
+    /* Badge Importado */
+      importedBadgeContainer: {
+        backgroundColor: colors.secondary,   // cor de destaque
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: border.medium,
+        alignSelf: 'flex-start',
+ 
+    },
+    importedBadgeText: {
+        color: colors.black,
+        fontWeight: 'bold',
+        fontSize: 12,
+    },
+
     /* Notification */
     typeAlert: {
         fontWeight: 'bold',

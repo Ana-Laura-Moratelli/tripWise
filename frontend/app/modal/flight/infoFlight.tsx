@@ -26,6 +26,8 @@ export default function InfoFlight() {
     origin,
     destination,
     airline,
+    travel_class,
+    flight_number,
     departureTime,
     arrivalTime,
     price,
@@ -37,6 +39,8 @@ export default function InfoFlight() {
         tipo,
         origin,
         destination,
+        travel_class,
+        flight_number,
         airline,
         departureTime,
         arrivalTime,
@@ -71,17 +75,19 @@ export default function InfoFlight() {
           <Text style={styles.cardInfo}>Origem: {origin}</Text>
           <Text style={styles.cardInfo}>Destino: {destination}</Text>
           <Text style={styles.cardInfo}>Companhia: {airline}</Text>
+          <Text style={styles.cardInfo}>Classe: {travel_class}</Text>
+          <Text style={styles.cardInfo}>Voo nº: {flight_number}</Text>
           <Text style={styles.cardInfo}>Partida: {departureTime}</Text>
           <Text style={styles.cardInfo}>Chegada: {arrivalTime}</Text>
           <Text style={styles.cardInfoPrimary}>Preço: {price}</Text>
         </View>
-        </ScrollView>
+      </ScrollView>
 
-        <View style={styles.footer}>
-          <TouchableOpacity style={styles.buttonPrimary} onPress={adicionarAoCarrinho}>
-            <Text style={styles.buttonText}>Adicionar ao Carrinho</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.buttonPrimary} onPress={adicionarAoCarrinho}>
+          <Text style={styles.buttonText}>Adicionar ao Carrinho</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

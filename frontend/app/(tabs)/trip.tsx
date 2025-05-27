@@ -9,10 +9,12 @@ import { Voo } from '@/src/types/flight'
 import { Hotel } from '@/src/types/hotel';
 import styles from '@/src/styles/global';
 import { Stack } from "expo-router";
+import { useIsFocused } from '@react-navigation/native';
 
 export default function Trip() {
   const [viagens, setViagens] = useState<Viagem[]>([]);
   const router = useRouter();
+  const isFocused = useIsFocused();
 
   useFocusEffect(
     useCallback(() => {
@@ -31,9 +33,11 @@ export default function Trip() {
           console.error("Erro ao carregar viagens:", error);
         }
       }
+      if (isFocused) {
+        carregarViagens();
+      }
 
-      carregarViagens();
-    }, [])
+    }, [isFocused])
   );
 
 
@@ -63,8 +67,8 @@ export default function Trip() {
 
   return (
     <View style={styles.container}>
-      
-        <Stack.Screen
+
+      <Stack.Screen
         options={{
           title: "Viagens",
         }}
@@ -90,6 +94,11 @@ export default function Trip() {
               <View style={styles.card}>
                 {item.voos && item.voos.length > 0 && renderVoo(item.voos)}
                 {item.hoteis && item.hoteis.length > 0 && renderHotel(item.hoteis)}
+                {item.origem === 'Importados' && (
+                  <View style={styles.importedBadgeContainer}>
+                    <Text style={styles.importedBadgeText}>Importado via e-mail</Text>
+                  </View>
+                )}
               </View>
             </TouchableOpacity>
           )}

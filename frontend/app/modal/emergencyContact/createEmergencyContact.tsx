@@ -63,6 +63,7 @@ export default function CreateEmergencyContact() {
   placeholderTextColor={colors.mediumGray}
   style={styles.input}
   keyboardType="phone-pad"
+  
   mask={[
     '(', /\d/, /\d/, ')', ' ',
     /\d/, /\d/, /\d/, /\d/, /\d/, '-', 

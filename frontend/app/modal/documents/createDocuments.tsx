@@ -9,9 +9,7 @@ import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
 import { Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-export const screenOptions = {
-  title: 'Cadastrar Documento',
-};
+
 export default function CreateDocuments() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
@@ -21,7 +19,7 @@ export default function CreateDocuments() {
   const [observacoes, setObservacoes] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
-  
+
   const tiposDoc = [
     { label: 'CPF', value: 'CPF' },
     { label: 'RG', value: 'RG' },
@@ -67,7 +65,12 @@ export default function CreateDocuments() {
   }
 
 
-
+ useEffect(() => {
+    navigation.setOptions({
+      title: 'Cadastrar Documento',
+      headerBackTitle: 'Voltar',
+    });
+  }, [navigation]);
 
   return (
     <ScrollView style={styles.container}>
