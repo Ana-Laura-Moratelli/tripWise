@@ -86,7 +86,7 @@ export default function Trip() {
             <TouchableOpacity
               onPress={() =>
                 router.push({
-                  pathname: "/modal/trip/infoTrip",
+                  pathname: "/(modals)/trip/infoTrip",
                   params: { id: item.id },
                 })
               }
