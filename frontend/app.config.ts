@@ -15,7 +15,7 @@ export default {
       backgroundColor: "#ffffff",
     },
     ios: {
-      bundleIdentifier: "com.analaura.tripwise", 
+      bundleIdentifier: "com.analaura.tripwise",
       supportsTablet: true,
       infoPlist: {
         NSCalendarsUsageDescription: "Precisamos acessar seu calendário para adicionar eventos das viagens.",
@@ -23,7 +23,7 @@ export default {
       },
     },
     android: {
-      package: "com.analaura.tripwise", 
+      package: "com.analaura.tripwise",
       softInputMode: "adjustResize",
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
@@ -43,16 +43,20 @@ export default {
     },
     extra: {
       googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      GEOAPIFY_API_KEY: process.env.GEOAPIFY_API_KEY,
       "eas": {
         "projectId": "91733a12-f30e-4664-a881-15c6b092c499"
       }
     },
     plugins: [
+      'expo-notifications',
       'expo-router',
+      'expo-image-picker',
       [
         'expo-build-properties',
         {
           android: {
+            'useNextNotificationsApi': true,
             manifest: {
               application: {
                 'android:windowSoftInputMode': 'adjustResize'

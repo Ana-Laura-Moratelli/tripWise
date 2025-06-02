@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
-import { api } from '../../../src/services/api';
+import { api } from '@/src/services/api';
 import MaskInput, { Masks } from 'react-native-mask-input';
-import { Transport } from '../../../src/types/transport';
+import { Transport } from '@/src/types/transport';
 import styles from '@/src/styles/global';
 
 export default function InfoTransport() {

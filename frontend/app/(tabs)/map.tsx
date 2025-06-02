@@ -4,16 +4,11 @@ import { useCallback } from 'react';
 import { View, Text, ActivityIndicator, Alert, Platform, Linking, TouchableOpacity } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { api } from '../../src/services/api';
+import { api } from '@/src/services/api';
 import Constants from 'expo-constants';
 import styles from '@/src/styles/map';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-/*
-import { Itinerario } from '../../src/types/itinerary';
-import { Hotel } from '../../src/types/hotel';
-*/
 
 interface Hotel {
   name: string;

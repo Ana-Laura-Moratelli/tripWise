@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TextInput, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { api } from '../../../src/services/api';
+import { api } from '@/src/services/api';
 import MaskInput, { Masks } from 'react-native-mask-input';
-import { Insurance } from '../../../src/types/insurance';
+import { Insurance } from '@/src/types/insurance';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
 

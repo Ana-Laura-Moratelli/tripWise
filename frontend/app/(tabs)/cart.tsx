@@ -4,9 +4,9 @@ import { useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Calendar from 'expo-calendar';
 import { parse } from 'date-fns';
-import { api } from '../../src/services/api';
-import { Voo } from '../../src/types/flight';
-import { Hotel } from '../../src/types/hotel';
+import { api } from '@/src/services/api';
+import { Voo } from '@/src/types/flight';
+import { Hotel } from '@/src/types/hotel';
 import styles from '@/src/styles/global';
 import { Stack } from "expo-router";
 

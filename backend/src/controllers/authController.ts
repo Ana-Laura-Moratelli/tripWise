@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { auth, db } from "../services/firebase"; 
+import { db } from "../services/firebase"; 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 

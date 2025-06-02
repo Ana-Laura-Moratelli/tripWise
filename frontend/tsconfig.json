@@ -1,13 +1,9 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext",
-    
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
@@ -17,13 +13,10 @@
     "skipLibCheck": true,
     "noEmit": true,
     "isolatedModules": true,
-    "moduleResolution": "node",
     "jsx": "react-native",
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [

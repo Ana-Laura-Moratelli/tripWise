@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { TextInput, TouchableOpacity, Alert, ScrollView, Text, Image, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { api } from '../../../src/services/api';
+import { api } from '@/src/services/api';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '@/src/styles/global';
@@ -9,7 +9,7 @@ import { colors } from '@/src/styles/global';
 
 export default function CreatePhotoNote() {
     const router = useRouter();
-    const { id } = useLocalSearchParams(); // tripId
+    const { id } = useLocalSearchParams(); 
     const navigation = useNavigation();
     const [fotoUrl, setFotoUrl] = useState('');
     const [anotacao, setAnotacao] = useState('');

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TextInput, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { api } from '../../../src/services/api';
+import { api } from '@/src/services/api';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import MaskInput, { Masks } from 'react-native-mask-input';
-import { EmergencyContact } from '../../../src/types/emergencyContact';
+import { EmergencyContact } from '@/src/types/emergencyContact';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
 

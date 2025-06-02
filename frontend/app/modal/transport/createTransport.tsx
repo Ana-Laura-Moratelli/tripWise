@@ -5,10 +5,9 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import MaskInput, { Masks } from 'react-native-mask-input';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { api } from '../../../src/services/api';
+import { api } from '@/src/services/api';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
-import maskCurrency from 'react-native-mask-input';
 
 export default function CreateTransport() {
   const router = useRouter();

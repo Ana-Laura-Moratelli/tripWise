@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
+import Constants from 'expo-constants';
 import { View, TextInput, FlatList, Text, Alert, ActivityIndicator, Linking, Platform, TouchableOpacity, ActionSheetIOS } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { Stack } from 'expo-router';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
-const API_KEY = 'e78a67473cfd4d2b8ed76424d4cdabbf';
 
 
 export default function SearchGeoapify() {
+    const API_KEY = Constants.expoConfig?.extra?.GEOAPIFY_API_KEY;
     const [query, setQuery] = useState('');
     const [categoria, setCategoria] = useState('catering.restaurant');
     const [resultados, setResultados] = useState<any[]>([]);
@@ -98,6 +99,7 @@ export default function SearchGeoapify() {
 
         <View style={styles.container}>
             <Stack.Screen options={{ title: 'Dicas de Viagem' }} />
+            
 
             <TextInput
                 placeholder="Digite cidade, estado ou país"

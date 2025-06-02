@@ -3,7 +3,7 @@ import { View, Text, FlatList } from 'react-native';
 import { parse, format, isAfter, isBefore, endOfTomorrow } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { api } from '../../src/services/api';
+import { api } from '@/src/services/api';
 import styles from '@/src/styles/global';
 import { Stack } from "expo-router";
 
@@ -21,7 +21,7 @@ export default function Notification() {
           const viagens = response.data.filter((v: any) => v.userId === userId);
 
           const agora = new Date();
-          const limite = endOfTomorrow(); // Até amanhã às 23:59
+          const limite = endOfTomorrow(); 
 
           const listaAlertas: any[] = [];
 

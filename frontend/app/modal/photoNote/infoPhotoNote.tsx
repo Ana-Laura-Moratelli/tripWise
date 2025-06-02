@@ -2,20 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { api } from '../../../src/services/api';
+import { api } from '@/src/services/api';
+import type { PhotoNote } from '@/src/types/photoNote';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
 
-type PhotoNote = {
-    id: string;
-    tripId: string;
-    fotoUrl?: string;
-    anotacao?: string;
-    criadoEm?: string;
-};
-
 export default function InfoPhotoNote() {
-    const { id } = useLocalSearchParams(); // tripId
+    const { id } = useLocalSearchParams(); 
     const [notas, setNotas] = useState<PhotoNote[]>([]);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editingItem, setEditingItem] = useState<Partial<PhotoNote>>({});

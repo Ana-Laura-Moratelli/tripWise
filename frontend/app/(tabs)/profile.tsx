@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import MaskInput, { Masks } from 'react-native-mask-input';
-import { api } from '../../src/services/api';
+import { api } from '@/src/services/api';
 import styles from '@/src/styles/global';
 import stylesProfile from '@/src/styles/profile';
 import { colors } from '@/src/styles/global';

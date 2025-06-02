@@ -1,6 +1,7 @@
 import { api } from "./api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RegisterData } from '../../src/types/registerData'; 
+import { registerForPushNotificationsAsync } from './notification';
 
 export async function loginUser(email: string, password: string) {
   try {
@@ -9,6 +10,8 @@ export async function loginUser(email: string, password: string) {
     await AsyncStorage.setItem("@token", response.data.token);
     await AsyncStorage.setItem("@user", JSON.stringify(response.data.user));
     await AsyncStorage.setItem("@user_id", response.data.user.uid);
+
+    await registerForPushNotificationsAsync();
 
     return response.data;
   } catch (error: any) {

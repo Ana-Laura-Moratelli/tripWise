@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
+import dotenv from 'dotenv';
 
-const SERPAPI_KEY = "b33e15aaa1eb27d47a52f29004190353fbe535af3acc6bee2a8eaacf5c4c2a6c";
+dotenv.config();
+
+const SERPAPI_KEY = process.env.SERPAPI_KEY;
 const SERPAPI_URL = "https://serpapi.com/search.json";
 
 export const listarHoteis = async (req: Request, res: Response): Promise<void> => {

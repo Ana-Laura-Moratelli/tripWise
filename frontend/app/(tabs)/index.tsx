@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, ActivityIndicator, Button} from 'react-native';
 import { useRouter } from 'expo-router';
 import { differenceInDays, parseISO, isBefore } from 'date-fns';
 import MaskInput, { Masks } from 'react-native-mask-input';
-import { api } from '../../src/services/api';
-import { Hotel } from '../../src/types/hotel';
+import { api } from '@/src/services/api';
+import { Hotel } from '@/src/types/hotel';
 import Constants from 'expo-constants';
 import styles from '@/src/styles/global';
 import { colors } from '@/src/styles/global';
@@ -161,7 +161,7 @@ export default function HotelSearch() {
           title: "Hotéis",
         }}
       />
-
+<Button title="Testar Notificação" onPress={() => api.post('/api/notificar')} />
       <TextInput
         style={styles.input}
         placeholder="Destino"

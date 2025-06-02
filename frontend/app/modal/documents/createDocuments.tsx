@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, ActionSheetIOS } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { api } from '../../../src/services/api';
+import { api } from '@/src/services/api';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import MaskInput, { Masks } from 'react-native-mask-input';

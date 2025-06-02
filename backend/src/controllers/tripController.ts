@@ -83,7 +83,7 @@ export const adicionarItinerario: RequestHandler = async (req, res) => {
       valor: valor || '',
       descricao: descricao || '',
       dia,
-      endereco: endereco || {}, // <-- aqui tratamos como opcional
+      endereco: endereco || {},
       criadoEm: new Date(),
     };
 

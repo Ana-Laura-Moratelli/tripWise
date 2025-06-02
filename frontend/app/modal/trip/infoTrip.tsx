@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useEffect } from "react";
+import Constants from 'expo-constants';
 import { View, Text, TouchableOpacity, Alert, ScrollView, Share } from "react-native";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { api } from "../../../src/services/api";
+import { api } from "@/src/services/api";
 import styles from '@/src/styles/global';
 
 function parseDate(dateStr: string): Date {
@@ -138,7 +139,7 @@ export default function InfoTrip() {
     async function buscarFusoHorario(lat: string, long: string) {
         try {
             const timestamp = Math.floor(new Date().getTime() / 1000);
-            const apiKey = 'AIzaSyBpmchWTIClePxMh-US0DCEe4ZzoVmA5Ms';
+            const apiKey = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
             const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${long}&timestamp=${timestamp}&key=${apiKey}`;
 
             const response = await fetch(url);

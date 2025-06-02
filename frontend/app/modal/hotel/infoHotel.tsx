@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Constants from 'expo-constants';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
