@@ -154,7 +154,6 @@ export default function InfoEmergencyContacts() {
               );
             }
 
-            // Modo leitura
             return (
               <View style={styles.card}>
                 <Text style={styles.cardInfo}>

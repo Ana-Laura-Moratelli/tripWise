@@ -170,7 +170,7 @@ export default function FlightSearch() {
             origin: iataOrigem.toUpperCase(),
             destination: iataDestino.toUpperCase(),
             airline: primeiraIda.airline,
-            travel_class: primeiraIda.travel_class,     // novo
+            travel_class: primeiraIda.travel_class,   
             flight_number: primeiraIda.flight_number,
             departureTime: formatarDataCompleta(primeiraIda?.departure_airport?.time),
             arrivalTime: calcularChegada(primeiraIda?.departure_airport?.time, duracaoIda),
@@ -190,7 +190,7 @@ export default function FlightSearch() {
                 origin: iataDestino.toUpperCase(),
                 destination: iataOrigem.toUpperCase(),
                 airline: primeiraVolta.airline,
-                travel_class: primeiraVolta.travel_class,     // novo
+                travel_class: primeiraVolta.travel_class,    
                 flight_number: primeiraVolta.flight_number,
                 departureTime: dataHoraPartidaVolta.toLocaleString('pt-BR', {
                   hour: '2-digit',

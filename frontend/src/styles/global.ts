@@ -294,7 +294,7 @@ export default StyleSheet.create({
 
     /* Badge Importado */
       importedBadgeContainer: {
-        backgroundColor: colors.secondary,   // cor de destaque
+        backgroundColor: colors.secondary,  
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: border.medium,

@@ -26,7 +26,7 @@ export default function Notification() {
           const listaAlertas: any[] = [];
 
           viagens.forEach((viagem: any) => {
-            // 🔔 Hoteis
+       
             viagem.hoteis?.forEach((hotel: any) => {
               const checkinData = parse(hotel.checkin + ' 10:00', 'dd/MM/yyyy HH:mm', new Date());
               if (isAfter(checkinData, agora) && isBefore(checkinData, limite)) {
@@ -49,7 +49,6 @@ export default function Notification() {
               }
             });
 
-            // 🔔 Voos
             viagem.voos?.forEach((voo: any) => {
               const partida = parse(voo.departureTime, 'dd/MM/yyyy, HH:mm', new Date());
               if (isAfter(partida, agora) && isBefore(partida, limite)) {

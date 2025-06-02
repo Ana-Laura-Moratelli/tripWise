@@ -109,7 +109,6 @@ export default function InfoTrip() {
         setTotalGastos(total);
 
         if (viagem?.hoteis?.length > 0) {
-            // usa o primeiro hotel, ou itere conforme desejar
             const { latitude, longitude } = viagem.hoteis[0];
             buscarFusoHorario(latitude, longitude);
         }
@@ -173,7 +172,6 @@ export default function InfoTrip() {
 
         let message = "📋 Detalhes da Viagem:\n\n";
 
-        // VOOS
         if (viagem.voos?.length > 0) {
             message += "✈️ Voos:\n";
             viagem.voos.forEach((voo: any, index: number) => {
@@ -188,7 +186,6 @@ export default function InfoTrip() {
             });
         }
 
-        // HOTÉIS
         if (viagem.hoteis?.length > 0) {
             message += "🏨 Hotéis:\n";
             viagem.hoteis.forEach((hotel: any, index: number) => {
@@ -202,7 +199,6 @@ export default function InfoTrip() {
             });
         }
 
-        // CRONOGRAMA
         if (viagem.itinerarios?.length > 0) {
             message += "📅 Cronograma:\n";
             viagem.itinerarios.forEach((item: any, index: number) => {
@@ -230,8 +226,6 @@ export default function InfoTrip() {
             });
         }
 
-
-        // TRANSPORTES
         if (transportes?.length > 0) {
             message += "🚗 Transportes:\n";
             transportes.forEach((transporte: any, index: number) => {
@@ -255,7 +249,6 @@ export default function InfoTrip() {
 
         }
 
-        // SEGUROS
         if (seguros?.length > 0) {
             message += "🛡️ Seguros:\n";
             seguros.forEach((item: any, index: number) => {
@@ -290,7 +283,7 @@ export default function InfoTrip() {
     return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={{ paddingBottom: 10 }}>
-                {/* VOOS */}
+
                 {viagem.voos?.length > 0 && (
                     <>
                         <Text style={styles.cardTitle}>Voos</Text>
@@ -310,7 +303,6 @@ export default function InfoTrip() {
                     </>
                 )}
 
-                {/* HOTÉIS */}
                 {viagem.hoteis?.length > 0 && (
                     <>
                         <Text style={styles.cardTitle}>Hotéis</Text>
@@ -329,7 +321,6 @@ export default function InfoTrip() {
                     </>
                 )}
 
-                {/* ITINERÁRIOS */}
                 {viagem.itinerarios?.length > 0 && (
                     <>
                         <Text style={styles.cardTitle}>Cronograma</Text>
@@ -348,7 +339,6 @@ export default function InfoTrip() {
                     </>
                 )}
 
-                {/* TRANSPORTES */}
                 {transportes?.length > 0 && (
                     <>
                         <Text style={styles.cardTitle}>Transportes</Text>

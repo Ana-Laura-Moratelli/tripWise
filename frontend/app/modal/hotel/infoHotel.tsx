@@ -17,7 +17,7 @@ export default function InfoHotel() {
   async function buscarFusoHorario(lat: string, long: string) {
     try {
       const timestamp = Math.floor(new Date().getTime() / 1000);
-      const apiKey = 'AIzaSyBpmchWTIClePxMh-US0DCEe4ZzoVmA5Ms';
+      const apiKey = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
       const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${long}&timestamp=${timestamp}&key=${apiKey}`;
 
       const response = await fetch(url);

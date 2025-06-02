@@ -1,4 +1,4 @@
-export interface Documento{
+export interface Documento {
     id: string;
     tripId: string;
     tipo: string;

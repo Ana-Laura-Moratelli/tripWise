@@ -48,7 +48,6 @@ export default function infoItinerary() {
 
   async function buscarEnderecoPorCEP(cepDigitado: string) {
     const cepNum = cepDigitado.replace(/\D/g, '');
-    // atualiza só o campo CEP
     setEditingItem(prev => ({
       ...prev,
       endereco: { ...prev.endereco, cep: cepDigitado }

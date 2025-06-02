@@ -9,5 +9,6 @@ export default function ModalLayout() {
         headerBackTitle: 'Voltar',
       }}
     />
+    
   );
 }

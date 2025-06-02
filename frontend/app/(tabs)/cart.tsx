@@ -108,7 +108,6 @@ export default function Cart() {
         throw new Error("Erro ao registrar a viagem");
       }
 
-      // Adiciona check-in e check-out como eventos separados
       for (const hotel of hoteisCarrinho) {
         const checkinDate = new Date(hotel.checkin.split('/').reverse().join('-') + 'T14:00:00');
         const checkoutDate = new Date(hotel.checkout.split('/').reverse().join('-') + 'T12:00:00');
@@ -116,7 +115,6 @@ export default function Cart() {
         await criarEventoCalendario(`Check-out do hotel ${hotel.name}`, checkoutDate);
       }
 
-      // Adiciona partidas e chegadas dos voos separadamente
       for (const voo of voosCarrinho) {
         const partida = parseDataHora(voo.departureTime);
         const chegada = parseDataHora(voo.arrivalTime);
