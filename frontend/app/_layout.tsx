@@ -53,40 +53,12 @@ function RootLayoutNav() {
   }
 
   const content = (
-    <ThemeProvider value={DefaultTheme}>
-      <Stack screenOptions={{ headerShown: true }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> {/* Header controlado pelas tabs */}
-        <Stack.Screen name="screens/auth/Login" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal/travelTips/travelTips"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            title: 'Dicas de Viagem',
-          }}
-        />
-        <Stack.Screen
-          name="modal/hotel/infoHotel"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            title: 'Informações do Hotel',
-            headerBackTitle: 'Voltar',
-          }}
-        />
-
-        <Stack.Screen
-          name="modal/flight/infoFlight"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            title: 'Informações do Voo',
-            headerBackTitle: 'Voltar',
-          }}
-        />
-      </Stack>
-
-    </ThemeProvider>
+   <ThemeProvider value={DefaultTheme}>
+    <Stack screenOptions={{ headerShown: true }}>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="screens/auth/Login" options={{ headerShown: false }} />
+    </Stack>
+  </ThemeProvider>
   );
 
   return !logado ? (

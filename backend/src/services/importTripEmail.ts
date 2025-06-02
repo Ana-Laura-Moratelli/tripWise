@@ -115,6 +115,16 @@ async function listarEmails(): Promise<void> {
     const headers = email.data.payload?.headers || [];
     const remetenteRaw = headers.find(h => h.name === 'From')?.value ?? '';
     const remetente = extrairEmail(remetenteRaw);
+
+    // Verifica se o remetente existe no banco
+    const user = await buscarUsuarioPorEmail(remetente);
+
+    if (!user) {
+      console.warn(`📭 Ignorando e-mail de remetente desconhecido: ${remetente}`);
+      await marcarComoLido(mensagem.id!);
+      continue;
+    }
+
     const corpo = getBody(email.data);
     console.log('📝 Corpo do e-mail:', corpo);
     try {
