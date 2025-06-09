@@ -221,16 +221,11 @@ export default function CreateItinerary() {
       <MaskInput
         style={styles.input}
         value={valor}
-        onChangeText={setValor}
+        onChangeText={(masked, _) => setValor(masked)}
         placeholder="Valor"
         placeholderTextColor={colors.mediumGray}
         keyboardType="numeric"
-        mask={[
-          'R', '$', ' ',
-          /\d/, /\d/, '.',
-          /\d/, /\d/, /\d/, ',',
-          /\d/, /\d/
-        ]}
+        mask={Masks.BRL_CURRENCY}
       />
 
 

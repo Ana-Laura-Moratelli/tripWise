@@ -113,19 +113,13 @@ export default function CreateInsurance() {
 
             <MaskInput
                 value={valor}
-                onChangeText={setValor}
+                onChangeText={(masked, _) => setValor(masked)}
                 placeholder="Valor"
                 placeholderTextColor={colors.mediumGray}
                 style={styles.input}
                 keyboardType="numeric"
-                mask={[
-                    'R', '$', ' ',
-                    /\d/, /\d/, '.',
-                    /\d/, /\d/, /\d/, ',',
-                    /\d/, /\d/
-                ]}
+                mask={Masks.BRL_CURRENCY}
             />
-
 
             <TextInput
                 style={styles.textarea}

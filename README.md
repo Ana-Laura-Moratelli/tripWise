@@ -127,9 +127,9 @@ O App tripWise tem como objetivo facilitar a organização de viagens, permitind
   <tr align="center">
     <td>03</td>
     <td>05/05/2025</td>
-    <td>02/06/2025</td>
-    <td></td> 
-    <td>🔄</td>
+    <td>09/06/2025</td>
+    <td><a href="https://github.com/Ana-Laura-Moratelli/tripWise/blob/main/sprints/sprint03/sprint03.md">Relatório</a></td> 
+    <td>✅</td>
   </tr>
 </tbody>
 </table>

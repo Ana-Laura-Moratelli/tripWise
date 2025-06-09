@@ -122,54 +122,49 @@ export default function CreateTransport() {
         </View>
       )}
 
-   <MaskInput
-  style={styles.input}
-  placeholder="Data e Hora de Partida"
-  value={dataHoraPartida}
-  onChangeText={setDataHoraPartida}
-  placeholderTextColor={colors.mediumGray}
-  keyboardType="numeric"
-  mask={[
-    /\d/, /\d/, '/', 
-    /\d/, /\d/, '/', 
-    /\d/, /\d/, /\d/, /\d/, ' ', 
-    /\d/, /\d/, ':', 
-    /\d/, /\d/
-  ]}
-/>
+      <MaskInput
+        style={styles.input}
+        placeholder="Data e Hora de Partida"
+        value={dataHoraPartida}
+        onChangeText={setDataHoraPartida}
+        placeholderTextColor={colors.mediumGray}
+        keyboardType="numeric"
+        mask={[
+          /\d/, /\d/, '/',
+          /\d/, /\d/, '/',
+          /\d/, /\d/, /\d/, /\d/, ' ',
+          /\d/, /\d/, ':',
+          /\d/, /\d/
+        ]}
+      />
 
 
-   <MaskInput
-  style={styles.input}
-  placeholder="Data e Hora de Chegada"
-  value={dataHoraChegada}
-  onChangeText={setDataHoraChegada}
-  placeholderTextColor={colors.mediumGray}
-  keyboardType="numeric"
-  mask={[
-    /\d/, /\d/, '/', 
-    /\d/, /\d/, '/', 
-    /\d/, /\d/, /\d/, /\d/, ' ', 
-    /\d/, /\d/, ':', 
-    /\d/, /\d/
-  ]}
-/>
+      <MaskInput
+        style={styles.input}
+        placeholder="Data e Hora de Chegada"
+        value={dataHoraChegada}
+        onChangeText={setDataHoraChegada}
+        placeholderTextColor={colors.mediumGray}
+        keyboardType="numeric"
+        mask={[
+          /\d/, /\d/, '/',
+          /\d/, /\d/, '/',
+          /\d/, /\d/, /\d/, /\d/, ' ',
+          /\d/, /\d/, ':',
+          /\d/, /\d/
+        ]}
+      />
 
 
-<MaskInput
-  value={valor}
-  onChangeText={(masked, unmasked) => setValor(masked)}
-  style={styles.input}
-  placeholder="Valor"
-  placeholderTextColor={colors.mediumGray}
-  keyboardType="numeric"
-  mask={[
-    'R', '$', ' ',
-    /\d/, /\d/, '.', 
-    /\d/, /\d/, /\d/, ',', 
-    /\d/, /\d/
-  ]}
-/>
+      <MaskInput
+        value={valor}
+        onChangeText={(masked, _) => setValor(masked)}
+        style={styles.input}
+        placeholder="Valor"
+        placeholderTextColor={colors.mediumGray}
+        keyboardType="numeric"
+        mask={Masks.BRL_CURRENCY}
+      />
 
 
       {tipoTransporte === 'aluguel' && (

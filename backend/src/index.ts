@@ -31,5 +31,5 @@
     app.use('/api', notificationRoutes);
 
     const PORT = parseInt(process.env.PORT || "5000", 10);
-    const HOST = "192.168.15.10"; 
+    const HOST = "172.20.10.6"; 
     app.listen(PORT, HOST, () => console.log(`🚀 Backend rodando em http://${HOST}:${PORT}`));

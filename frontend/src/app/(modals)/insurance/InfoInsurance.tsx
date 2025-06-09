@@ -70,6 +70,12 @@ export default function InfoInsurance() {
     }
   }
 
+  function formatarComCifrao(valor: string) {
+    if (!valor) return '';
+    return valor.startsWith('R$') ? valor : `R$ ${valor}`;
+  }
+
+
   return (
     <View style={styles.container}>
       {loading ? (
@@ -161,13 +167,19 @@ export default function InfoInsurance() {
                   />
 
                   <Text style={styles.cardLabel}><Text style={styles.bold}>Valor</Text></Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Valor"
+
+                  <MaskInput
                     value={editingItem.valor ?? item.valor}
-                    onChangeText={(text) => setEditingItem({ ...editingItem, valor: text })}
+                    onChangeText={(masked) =>
+                      setEditingItem({ ...editingItem, valor: masked })
+                    }
+                    placeholder="Valor"
+                    placeholderTextColor={colors.mediumGray}
+                    style={styles.input}
                     keyboardType="numeric"
+                    mask={Masks.BRL_CURRENCY}
                   />
+
                   <Text style={styles.cardLabel}><Text style={styles.bold}>Observações</Text></Text>
                   <TextInput
                     style={styles.input}

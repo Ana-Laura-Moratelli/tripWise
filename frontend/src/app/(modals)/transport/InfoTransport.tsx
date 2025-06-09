@@ -6,6 +6,7 @@ import { api } from '@/services/api';
 import MaskInput, { Masks } from 'react-native-mask-input';
 import { Transport } from '@/types/transport';
 import styles from '@/app/styles/global';
+import { colors } from '@/app/styles/global';
 
 export default function InfoTransport() {
   const { id } = useLocalSearchParams();
@@ -134,14 +135,17 @@ export default function InfoTransport() {
                   />
 
                   <Text style={styles.cardLabel}><Text style={styles.bold}>Valor</Text></Text>
-                  <TextInput
+                  <MaskInput
                     style={styles.input}
-                    placeholder="Valor"
                     value={editingItem.valor ?? item.valor}
-                    onChangeText={(text) => setEditingItem({ ...editingItem, valor: text })}
+                    onChangeText={(masked) =>
+                      setEditingItem({ ...editingItem, valor: masked })
+                    }
+                    placeholder="Valor"
+                    placeholderTextColor={colors.mediumGray}
                     keyboardType="numeric"
+                    mask={Masks.BRL_CURRENCY}
                   />
-
                   {editingItem.tipoTransporte === 'aluguel' && (
                     <>
                       <Text style={styles.cardLabel}><Text style={styles.bold}>Modelo do Veículo</Text></Text>
@@ -218,7 +222,7 @@ export default function InfoTransport() {
                   <Text style={styles.bold}>Chegada:</Text> {item.dataHoraChegada}
                 </Text>
                 <Text style={styles.cardInfo}>
-                  <Text style={styles.bold}>Valor:</Text> R$ {item.valor}
+                  <Text style={styles.bold}>Valor:</Text> {item.valor}
                 </Text>
                 {item.modeloVeiculo && (
                   <Text style={styles.cardInfo}>

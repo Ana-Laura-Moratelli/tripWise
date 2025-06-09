@@ -30,6 +30,8 @@ interface Voo {
   origin: string;
   price: string;
   tipo: string;
+  travel_class: string;
+  flight_number: string;
 }
 
 interface Hotel {
@@ -57,8 +59,9 @@ function extrairDadosDeTexto(corpo: string): DadosImportados {
   const textoLimpo = corpo.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
 
   // 🔍 Regex para Voo
-  const vooRegex = /Voo de (.+?) para (.+?), saída às (.+?) e chegada às (.+?), pela (.+?), valor R\$?(\d+[\d.,]*)/i;
+  const vooRegex = /Voo de (.+?) para (.+?), saída às (.+?) e chegada às (.+?), pela (.+?), classe (.+?), número do voo (\w+), valor R\$?(\d+[\d.,]*)/i;
   const vooMatch = textoLimpo.match(vooRegex);
+
   if (vooMatch) {
     dados.voos = [{
       origin: vooMatch[1].trim(),
@@ -66,10 +69,13 @@ function extrairDadosDeTexto(corpo: string): DadosImportados {
       departureTime: vooMatch[3].trim(),
       arrivalTime: vooMatch[4].trim(),
       airline: vooMatch[5].trim(),
-      price: vooMatch[6].trim(),
+      travel_class: vooMatch[6].trim(),
+      flight_number: vooMatch[7].trim(),
+      price: vooMatch[8].trim(),
       tipo: 'ida',
     }];
   }
+
 
   // 🔍 Regex para Hotel
   const hotelRegex = /Hotel[:\s]*(.+?), check-in (.+?), check-out (.+?), endereço[:\s]*(.+?), nota (\d[\d.,]*), valor R\$?(\d+[\d.,]*)/i;

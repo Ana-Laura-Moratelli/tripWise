@@ -100,40 +100,40 @@ export default function infoItinerary() {
     return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
   }
   async function fetchItinerarios() {
-  try {
-    const userId = await AsyncStorage.getItem("@user_id");
-    if (!userId) {
-      Alert.alert("Erro", "Usuário não encontrado.");
-      return;
-    }
-
-    const response = await api.get('/api/trip', {
-      params: { userId }
-    });
-
-    const data = response.data;
-    const viagem = data.find((item: any) => item.id === id);
-    if (viagem) {
-      if (!viagem.itinerarios || viagem.itinerarios.length === 0) {
-        setItinerarios([]);
-      } else {
-        const itinerariosComIndex: Itinerario[] = viagem.itinerarios.map(
-          (item: Itinerario, idx: number) => ({ ...item, originalIndex: idx })
-        );
-        const sortedItinerarios = itinerariosComIndex.sort((a, b) => {
-          return parseDate(a.dia).getTime() - parseDate(b.dia).getTime();
-        });
-        setItinerarios(sortedItinerarios);
+    try {
+      const userId = await AsyncStorage.getItem("@user_id");
+      if (!userId) {
+        Alert.alert("Erro", "Usuário não encontrado.");
+        return;
       }
-    } else {
-      Alert.alert("Erro", "Viagem não encontrada.");
+
+      const response = await api.get('/api/trip', {
+        params: { userId }
+      });
+
+      const data = response.data;
+      const viagem = data.find((item: any) => item.id === id);
+      if (viagem) {
+        if (!viagem.itinerarios || viagem.itinerarios.length === 0) {
+          setItinerarios([]);
+        } else {
+          const itinerariosComIndex: Itinerario[] = viagem.itinerarios.map(
+            (item: Itinerario, idx: number) => ({ ...item, originalIndex: idx })
+          );
+          const sortedItinerarios = itinerariosComIndex.sort((a, b) => {
+            return parseDate(a.dia).getTime() - parseDate(b.dia).getTime();
+          });
+          setItinerarios(sortedItinerarios);
+        }
+      } else {
+        Alert.alert("Erro", "Viagem não encontrada.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar itinerários:", error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Erro ao buscar itinerários:", error);
-  } finally {
-    setLoading(false);
   }
-}
 
 
   useEffect(() => {
@@ -233,20 +233,15 @@ export default function infoItinerary() {
           <MaskInput
             style={styles.input}
             value={editingItem.valor ?? item.valor}
-            onChangeText={(text) =>
-              setEditingItem({ ...editingItem, valor: text })
+            onChangeText={(masked) =>
+              setEditingItem({ ...editingItem, valor: masked })
             }
             placeholder="Valor"
             placeholderTextColor={colors.mediumGray}
             keyboardType="numeric"
-            mask={[
-              'R', '$', ' ',
-              /\d/, /\d/, '.',
-              /\d/, /\d/, /\d/, ',',
-              /\d/, /\d/
-            ]}
+            mask={Masks.BRL_CURRENCY}
           />
-
+        
           <Text style={styles.cardLabel}>
             <Text style={styles.bold}>Dia</Text>
           </Text>

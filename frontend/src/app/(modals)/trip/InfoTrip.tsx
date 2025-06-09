@@ -313,8 +313,12 @@ export default function InfoTrip() {
                                 <Text style={styles.cardInfo}><Text style={styles.bold}>Avaliação:</Text> {hotel.rating} ({hotel.reviews} reviews)</Text>
                                 <Text style={styles.cardInfo}><Text style={styles.bold}>Check-in:</Text> {hotel.checkin}</Text>
                                 <Text style={styles.cardInfo}><Text style={styles.bold}>Check-out:</Text> {hotel.checkout}</Text>
-                                <Text style={styles.cardInfo}><Text style={styles.bold}>Fuso Horário:</Text> {fusoHorario}</Text>
-                                <Text style={styles.cardInfo}><Text style={styles.bold}>Hora Local:</Text> {horaLocal}</Text>
+                                {viagem.origem !== "Importados" && (
+                                    <>
+                                        <Text style={styles.cardInfo}><Text style={styles.bold}>Fuso Horário:</Text> {fusoHorario}</Text>
+                                        <Text style={styles.cardInfo}><Text style={styles.bold}>Hora Local:</Text> {horaLocal}</Text>
+                                    </>
+                                )}
                                 <Text style={styles.cardInfoPrimary}>{hotel.total}</Text>
                             </View>
                         ))}

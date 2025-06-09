@@ -74,15 +74,8 @@ export async function enviarNotificacoes() {
   }
 }
 
-// 🚀 Agendamento do cron — executa todos os dias às 10h da manhã
-cron.schedule('48 23 * * *', () => {
+cron.schedule('22 08 * * *', () => {
   console.log('🔔 Executando envio de notificações às 10h...');
   enviarNotificacoes();
 });
 
-/*
-cron.schedule('34 9 * * *', () => {
-  console.log('🔔 Executando envio de notificações às 9:34...');
-  enviarNotificacoes();
-});
-*/
