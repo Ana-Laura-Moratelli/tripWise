@@ -86,6 +86,7 @@ export default StyleSheet.create({
         borderColor: colors.gray,
         borderRadius: border.large,
         overflow: 'hidden',
+        marginBottom: spacing.medium,
     },
     picker: {
         borderWidth: border.width,

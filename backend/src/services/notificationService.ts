@@ -74,7 +74,7 @@ export async function enviarNotificacoes() {
   }
 }
 
-cron.schedule('22 08 * * *', () => {
+cron.schedule('47 08 * * *', () => {
   console.log('🔔 Executando envio de notificações às 10h...');
   enviarNotificacoes();
 });
