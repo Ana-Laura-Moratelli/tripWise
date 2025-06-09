@@ -36,5 +36,6 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-android/
 ios/
+
+tripwise-b05de-firebase-adminsdk-fbsvc-a6a2f154ee.json

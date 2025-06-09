@@ -35,6 +35,9 @@ export default {
           apiKey: process.env.GOOGLE_MAPS_API_KEY,
         },
       },
+      googleServicesFile: "./android/app/google-services.json",
+      useNextNotificationsApi: true,
+      permissions: ["NOTIFICATIONS"]
     },
     web: {
       favicon: "./assets/images/favicon.png",

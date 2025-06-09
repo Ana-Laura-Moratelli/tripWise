@@ -3,16 +3,13 @@ import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from './api';
 
-// 1) Configure o handler **UMA ÚNICA VEZ** na inicialização do app.
 Notifications.setNotificationHandler({
   handleNotification: async () => {
     return {
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-      // 👇 Essas duas propriedades agora são obrigatórias:
       shouldShowBanner: true,
       shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
     };
   },
 });
